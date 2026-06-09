@@ -203,20 +203,65 @@
   background: rgba(0,0,0,0.04);
 }
 
-/* ==================== 侧边栏链接增强 ==================== */
+/* ==================== 侧边栏样式增强 ==================== */
+
+/* 一级分组标题（**加粗文字**渲染为 <p>） */
 .sidebar-nav > ul > li > p {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: 20px;
-  padding: 0 0 4px;
+  color: #1a365d;
+  letter-spacing: 0.02em;
+  margin: 18px 0 4px;
+  padding: 8px 20px 6px;
+  border-left: 3px solid #c8a45c;
+  background: linear-gradient(90deg, rgba(200, 164, 92, 0.06) 0%, transparent 100%);
+  border-radius: 0 4px 4px 0;
 }
 
+/* 一级链接（如"🏠 前言"） */
+.sidebar-nav > ul > li > a {
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 8px 20px;
+  color: #334155;
+}
+
+/* 二级链接（子菜单） */
+.sidebar-nav > ul > li > ul > li > a {
+  font-size: 0.86rem;
+  padding: 5px 20px 5px 28px;
+  color: #64748b;
+}
+
+/* 链接 hover 统一 */
+.sidebar-nav a:hover {
+  color: #1a365d;
+}
+
+/* 当前激活链接 */
 .sidebar-nav li.active > a {
-  color: var(--theme-color);
+  color: #1a365d;
   font-weight: 600;
+  background: rgba(26, 54, 93, 0.06);
+  border-right: 3px solid #1a365d;
+}
+
+/* 侧边栏滚动条美化 */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #d2d8e0;
+  border-radius: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
 }
 
 /* ==================== 内容区微调 ==================== */
