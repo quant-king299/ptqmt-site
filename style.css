@@ -79,8 +79,12 @@
   --search-result-item-border-color: #e2e8f0;
 
   /* 封面页 */
-  --cover-background-color: #1a365d;
-  --cover-background-image: linear-gradient(135deg, #0f1b2e 0%, #1a365d 40%, #0f1b2e 100%);
+  --cover-background-color: #0a1628;
+  --cover-background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(30, 58, 95, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(100, 80, 40, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(26, 54, 93, 0.8) 0%, transparent 60%),
+    linear-gradient(180deg, #0a1628 0%, #132744 50%, #0a1628 100%);
   --cover-heading-color: #fff;
 
   /* 字体 */
@@ -105,18 +109,69 @@
 }
 
 /* ==================== 封面页 ==================== */
+
+/* 封面背景：多层渐变 + 网格纹理 */
 .cover {
-  background: linear-gradient(135deg, #0f1b2e 0%, #1a365d 40%, #0f1b2e 100%) !important;
+  overflow: hidden;
 }
 
+/* 网格纹理叠加层（纯CSS，无图片） */
+.cover::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 缓慢呼吸光晕动画 */
+.cover::before {
+  animation: cover-glow 8s ease-in-out infinite alternate;
+}
+
+@keyframes cover-glow {
+  0% {
+    opacity: 0.7;
+    filter: brightness(1);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1.15);
+  }
+}
+
+/* 主卡片 — 玻璃拟态风格 */
 .cover-main-content {
+  position: relative;
+  z-index: 1;
   text-align: center;
-  padding: 60px 48px;
-  max-width: 720px;
+  padding: 56px 48px 48px;
+  max-width: 740px;
   margin: 0 auto;
-  background: rgba(255,255,255,0.97);
-  border-radius: 16px;
-  box-shadow: 0 25px 80px rgba(0,0,0,0.25);
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  backdrop-filter: blur(12px);
+}
+
+/* 卡片顶部装饰线 */
+.cover-main-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 40px;
+  right: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #c8a45c, #1a365d, #c8a45c, transparent);
+  border-radius: 0 0 4px 4px;
 }
 
 .cover-main-content h1 {
@@ -126,20 +181,85 @@
   color: var(--theme-color);
   margin: 0 0 12px;
   letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
 .cover-main-content h1 .gradient-text {
-  background: linear-gradient(135deg, #1a365d 0%, #c8a45c 100%);
+  background: linear-gradient(135deg, #1a365d 0%, #c8a45c 60%, #1a365d 100%);
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: title-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes title-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .cover-subtitle {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: #64748b;
-  margin: 0 0 32px;
+  margin: 0 0 24px;
   font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+/* 顶部标签 */
+.cover-badge {
+  display: inline-block;
+  padding: 5px 16px;
+  margin-bottom: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+/* 数据统计区 */
+.cover-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  margin: 0 auto 28px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f0f4f8 100%);
+  border-radius: 12px;
+  border: 1px solid #e8ecf1;
+  max-width: 360px;
+}
+
+.cover-stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.cover-stat-num {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a365d;
+  line-height: 1.2;
+}
+
+.cover-stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.cover-stat-divider {
+  width: 1px;
+  height: 28px;
+  background: #e2e8f0;
+  margin: 0 4px;
+  flex-shrink: 0;
 }
 
 /* 快速入口按钮 */
@@ -147,8 +267,15 @@
   display: flex;
   justify-content: center;
   gap: 14px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   flex-wrap: wrap;
+}
+
+/* 社交平台区域 */
+.cover-social {
+  margin-bottom: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f2f5;
 }
 
 .cover-btn-primary {
@@ -193,12 +320,7 @@
   transform: translateY(-2px);
 }
 
-/* 社交平台区域 */
-.cover-social {
-  margin-bottom: 28px;
-  padding-top: 20px;
-  border-top: 1px solid #f0f2f5;
-}
+/* 社交平台区域（重复定义已合并到上方） */
 
 .cover-social-label {
   font-size: 0.78rem;
