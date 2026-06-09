@@ -243,62 +243,62 @@
 
 /* B站 — 粉蓝 */
 .social-bilibili {
-  color: #fb7299;
-  border-color: #fce4ec;
-  background: #fff5f8;
+  color: #fb7299 !important;
+  border-color: #fce4ec !important;
+  background: #fff5f8 !important;
 }
 .social-bilibili:hover {
-  background: #fb7299;
-  color: #fff;
-  border-color: #fb7299;
+  background: #fb7299 !important;
+  color: #fff !important;
+  border-color: #fb7299 !important;
 }
 
 /* 微信 — 绿色 */
 .social-wechat {
-  color: #07c160;
-  border-color: #e6f7ed;
-  background: #f0faf3;
+  color: #07c160 !important;
+  border-color: #e6f7ed !important;
+  background: #f0faf3 !important;
 }
 .social-wechat:hover {
-  background: #07c160;
-  color: #fff;
-  border-color: #07c160;
+  background: #07c160 !important;
+  color: #fff !important;
+  border-color: #07c160 !important;
 }
 
 /* 知乎 — 蓝色 */
 .social-zhihu {
-  color: #0066ff;
-  border-color: #e0edff;
-  background: #f0f6ff;
+  color: #0066ff !important;
+  border-color: #e0edff !important;
+  background: #f0f6ff !important;
 }
 .social-zhihu:hover {
-  background: #0066ff;
-  color: #fff;
-  border-color: #0066ff;
+  background: #0066ff !important;
+  color: #fff !important;
+  border-color: #0066ff !important;
 }
 
 /* 抖音 — 红蓝渐变（抖音品牌色） */
 .social-douyin {
-  color: #fe2c55;
-  border-color: #ffe0e5;
-  background: linear-gradient(135deg, #fff5f6 0%, #f0f0ff 100%);
+  color: #fe2c55 !important;
+  border-color: #ffe0e5 !important;
+  background: linear-gradient(135deg, #fff5f6 0%, #f0f0ff 100%) !important;
 }
 .social-douyin:hover {
-  background: linear-gradient(135deg, #25f4ee 0%, #fe2c55 100%);
-  color: #fff;
-  border-color: #fe2c55;
+  background: linear-gradient(135deg, #25f4ee 0%, #fe2c55 100%) !important;
+  color: #fff !important;
+  border-color: #fe2c55 !important;
 }
 
 /* 小红书 — 红色 */
 .social-xiaohongshu {
-  color: #ff2442;
-  border-color: #ffe0e5;
-  background: #fff5f6;
+  color: #ff2442 !important;
+  border-color: #ffe0e5 !important;
+  background: #fff5f6 !important;
 }
 .social-xiaohongshu:hover {
-  background: #ff2442;
-  color: #fff;
-  border-color: #ff2442;
+  background: #ff2442 !important;
+  color: #fff !important;
+  border-color: #ff2442 !important;
 }
 
 /* 底部版权 */
