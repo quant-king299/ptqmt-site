@@ -277,16 +277,16 @@
   border-color: #0066ff;
 }
 
-/* 抖音 — 黑色 + 彩色音符 */
+/* 抖音 — 红蓝渐变（抖音品牌色） */
 .social-douyin {
-  color: #161823;
-  border-color: #e8e8e8;
-  background: #f5f5f5;
+  color: #fe2c55;
+  border-color: #ffe0e5;
+  background: linear-gradient(135deg, #fff5f6 0%, #f0f0ff 100%);
 }
 .social-douyin:hover {
-  background: #161823;
+  background: linear-gradient(135deg, #25f4ee 0%, #fe2c55 100%);
   color: #fff;
-  border-color: #161823;
+  border-color: #fe2c55;
 }
 
 /* 小红书 — 红色 */
