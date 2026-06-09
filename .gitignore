@@ -1,10 +1,30 @@
-# 索引和缓存
+# 开发/部署相关文件（不属于静态网站）
+PTQMT_PROXY_*.md
+nginx-ptqmt-fixed.conf
+install_ptqmt_service.ps1
+proxy_config*.json
+test_service.py
+app.7z
+ptqmt-proxy-minimal/
+离线配置Nginx.bat
+
+# 已删除的 CSS/JS（合并后不再需要）
+style-mobile-fixes.css
+mobile-fixes.css
+search-fix.js
+code-highlighter.js
+clean-duplicate-buttons.js
+
+# 编辑器/工具缓存
 .codebuddy/
-*.7z
+.vscode/
+.idea/
 
 # 系统文件
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # 备份文件
 *-backup.*
+*.7z

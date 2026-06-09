@@ -5,646 +5,144 @@
   <title>王者Quant量化交易文档</title>
   <meta name="keywords" content="量化交易, QMT, PTrade, Python, 金融, 策略, 回测">
   <meta name="description" content="专业的量化交易学习平台，涵盖QMT和PTrade两大主流量化交易平台">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
-  <!-- 预加载关键资源 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+  <!-- 预加载 -->
   <link rel="preload" href="vendor/docsify/docsify.min.js" as="script">
-  <link rel="preload" href="themes/vue.css" as="style">
-  
-  <!-- 主题样式 - 使用多个CDN备选 -->
-  <link rel="stylesheet" href="themes/vue.css" id="default-theme">
+
+  <!-- 样式 -->
+  <link rel="stylesheet" href="themes/vue.css">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="style-mobile-fixes.css">
-  <link rel="stylesheet" href="mobile-fixes.css">
-  <!-- Prism 代码高亮样式 -->
   <link rel="stylesheet" href="vendor/prismjs/themes/prism-custom.css">
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css"> -->
-  
-  <!-- 自定义样式优化 -->
-  <style>
-    /* 移动端优化 */
-    @media screen and (max-width: 768px) {
-      /* 遵循 docsify 的开关状态：body.close 时收起侧栏，否则显示 */
-      body.close .sidebar {
-        transform: translateX(-300px);
-      }
-      body:not(.close) .sidebar {
-        transform: translateX(0);
-      }
-      .content {
-        padding: 0 15px;
-      }
-      .sidebar-toggle {
-        position: fixed;
-        top: 12px;
-        left: 12px;
-        z-index: 1001;
-        background-color: var(--theme-color, #42b983);
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      }
-      .content {
-        padding: 0 15px;
-      }
-      .markdown-section {
-        padding: 20px 15px 40px;
-      }
-      .markdown-section h1 {
-        font-size: 1.8rem;
-      }
-      .markdown-section h2 {
-        font-size: 1.5rem;
-      }
-      .markdown-section table {
-        font-size: 0.9rem;
-        overflow-x: auto;
-        display: block;
-        white-space: nowrap;
-      }
-      .markdown-section pre {
-        overflow-x: auto;
-      }
-    }
-    
-    /* 加载状态优化 */
-    .app-loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: #f8f9fa;
-    }
-    
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #e3e3e3;
-      border-top: 4px solid #42b983;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    /* 搜索框优化 */
-    .search input {
-      border-radius: 20px;
-      border: 2px solid #e3e3e3;
-      transition: border-color 0.3s ease;
-      width: 200px;
-      padding: 8px 15px;
-      font-size: 14px;
-      background: #f5f5f5;
-    }
-    
-    .search input:focus {
-      border-color: var(--theme-color, #42b983);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(66, 185, 131, 0.1);
-      background: white;
-    }
-        
-    /* 确保搜索框事件可接受 */
-    .search {
-      pointer-events: auto !important;
-      z-index: 1500 !important;
-    }
-        
-    .search input {
-      pointer-events: auto !important;
-      position: relative;
-      z-index: 1500 !important;
-    }
-    
-    /* 搜索结果段落 */
-    .results-panel {
-      pointer-events: auto !important;
-      z-index: 1500 !important;
-    }
-    
-    /* 代码块优化 */
-    /*
-    .markdown-section pre {
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    */
-    
-    /* 表格优化 */
-    .markdown-section table {
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    
-    /* 链接优化 */
-    .markdown-section a {
-      transition: color 0.3s ease;
-    }
-    
-    /* 返回顶部按钮 */
-    .back-to-top {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 50px;
-      height: 50px;
-      background: var(--theme-color, #42b983);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transition: all 0.3s ease;
-      z-index: 1000;
-    }
-    
-    .back-to-top:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    }
-    
-    .back-to-top.show {
-      display: flex;
-    }
-    
-    /* 深色模式支持 */
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --base-background-color: #1a1a1a;
-        --base-color: #e0e0e0;
-      }
-    }
-  </style>
-  <!-- 封面滚动锁定样式（仅禁止正文滚动，不禁用侧栏） -->
-  <style>
-    /* 封面显示时禁止页面滚动 */
-    body.cover-lock {
-      overflow: hidden !important;
-    }
-    
-    /* 移动端封面页优化 - 改用相对定位布局 */
-    @media (max-width: 768px) {
-      body.cover-lock {
-        height: auto !important;
-        min-height: 100vh !important;
-      }
-    }
-    
-    /* 桃面页时，避免顶部出现白色遮挡条 */
-    body.cover-lock .app-nav {
-      background: transparent !important;
-      box-shadow: none !important;
-    }
-    
-    /* 不再禁用侧栏交互，确保移动端能点击 */
-    /* 保留封面交互 */
-    .cover { pointer-events: auto; }
-  </style>
 </head>
 <body>
-  <!-- 加载状态指示器 -->
-  <div class="app-loading" id="app-loading">
-    <div class="loading-spinner"></div>
-    <div>正在加载文档...</div>
-  </div>
-  
-  <!-- 返回顶部按钮 -->
-  <button class="back-to-top" id="backToTop">↑</button>
-  
-  <div id="app"></div>
-  
-  <!-- 配置 -->
+  <div id="app">正在加载...</div>
+
   <script>
-    // 页面加载完成后隐藏加载指示器
-    window.addEventListener('load', function() {
-      document.getElementById('app-loading').style.display = 'none';
-    });
-    
-    // Docsify配置
     window.$docsify = {
-      name: '王者Quant量化交易文档',
+      name: '王者Quant',
       repo: '',
       loadSidebar: true,
       loadNavbar: true,
       coverpage: true,
       onlyCover: true,
-      // 性能优化配置
       maxLevel: 4,
       subMaxLevel: 2,
-      // 代码高亮配置
-      markdown: {
-        highlight: 'prism'
-      },
-      // Prism配置
-      prism: {
-        preprocess: function(code, lang) {
-          // 预处理代码以确保正确的语言类
-          return code;
-        }
-      },
+
       // 搜索配置
       search: {
         maxAge: 86400000,
         paths: 'auto',
-        placeholder: '🔍 搜索文档内容...',
-        noData: '😞 找不到相关内容',
+        placeholder: '搜索文档...',
+        noData: '找不到相关内容',
         depth: 6,
-        hideOtherSidebarContent: false,
-        namespace: 'quant-docs',
-        autoFocus: true,
-        hideSidebar: false
+        namespace: 'quant-docs'
       },
-      
-      // 复制代码配置
+
+      // 复制代码
       copyCode: {
         buttonText: '复制',
         errorText: '错误',
         successText: '已复制'
       },
-      
-      // 404页面
-      notFoundPage: {
-        '/': '_404.md'
-      },
-      
-      // 外部链接
+
+      // 404
+      notFoundPage: { '/': '_404.md' },
+
       externalLinkTarget: '_blank',
       externalLinkRel: 'noopener',
-      
-      // 路由模式
       routerMode: 'hash',
-      
-      // 别名配置
+
       alias: {
         '/.*/_sidebar.md': '/_sidebar.md',
         '/.*/_navbar.md': '/_navbar.md',
-        
-        // PTrade API 常用上优
         '/ptrade-api': '/docs/Chapter-21.md',
-        '/ptrade-%E5%AE%8C%E6%95%B4api%E5%8F%82%E8%80%83%E6%89%8B%E5%86%8C': '/docs/Chapter-21.md',
         '/ptrade': '/docs/Chapter-21.md',
-        
-        // QMT API 上优
         '/qmt-api': '/docs/Chapter-17.md',
-        
-        // 其他常用文档
         '/intro': '/README.md',
         '/home': '/README.md'
       },
-      
-      // 插件配置
+
       plugins: [
-        // 返回顶部功能
-        function(hook, vm) {
+        // 章节导航
+        function(hook) {
           hook.doneEach(function() {
-            const backToTop = document.getElementById('backToTop');
-            
-            window.addEventListener('scroll', function() {
-              if (window.pageYOffset > 300) {
-                backToTop.classList.add('show');
-              } else {
-                backToTop.classList.remove('show');
-              }
+            var sidebar = document.querySelector('.sidebar');
+            var container = document.querySelector('.markdown-section');
+            if (!sidebar || !container) return;
+
+            // 构建扁平链接列表
+            var links = [];
+            var seen = {};
+            sidebar.querySelectorAll('a[href^="#/"]').forEach(function(a) {
+              var href = a.getAttribute('href') || '';
+              var path = href.split('?')[0].split('#')[0].replace(/^#\//, '').replace(/\/+$/, '');
+              if (!path || seen[path]) return;
+              seen[path] = true;
+              links.push({ href: href, path: path, title: (a.textContent || '').trim() });
             });
-            
-            backToTop.addEventListener('click', function() {
-              window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-              });
-            });
-          });
-        },
-        
-        // 章节导航按钮功能
-        function(hook, vm) {
-          hook.doneEach(function() {
-            // 构建扁平化的侧边栏链接数组
-            function buildFlatSidebarLinks() {
-              var sidebar = document.querySelector('.sidebar');
-              if (!sidebar) return [];
-              
-              var links = Array.from(sidebar.querySelectorAll('a[href^="#/"]'));
-              // 按页面路径去重，保持出现顺序
-              var seen = new Set();
-              var out = [];
-              
-              links.forEach(function(a) {
-                var href = a.getAttribute('href') || '';
-                var n = normRoute(href);
-                var pathOnly = n.split('?')[0].split('#')[0]; // 仅路径部分
-                if (!pathOnly || seen.has(pathOnly)) return;
-                seen.add(pathOnly);
-                out.push({
-                  href: href,          // 原始 href（用于点击）
-                  norm: n,             // 规范化（含可能的子锚）
-                  pathOnly: pathOnly,  // 仅路径部分（用于分页计算）
-                  el: a,
-                  title: (a.textContent || '').trim()
-                });
-              });
-              
-              return out;
-            }
-            
-            // 规范化路由路径
-            function normRoute(s) {
-              return (s || '')
-                .replace(/^#\//, '')
-                .replace(/\.\//g, '')
-                .split('?')[0]
-                .replace(/\/+$/, '')
-                .replace(/\/{2,}/g, '/');
-            }
-            
-            // 查找前一章和后一章
-            function findNeighbors(flatLinks, currentHash) {
-              var curr = normRoute(currentHash);
-              // 当前页仅路径部分（忽略 query/hash）
-              var currPath = curr.split('?')[0].split('#')[0];
-              var idx = flatLinks.findIndex(function(x) { return x.pathOnly === currPath; });
-              if (idx === -1) return {prev: null, next: null};
-              var prev = idx > 0 ? flatLinks[idx-1] : null;
-              var next = idx < flatLinks.length-1 ? flatLinks[idx+1] : null;
-              return {prev: prev, next: next};
-            }
-            
-            // 创建导航链接
-            function makeLink(item, cls, fallbackText) {
+
+            // 找当前页
+            var curr = location.hash.replace(/^#\//, '').split('?')[0].split('#')[0].replace(/\/+$/, '');
+            var idx = links.findIndex(function(x) { return x.path === curr; });
+            if (idx === -1) return;
+
+            // 移除旧导航
+            var old = container.querySelector('.page-nav');
+            if (old) old.remove();
+            var oldSep = container.querySelector('.page-nav-sep');
+            if (oldSep) oldSep.remove();
+
+            var prev = idx > 0 ? links[idx - 1] : null;
+            var next = idx < links.length - 1 ? links[idx + 1] : null;
+            if (!prev && !next) return;
+
+            var sep = document.createElement('hr');
+            sep.className = 'page-nav-sep';
+            container.appendChild(sep);
+
+            var nav = document.createElement('div');
+            nav.className = 'page-nav';
+
+            function makeLink(item, label) {
               var a = document.createElement('a');
-              a.className = cls;
-              a.setAttribute('rel', cls === 'prev' ? 'prev' : 'next');
               a.href = item.href;
-              // 兜底标题：若侧栏文本为空，取路径最后一段
-              var title = (item.title || '').trim();
-              if (!title) {
-                try {
-                  var path = (item.norm || '').split('/').filter(Boolean);
-                  title = path.length ? decodeURIComponent(path[path.length-1]) : fallbackText;
-                } catch(e) { title = fallbackText; }
-              }
-              a.innerHTML = '<span class="label">' + (cls === 'prev' ? '上一章' : '下一章') + '</span>'
-                          + '<span class="title">' + title + '</span>';
+              a.rel = label;
+              var title = item.title || item.path.split('/').pop();
+              a.innerHTML = '<span class="label">' + label + '</span><span class="title">' + title + '</span>';
               return a;
             }
-            
-            // 渲染分页导航
-            function renderPagination(prev, next) {
-              var container = document.querySelector('.markdown-section');
-              if (!container) return;
-              
-              // 移除旧分页
-              var old = container.querySelector('.page-nav');
-              if (old) old.remove();
-              var oldSep = container.querySelector('.page-nav-sep');
-              if (oldSep) oldSep.remove();
-              
-              // 分隔线提高可见性
-              var sep = document.createElement('hr');
-              sep.className = 'page-nav-sep';
-              container.appendChild(sep);
-              
-              // 构建新分页
-              var nav = document.createElement('div');
-              nav.className = 'page-nav';
-              
-              if (prev) nav.appendChild(makeLink(prev, 'prev', '上一章'));
-              else {
-                var span = document.createElement('span');
-                span.style.opacity = '0.6';
-                span.textContent = '无上一章';
-                nav.appendChild(span);
-              }
-              
-              if (next) nav.appendChild(makeLink(next, 'next', '下一章'));
-              else {
-                var span2 = document.createElement('span');
-                span2.style.opacity = '0.6';
-                span2.textContent = '无下一章';
-                nav.appendChild(span2);
-              }
-              
-              container.appendChild(nav);
-            }
-            
-            // 获取当前页面的前一章和后一章并渲染导航按钮
-            var flatLinks = buildFlatSidebarLinks();
-            var neighbors = findNeighbors(flatLinks, location.hash);
-            renderPagination(neighbors.prev, neighbors.next);
+
+            if (prev) nav.appendChild(makeLink(prev, '上一章'));
+            else nav.appendChild(Object.assign(document.createElement('span'), { textContent: '已是第一章', className: 'page-nav-empty' }));
+
+            if (next) nav.appendChild(makeLink(next, '下一章'));
+            else nav.appendChild(Object.assign(document.createElement('span'), { textContent: '已是最后一章', className: 'page-nav-empty' }));
+
+            container.appendChild(nav);
           });
         }
       ]
     };
   </script>
-  <!-- 核心Docsify库 -->
+
+  <!-- Docsify 核心 -->
   <script src="vendor/docsify/docsify.min.js"></script>
-  
-  <!-- Prism核心库 -->
+
+  <!-- Prism 语言支持 -->
   <script src="vendor/prismjs/prism-core.min.js"></script>
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script> -->
-  
-  <!-- 确保Prism正确初始化 -->
-  <script>
-    // 设置Prism为自动模式
-    window.Prism = window.Prism || {};
-    Prism.manual = false;
-    
-    // 确保Prism在页面加载完成后初始化
-    document.addEventListener('DOMContentLoaded', function() {
-      if (typeof Prism !== 'undefined') {
-        // 强制重新高亮所有代码块
-        Prism.highlightAll();
-        console.log('Prism initialized');
-      } else {
-        console.log('Prism not loaded');
-      }
-    });
-    
-    // 页面加载完成后再次尝试初始化
-    window.addEventListener('load', function() {
-      if (typeof Prism !== 'undefined') {
-        Prism.highlightAll();
-        console.log('Prism initialized on window load');
-      }
-    });
-  </script>
-  
-  <!-- 必需的基础插件 -->
   <script src="vendor/docsify/plugins/search.min.js"></script>
   <script src="vendor/docsify/plugins/prism-python.min.js"></script>
   <script src="vendor/docsify/plugins/prism-bash.min.js"></script>
   <script src="vendor/docsify/plugins/prism-javascript.min.js"></script>
   <script src="vendor/docsify/plugins/prism-json.min.js"></script>
   <script src="vendor/docsify/plugins/prism-sql.min.js"></script>
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script> -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script> -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script> -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script> -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script> -->
-  
-  <!-- 在所有Prism组件加载完成后初始化 -->
-  <script>
-    // 等待所有Prism组件加载完成后初始化
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        if (typeof Prism !== 'undefined') {
-          Prism.highlightAll();
-          console.log('Prism final initialization');
-        }
-      }, 100);
-    });
-    
-    // 添加一个更强大的高亮函数
-    function highlightCodeBlocks() {
-      if (typeof Prism !== 'undefined') {
-        // 获取所有代码块
-        var codeBlocks = document.querySelectorAll('pre code');
-        codeBlocks.forEach(function(block) {
-          // 确保每个代码块都有正确的语言类
-          var classes = block.className.split(' ');
-          var hasLanguageClass = classes.some(function(cls) {
-            return cls.startsWith('language-');
-          });
-          
-          if (!hasLanguageClass && block.parentElement) {
-            // 如果没有语言类，尝试从父元素获取
-            var preClasses = block.parentElement.className.split(' ');
-            var preLanguageClass = preClasses.find(function(cls) {
-              return cls.startsWith('language-');
-            });
-            
-            if (preLanguageClass) {
-              block.className += ' ' + preLanguageClass;
-            }
-          }
-          
-          // 高亮代码块
-          Prism.highlightElement(block);
-        });
-        console.log('Code blocks highlighted:', codeBlocks.length);
-      }
-    }
-    
-    // 在页面加载完成后执行高亮
-    document.addEventListener('DOMContentLoaded', highlightCodeBlocks);
-    window.addEventListener('load', highlightCodeBlocks);
-    
-    // 在每次页面内容更新后执行高亮（适用于SPA应用）
-    if (typeof MutationObserver !== 'undefined') {
-      var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.type === 'childList') {
-            mutation.addedNodes.forEach(function(node) {
-              if (node.nodeType === 1) { // Element node
-                if (node.querySelectorAll) {
-                  var codeBlocks = node.querySelectorAll('pre code');
-                  if (codeBlocks.length > 0 || node.matches('pre code')) {
-                    setTimeout(highlightCodeBlocks, 0);
-                  }
-                }
-              }
-            });
-          }
-        });
-      });
-      
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-    }
-  </script>
-  
-  <!-- 可选的功能插件（根据实际需求启用） -->
-  <!-- 注：以下插件已根据性能优化需求禁用 -->
-  <!--
-  <script src="vendor/docsify/plugins/docsify-pagination.min.js"></script>
-  <script src="vendor/docsify/plugins/docsify-themeable.min.js"></script>
-  <script src="vendor/docsify/plugins/docsify-tabs.min.js"></script>
-  <script src="vendor/docsify/plugins/docsify-progress.min.js"></script>
-  <script src="vendor/docsify/plugins/zoom-image.min.js"></script>
-  -->
-  <script src="vendor/docsify/plugins/search.min.js"></script>
   <script src="vendor/docsify/plugins/copy-code.min.js"></script>
-  
-  <!-- 自定义脚本 -->
-  <script src="search-config.js"></script>
-  <script src="search-fix.js"></script>
-  <script src="navbar-enhancement.js"></script>
+
+  <!-- 移动端侧边栏 -->
   <script src="mobile-sidebar.js"></script>
-  
-  <!-- 强制清理重复搜索框脚本 -->
-  <script>
-    // 强制清理重复搜索框
-    function forceCleanupSearchBoxes() {
-      // 查找所有搜索相关的元素
-      const searchContainers = Array.from(document.querySelectorAll('.search, .docsify-search'));
-      const searchInputs = Array.from(document.querySelectorAll('input[type="search"]'));
-      
-      console.log('找到搜索容器:', searchContainers.length);
-      console.log('找到搜索输入框:', searchInputs.length);
-      
-      // 只保留第一个搜索容器
-      if (searchContainers.length > 1) {
-        for (let i = 1; i < searchContainers.length; i++) {
-          if (searchContainers[i] && searchContainers[i].parentNode) {
-            searchContainers[i].parentNode.removeChild(searchContainers[i]);
-          }
-        }
-      }
-      
-      // 只保留第一个搜索输入框
-      if (searchInputs.length > 1) {
-        for (let i = 1; i < searchInputs.length; i++) {
-          if (searchInputs[i] && searchInputs[i].parentNode) {
-            searchInputs[i].parentNode.removeChild(searchInputs[i]);
-          }
-        }
-      }
-      
-      // 特别处理：确保侧边栏中只有一个搜索容器
-      const sidebar = document.querySelector('.sidebar');
-      if (sidebar) {
-        const sidebarSearchContainers = Array.from(sidebar.querySelectorAll('.search'));
-        if (sidebarSearchContainers.length > 1) {
-          for (let i = 1; i < sidebarSearchContainers.length; i++) {
-            if (sidebarSearchContainers[i] && sidebarSearchContainers[i].parentNode) {
-              sidebarSearchContainers[i].parentNode.removeChild(sidebarSearchContainers[i]);
-            }
-          }
-        }
-      }
-    }
-    
-    // 在不同时间点执行清理
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(forceCleanupSearchBoxes, 500);
-      setTimeout(forceCleanupSearchBoxes, 1500);
-    });
-    
-    window.addEventListener('load', function() {
-      setTimeout(forceCleanupSearchBoxes, 1000);
-      setTimeout(forceCleanupSearchBoxes, 3000);
-    });
-    
-    window.addEventListener('hashchange', function() {
-      setTimeout(forceCleanupSearchBoxes, 300);
-    });
-  </script>
-  
-
-
+  <script src="navbar-enhancement.js"></script>
+  <script src="search-config.js"></script>
+  <script src="anchor-navigation-fix.js"></script>
 </body>
 </html>

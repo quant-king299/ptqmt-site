@@ -14,7 +14,7 @@ Hello，各位好，我是王者quant！，需要开通PTtrade/QMT可以加我�
 
 ### 📚 与在线版本
 
-- **在线文档**: [https://www.ptqmt.com](https://www.ptqmt.com)
+- **在线文档**: [https://ptqmt-site.pages.dev](https://ptqmt-site.pages.dev)
 - **技术支持**: 王者quant
 - **联系方式**: www_ptqmt_com
 
