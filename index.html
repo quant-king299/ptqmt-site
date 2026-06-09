@@ -10,8 +10,8 @@
   <!-- docsify-themeable 基础主题（专业排版/间距/响应式） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
 
-  <!-- One Dark Prism 代码高亮主题 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/PrismJS/prism-themes/themes/prism-one-dark.min.css">
+  <!-- Prism Tomorrow Night 代码高亮主题（本地） -->
+  <link rel="stylesheet" href="vendor/prismjs/themes/prism-tomorrow.css">
 
   <!-- 自定义样式（覆盖默认主题） -->
   <link rel="stylesheet" href="style.css">
@@ -120,21 +120,20 @@
   <!-- docsify-themeable JS -->
   <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0"></script>
 
-  <!-- Docsify 核心 -->
+  <!-- Docsify 核心（内置 Prism，不要单独加载 prism-core） -->
   <script src="vendor/docsify/docsify.min.js"></script>
-
-  <!-- Prism 语言支持 -->
-  <script src="vendor/prismjs/prism-core.min.js"></script>
 
   <!-- 插件 -->
   <script src="vendor/docsify/plugins/search.min.js"></script>
+  <script src="vendor/docsify/plugins/copy-code.min.js"></script>
+  <script src="vendor/docsify/plugins/zoom-image.min.js"></script>
+
+  <!-- Prism 语言扩展（Docsify 内置 Prism 后加载语言定义） -->
   <script src="vendor/docsify/plugins/prism-python.min.js"></script>
   <script src="vendor/docsify/plugins/prism-bash.min.js"></script>
   <script src="vendor/docsify/plugins/prism-javascript.min.js"></script>
   <script src="vendor/docsify/plugins/prism-json.min.js"></script>
   <script src="vendor/docsify/plugins/prism-sql.min.js"></script>
-  <script src="vendor/docsify/plugins/copy-code.min.js"></script>
-  <script src="vendor/docsify/plugins/zoom-image.min.js"></script>
 
   <!-- 移动端侧边栏 -->
   <script src="mobile-sidebar.js"></script>
