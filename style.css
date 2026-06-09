@@ -5,68 +5,103 @@
    ============================================================ */
 
 /* ==================== 品牌配色 ==================== */
+/* 正确接入 docsify-themeable 的 HSL 色彩体系 */
 :root {
-  /* 主色 - 深蓝 */
-  --theme-color: #1a365d;
-  --theme-color-dark: #122847;
-  --theme-color-light: #2b5a8c;
+  /* 主色 HSL：#1a365d ≈ hsl(215, 56%, 23%) */
+  --theme-hue: 215;
+  --theme-saturation: 56%;
+  --theme-lightness: 23%;
+  --theme-color: hsl(var(--theme-hue), var(--theme-saturation), var(--theme-lightness));
 
   /* 金色点缀 */
   --accent-color: #c8a45c;
-  --accent-color-light: #dab86e;
+
+  /* 单色系（跟随主色相） */
+  --mono-hue: 215;
+  --mono-saturation: 10%;
 
   /* 侧边栏 */
   --sidebar-width: 290px;
   --sidebar-background: #fafbfd;
-  --sidebar-border-color: #e8ecf1;
+  --sidebar-border-color: #e2e8f0;
 
   /* 内容区 */
   --base-background-color: #fff;
-  --base-color: #1a202c;
+  --base-color: #334155;
   --base-font-size: 15px;
+  --base-line-height: 1.8;
 
   /* 链接 */
-  --link-color: #2b5a8c;
-  --link-color--hover: #1a365d;
+  --link-color: hsl(215, 56%, 35%);
+  --link-color--hover: hsl(215, 56%, 23%);
 
   /* 标题 */
   --heading-color: #1a365d;
   --heading-font-weight: 600;
 
-  /* 代码 */
+  /* 代码块 */
+  --code-block-border-radius: 8px;
+  --code-block-padding: 1.25em 1.5em;
+  --code-theme-background: #1d1f21;
+  --code-theme-text: #ccc;
+  --code-theme-comment: #969896;
+  --code-theme-punctuation: #ccc;
+  --code-theme-tag: #f08d49;
+  --code-theme-selector: #b5bd68;
+  --code-theme-keyword: #cc99cc;
+  --code-theme-function: #de935f;
+  --code-theme-variable: #f08d49;
+  --code-theme-operator: #8abeb7;
+
+  /* 行内代码 */
   --code-inline-background: #f0f2f5;
   --code-inline-color: #c7254e;
-  --code-block-background: #1d1f21;
-  --code-block-border-radius: 8px;
 
   /* 引用块 */
   --blockquote-border-color: #1a365d;
   --blockquote-background: rgba(26, 54, 93, 0.04);
 
   /* 表格 */
-  --table-border-color: #e8ecf1;
+  --table-cell-border-color: #e2e8f0;
   --table-head-background: #f4f6f9;
 
   /* 导航栏 */
   --navbar-height: 50px;
   --navbar-background: #fff;
-  --navbar-border-color: #e8ecf1;
+  --navbar-border-color: #e2e8f0;
 
   /* 搜索 */
-  --search-input-color: #1a202c;
-  --search-input-background: #fff;
+  --search-input-color: #334155;
+  --search-input-background-color: #fff;
   --search-input-border-color: #d2d8e0;
-  --search-input-focus-border-color: #1a365d;
+  --search-input-placeholder-color: rgba(0,0,0,0.35);
   --search-result-heading-color: #1a365d;
-  --search-result-item-hover-background: rgba(26, 54, 93, 0.04);
+  --search-result-item-border-color: #e2e8f0;
 
-  /* 过渡 */
-  --sidebar-nav-pagelink-transition: none;
+  /* 封面页 */
+  --cover-background-color: #1a365d;
+  --cover-background-image: linear-gradient(135deg, #0f1b2e 0%, #1a365d 40%, #0f1b2e 100%);
+  --cover-heading-color: #fff;
 
   /* 字体 */
   --base-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --base-code-font-family: 'SF Mono', 'Fira Code', Consolas, Monaco, 'Courier New', monospace;
-  --base-line-height: 1.8;
+  --code-font-family: 'SF Mono', 'Fira Code', Consolas, Monaco, 'Courier New', monospace;
+
+  /* 侧边栏分组标题 */
+  --sidebar-nav-strong-color: #1a365d;
+  --sidebar-nav-strong-font-size: 0.85rem;
+  --sidebar-nav-strong-font-weight: 700;
+  --sidebar-nav-strong-text-transform: none;
+  --sidebar-nav-strong-margin: 1.5em -25px 0.5em 0;
+  --sidebar-nav-strong-padding: 0.35em 0 0.35em 16px;
+
+  /* 侧边栏链接 */
+  --sidebar-nav-link-color: #64748b;
+  --sidebar-nav-link-color--active: #1a365d;
+  --sidebar-nav-link-border-color--active: #1a365d;
+
+  /* 翻页过渡 */
+  --sidebar-nav-pagelink-transition: none;
 }
 
 /* ==================== 封面页 ==================== */
