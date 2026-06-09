@@ -1,0 +1,23 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "debug": false
+  },
+  "security": {
+    "tokens": [
+      "test_token"
+    ],
+    "allowed_ips": []
+  },
+  "storage": {
+    "type": "memory"
+  },
+  "logging": {
+    "level": "DEBUG",
+    "file": "ptqmt_proxy.log"
+  },
+  "limits": {
+    "max_signals_per_request": 20
+  }
+}

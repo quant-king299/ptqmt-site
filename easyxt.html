@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>EasyXT - 基于 MiniQMT xtquant 的易用封装库</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="EasyXT 是基于 MiniQMT 中 xtquant 的二次封装库，为量化开发者提供更友好的 API，统一接口、智能参数与完善错误处理，让量化开发更简单高效。" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="themes/vue.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root{
+      --brand:#e67e22; /* 橙色品牌色 */
+      --brand-dark:#d35400;
+    }
+    body{
+      padding:0 !important;
+    }
+    .hero{
+      background: linear-gradient(135deg, #fff7f0, #ffe9d6);
+      border-bottom: 1px solid #ffd7b3;
+      padding: 64px 24px;
+      text-align: center;
+    }
+    .hero h1{
+      font-size: 3rem;
+      margin: 0 0 12px;
+      color: var(--text-accent);
+    }
+    .hero p.sub{
+      font-size: 1.15rem;
+      color: #7b7b7b;
+      margin: 0 auto 20px;
+      max-width: 800px;
+    }
+    .cta{
+      display:flex;
+      gap:16px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 18px;
+    }
+    .cta a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:12px 18px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:600;
+      border:1px solid #ffcf99;
+      background:#fff7f0;
+      color:#d9730d;
+      box-shadow:0 4px 12px rgba(217,115,13,.15);
+      transition:.2s ease;
+    }
+    .cta a:hover{
+      background:#ffb866;
+      color:#fff;
+      border-color:#ff9a33;
+      box-shadow:0 6px 18px rgba(217,115,13,.28);
+      transform: translateY(-1px);
+    }
+    .container{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+    .card{
+      background:#fff;
+      border:1px solid #e8e6e3;
+      border-radius:14px;
+      box-shadow:0 8px 24px rgba(44,62,80,.08);
+      padding:20px 22px;
+      margin:18px 0;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:18px;
+    }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
+      .hero h1{ font-size:2.2rem; }
+    }
+    .section-title{
+      font-size:1.6rem;
+      font-weight:700;
+      color:var(--text-accent);
+      margin: 8px 0 12px;
+    }
+    .kbd{
+      background:#1e1e1e;
+      color:#d4d4d4;
+      border:1px solid #3c3c3c;
+      border-radius:8px;
+      padding:12px 14px;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 14px;
+      overflow:auto;
+    }
+    .badge{
+      display:inline-block;
+      font-size:.85rem;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#fff7f0;
+      color:#d9730d;
+      border:1px solid #ffd7b3;
+      margin:4px 6px 0 0;
+    }
+    .list{
+      margin:10px 0 0;
+      padding-left: 18px;
+    }
+    .list li{ margin:6px 0; color:var(--text-accent); }
+    .footer-note{
+      text-align:center;
+      color:#7b7b7b;
+      font-size:.95rem;
+      margin-top: 26px;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <h1>EasyXT</h1>
+    <p class="sub">基于 MiniQMT 平台中的 xtquant 进行二次封装，提供统一接口、智能参数处理与完善的错误机制，让量化数据获取与交易更简单、更稳健。</p>
+    <div class="cta">
+      <a href="#features">功能亮点</a>
+      <a href="#install">安装配置</a>
+      <a href="#quickstart">快速上手</a>
+      <a href="#api">常用API</a>
+      <a href="#arch">架构设计</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <section class="card">
+        <div class="section-title" id="intro">项目简介</div>
+        <span class="badge">位置：MiniQMT/xtquant/EasyXT</span>
+        <span class="badge">适配语言：Python 3.6~3.12</span>
+        <span class="badge">场景：数据获取 / 交易执行 / 事件回调</span>
+        <ul class="list">
+          <li>统一 API：对 xtquant 的多模块进行统一命名与参数风格封装。</li>
+          <li>智能参数：容错与默认值注入，减少样板代码。</li>
+          <li>错误处理：分级异常与重试机制，保障线上稳定性。</li>
+          <li>开发友好：更友好的返回结构与类型提示。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <div class="section-title" id="features">功能亮点</div>
+        <ul class="list">
+          <li>行情数据：K线/分时/快照等统一接口，一键订阅与缓存。</li>
+          <li>账户交易：下单、撤单、查询统一封装，支持风控钩子。</li>
+          <li>事件回调：撮合/成交/资金变动事件集中式处理。</li>
+          <li>日志与监控：可插拔日志适配器与性能指标采集。</li>
+          <li>插件扩展：策略组件与数据管线可扩展。</li>
+        </ul>
+      </section>
+    </div>
+
+    <section class="card" id="install">
+      <div class="section-title">安装与环境配置</div>
+      <div class="kbd">
+pip install easyxt  # 若发布为 pip 包；否则使用本地路径安装
+# 本地开发（示例）
+# 假设 EasyXT 位于 MiniQMT 安装目录下的 xtquant/EasyXT
+# 例如：D:\QMT交易端\userdata_mini\xtquant\EasyXT
+import sys, os
+EASYXT_HOME = r"D:\QMT交易端\userdata_mini\xtquant\EasyXT"
+sys.path.append(EASYXT_HOME)
+
+# 环境变量（根据你的 MiniQMT 实际路径调整）
+os.environ['XTQUANT_HOME'] = r"D:\QMT交易端\userdata_mini"
+os.environ['PTRADE_HOME'] = r"C:\PTrade"  # 如需对接 PTrade
+      </div>
+    </section>
+
+    <section class="card" id="quickstart">
+      <div class="section-title">快速上手：三行订阅与获取</div>
+      <div class="kbd">
+from easyxt import Market, Trade, Events
+
+# 1) 订阅与拉取行情（自动处理市场/代码格式）
+df = Market.fetch_kline("SH.600000", period="1m", start="2024-10-01", end="2024-10-31", adjust="none")
+
+# 2) 下单示例（带风控与错误处理）
+order_id = Trade.buy("SH.600000", price=10.23, volume=100, account="模拟账户A")
+
+# 3) 事件回调（集中式）
+@Events.on("order_filled")
+def on_filled(event):
+    print("成交回报：", event)
+
+      </div>
+    </section>
+
+    <section class="card" id="api">
+      <div class="section-title">常用 API 一览</div>
+      <div class="grid">
+        <div>
+          <h4>Market</h4>
+          <ul class="list">
+            <li>fetch_kline(code, period, start, end, adjust)</li>
+            <li>fetch_snapshot(code) / fetch_ticks(code, start, end)</li>
+            <li>subscribe(codes, fields, on_update)</li>
+            <li>cache.enable(ttl) / cache.clear()</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Trade</h4>
+          <ul class="list">
+            <li>buy(code, price, volume, account)</li>
+            <li>sell(code, price, volume, account)</li>
+            <li>cancel(order_id)</li>
+            <li>query_orders() / query_positions() / query_assets()</li>
+            <li>set_risk_guard(guard_fn)</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Events</h4>
+          <ul class="list">
+            <li>on(event_name)(handler)</li>
+            <li>start() / stop()</li>
+            <li>supported(): ['order_filled','order_rejected','asset_changed','tick']</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Utils</h4>
+          <ul class="list">
+            <li>normalize_code("600000") -> "SH.600000"</li>
+            <li>retry(fn, times=3, backoff=0.5)</li>
+            <li>log.set_level("INFO") / log.bind(handler)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="arch">
+      <div class="section-title">架构示意</div>
+      <div class="kbd">
+EasyXT
+├─ Market      # 行情层：统一订阅/拉取/缓存
+├─ Trade       # 交易层：下单/撤单/查询，风控钩子
+├─ Events      # 事件层：集中式回调分发
+├─ Utils       # 工具层：代码归一化/重试/日志
+└─ Adapters    # 适配层：对接 xtquant 原始 API
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">对比与优势</div>
+      <ul class="list">
+        <li>更少样板代码：参数与代码格式智能填充。</li>
+        <li>更高健壮性：错误分级 + 重试回退策略。</li>
+        <li>更易维护：统一命名 + 返回数据结构明确。</li>
+        <li>可扩展：插件化组件，满足不同策略需求。</li>
+      </ul>
+    </section>
+
+    <p class="footer-note">若需直接集成到 Docsify，可在 README 或 _sidebar 中添加链接：<code><a href="easyxt.html" class="tech-nav-button">EasyXT</a></code></p>
+  </main>
+</body>
+</html> 

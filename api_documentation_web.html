@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通达信量化交易API文档 - TPythClient.dll 接口及 tqcenter.py 模块完整API文档</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #e1e8ed;
+            --code-bg: #f6f8fa;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 返回主页按钮 */
+        .back-to-home {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background-color: #2980b9;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .sidebar h2 {
+            padding: 0 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 10px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255,255,255,0.1);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .sidebar a.active {
+            background-color: rgba(52, 152, 219, 0.3);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .section {
+            background-color: var(--card-color);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            color: var(--secondary-color);
+            margin: 25px 0 15px;
+        }
+
+        .section h4 {
+            color: var(--text-color);
+            margin: 20px 0 10px;
+        }
+
+        .function-signature {
+            background-color: var(--code-bg);
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        .parameters-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .parameters-table th {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: left;
+            padding: 12px;
+        }
+
+        .parameters-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .parameters-table tr:nth-child(even) {
+            background-color: var(--code-bg);
+        }
+
+        .example-code {
+            background-color: var(--code-bg);
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-implemented {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .status-partial {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .status-not-implemented {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .feature-list {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .feature-list li {
+            margin-bottom: 8px;
+        }
+
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .tip {
+            background-color: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: #777;
+            font-size: 0.9em;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .back-to-home {
+                position: static;
+                display: inline-block;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* 锚点链接样式 */
+        .anchor-link {
+            text-decoration: none;
+            color: var(--secondary-color);
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        h2:hover .anchor-link,
+        h3:hover .anchor-link,
+        h4:hover .anchor-link {
+            opacity: 1;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <a href="./#/" class="back-to-home">🏠 返回主页</a>
+    
+    <div class="container">
+        <!-- 侧边栏导航 -->
+        <nav class="sidebar">
+            <h2>API文档导航</h2>
+            <ul>
+                <li><a href="#overview">一、概述</a></li>
+                <li><a href="#implemented-functions">二、已实现功能</a>
+                    <ul style="padding-left: 20px;">
+                        <li><a href="#market-data">2.1 市场数据获取</a></li>
+                        <li><a href="#financial-data">2.2 财务数据获取</a></li>
+                        <li><a href="#sector-data">2.3 板块数据获取</a></li>
+                        <li><a href="#realtime-data">2.4 实时行情数据</a></li>
+                        <li><a href="#trading-api">2.5 交易下单接口</a></li>
+                        <li><a href="#connection-management">2.6 连接管理</a></li>
+                    </ul>
+                </li>
+                <li><a href="#partial-functions">三、部分实现功能</a></li>
+                <li><a href="#unimplemented-functions">四、未实现功能</a></li>
+                <li><a href="#dll-mapping">五、DLL接口映射</a></li>
+                <li><a href="#usage-notes">六、使用注意事项</a></li>
+                <li><a href="#faq">七、常见问题</a></li>
+                <li><a href="#future-improvements">八、未来改进建议</a></li>
+            </ul>
+        </nav>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <header class="header">
+                <h1>通达信量化交易API文档</h1>
+                <h2>TPythClient.dll 接口及 tqcenter.py 模块完整API文档</h2>
+                <p>本文档详细描述了通达信量化交易系统中TPythClient.dll接口及其上层封装tqcenter.py模块的功能实现情况</p>
+            </header>
+
+            <section id="introduction" class="section">
+                <p>Hello，各位好，我是王者quant！，通达信量化还处于起步阶段，需要开通量化软件PTtrade/QMT可以加我微信：www_ptqmt_com，这两种比较成熟，也可点返回主页查看这两款软件的介绍</p>
+            </section>
+
+            <section id="overview" class="section">
+                <h2>一、概述 <a class="anchor-link" href="#overview">#</a></h2>
+                
+                <h3>1.1 项目结构</h3>
+                <ul class="feature-list">
+                    <li><strong>TPythClient.dll</strong>: 通达信提供的原生DLL接口库</li>
+                    <li><strong>tqcenter.py</strong>: 对TPythClient.dll的Python封装，提供面向对象的接口</li>
+                </ul>
+                
+                <h3>1.2 核心功能</h3>
+                <p>tqcenter.py模块主要提供以下几类功能：</p>
+                <ol class="feature-list">
+                    <li>市场数据获取（K线、Tick数据等）</li>
+                    <li>财务数据获取</li>
+                    <li>板块数据获取</li>
+                    <li>实时行情数据获取</li>
+                    <li>交易下单接口</li>
+                    <li>连接池管理</li>
+                </ol>
+            </section>
+
+            <section id="implemented-functions" class="section">
+                <h2>二、已实现功能详解 <a class="anchor-link" href="#implemented-functions">#</a></h2>
+                
+                <div id="market-data">
+                    <h3>2.1 市场数据获取 <span class="status-badge status-implemented">已实现</span></h3>
+                    
+                    <h4>get_market_data() - 获取市场数据</h4>
+                    <p><strong>功能描述</strong>: 获取股票的K线数据、分钟线数据、Tick数据等</p>
+                    
+                    <div class="function-signature">
+                        <pre>@classmethod
+def get_market_data(cls,
+                    field_list: List[str] = [],
+                    stock_list: List[str] = [],
+                    period: str = '',
+                    start_time: str = '',
+                    end_time: str = '',
+                    count: int = -1,
+                    dividend_type: Optional[str] = None,
+                    fill_data: bool = True) -> Dict</pre>
+                    </div>
+                    
+                    <h4>参数说明</h4>
+                    <table class="parameters-table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>field_list</td>
+                                <td>List[str]</td>
+                                <td>否</td>
+                                <td>要获取的字段列表，如['Open', 'High', 'Low', 'Close', 'Volume']</td>
+                            </tr>
+                            <tr>
+                                <td>stock_list</td>
+                                <td>List[str]</td>
+                                <td>是</td>
+                                <td>股票代码列表，如['600519.SH', '000001.SZ']</td>
+                            </tr>
+                            <tr>
+                                <td>period</td>
+                                <td>str</td>
+                                <td>是</td>
+                                <td>数据周期，支持'1d','1w','1mon','1m','5m','15m','30m','60m','tick'等</td>
+                            </tr>
+                            <tr>
+                                <td>start_time</td>
+                                <td>str</td>
+                                <td>否</td>
+                                <td>起始时间，格式YYYYMMDD或YYYYMMDDHHMMSS</td>
+                            </tr>
+                            <tr>
+                                <td>end_time</td>
+                                <td>str</td>
+                                <td>否</td>
+                                <td>结束时间，格式YYYYMMDD或YYYYMMDDHHMMSS</td>
+                            </tr>
+                            <tr>
+                                <td>count</td>
+                                <td>int</td>
+                                <td>否</td>
+                                <td>数据条数，-1表示不限制</td>
+                            </tr>
+                            <tr>
+                                <td>dividend_type</td>
+                                <td>str</td>
+                                <td>否</td>
+                                <td>除权类型：'none'(不复权)、'front'(前复权)、'back'(后复权)</td>
+                            </tr>
+                            <tr>
+                                <td>fill_data</td>
+                                <td>bool</td>
+                                <td>否</td>
+                                <td>是否填充缺失数据，默认True</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><strong>返回值</strong>: Dict类型，包含各字段的DataFrame数据</p>
+                    
+                    <h4>使用示例</h4>
+                    <div class="example-code">
+                        <pre># 获取日线数据
+data = tdxdata.get_market_data(
+    field_list=['Open', 'High', 'Low', 'Close', 'Volume'],
+    stock_list=['600519.SH'],
+    period='1d',
+    count=30
+)
+
+# 获取分钟线数据
+data = tdxdata.get_market_data(
+    field_list=['Close', 'Volume'],
+    stock_list=['600519.SH'],
+    period='5m',
+    start_time='20241201',
+    end_time='20241231'
+)</pre>
+                    </div>
+                    
+                    <h4>price_df() - 提取价格数据</h4>
+                    <p><strong>功能描述</strong>: 从get_market_data返回的数据中提取特定字段并格式化</p>
+                    
+                    <div class="function-signature">
+                        <pre>@staticmethod
+def price_df(df, price_col, column_names=None)</pre>
+                    </div>
+                    
+                    <h4>参数说明</h4>
+                    <table class="parameters-table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>df</td>
+                                <td>Dict</td>
+                                <td>是</td>
+                                <td>get_market_data返回的数据</td>
+                            </tr>
+                            <tr>
+                                <td>price_col</td>
+                                <td>str</td>
+                                <td>是</td>
+                                <td>要提取的字段名，如'Close'</td>
+                            </tr>
+                            <tr>
+                                <td>column_names</td>
+                                <td>List[str]</td>
+                                <td>否</td>
+                                <td>自定义列名</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><strong>返回值</strong>: DataFrame格式的价格数据</p>
+                </div>
+                
+                <div id="financial-data">
+                    <h3>2.2 财务数据获取 <span class="status-badge status-partial">部分实现</span></h3>
+                    
+                    <h4>get_financial_data() - 获取财务数据</h4>
+                    <p><strong>功能描述</strong>: 获取股票的财务报表数据（部分实现，存在权限或配置问题）</p>
+                    
+                    <div class="function-signature">
+                        <pre>@classmethod
+def get_financial_data(cls,
+                        stock_list: List[str] = [], 
+                        table_list: List[str] = [], 
+                        start_time: str = '', 
+                        end_time: str = '', 
+                        report_type: str = 'report_time') -> Dict</pre>
+                    </div>
+                    
+                    <h4>参数说明</h4>
+                    <table class="parameters-table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>stock_list</td>
+                                <td>List[str]</td>
+                                <td>是</td>
+                                <td>股票代码列表</td>
+                            </tr>
+                            <tr>
+                                <td>table_list</td>
+                                <td>List[str]</td>
+                                <td>否</td>
+                                <td>财务表列表，空列表表示获取所有表</td>
+                            </tr>
+                            <tr>
+                                <td>start_time</td>
+                                <td>str</td>
+                                <td>否</td>
+                                <td>起始时间</td>
+                            </tr>
+                            <tr>
+                                <td>end_time</td>
+                                <td>str</td>
+                                <td>否</td>
+                                <td>结束时间</td>
+                            </tr>
+                            <tr>
+                                <td>report_type</td>
+                                <td>str</td>
+                                <td>否</td>
+                                <td>报告类型，默认'report_time'</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><strong>返回值</strong>: Dict类型，包含各股票的财务数据</p>
+                    
+                    <div class="warning">
+                        <p><strong>重要提醒</strong>: 经测试发现，此接口存在以下问题：</p>
+                        <ul class="feature-list">
+                            <li>函数接口已完整实现，可正常调用</li>
+                            <li>但实际返回空数据（包含0个财务表）</li>
+                            <li>根据测试结果，返回错误代码6（数量错误）</li>
+                            <li>可能需要特殊的财务数据权限或配置才能正常使用</li>
+                            <li>建议使用第三方数据源（如Tushare）作为替代方案</li>
+                        </ul>
+                        <p>理论上应支持获取以下财务报表数据：</p>
+                        <ul class="feature-list">
+                            <li>资产负债表</li>
+                            <li>利润表</li>
+                            <li>现金流量表</li>
+                            <li>各类财务指标数据</li>
+                        </ul>
+                    </div>
+                    
+                    <h4>使用示例</h4>
+                    <div class="example-code">
+                        <pre>financial_data = tdxdata.get_financial_data(
+    stock_list=['600519.SH'],
+    start_time='20230101',
+    end_time='20231231'
+)</pre>
+                    </div>
+                </div>
+                
+                <div id="sector-data">
+                    <h3>2.3 板块数据获取 <span class="status-badge status-implemented">已实现</span></h3>
+                    
+                    <h4>get_sector_list() - 获取板块列表</h4>
+                    <p><strong>功能描述</strong>: 获取所有板块列表</p>
+                    
+                    <div class="function-signature">
+                        <pre>@classmethod
+def get_sector_list(cls) -> List</pre>
+                    </div>
+                    
+                    <p><strong>返回值</strong>: List类型，包含所有板块代码</p>
+                    
+                    <h4>get_stock_list_in_sector() - 获取板块成分股</h4>
+                    <p><strong>功能描述</strong>: 获取指定板块的成分股列表</p>
+                    
+                    <div class="function-signature">
+                        <pre>@classmethod
+def get_stock_list_in_sector(cls, block_code: str) -> List</pre>
+                    </div>
+                    
+                    <h4>参数说明</h4>
+                    <table class="parameters-table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>block_code</td>
+                                <td>str</td>
+                                <td>是</td>
+                                <td>板块代码</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><strong>返回值</strong>: List类型，包含板块内所有股票代码</p>
+                    
+                    <h4>使用示例</h4>
+                    <div class="example-code">
+                        <pre># 获取板块列表
+sectors = tdxdata.get_sector_list()
+
+# 获取某个板块的成分股
+if sectors:
+    stocks = tdxdata.get_stock_list_in_sector(sectors[0])</pre>
+                    </div>
+                </div>
+                
+                <div id="realtime-data">
+                    <h3>2.4 实时行情数据获取 <span class="status-badge status-implemented">已实现</span></h3>
+                    
+                    <h4>get_report_data() - 获取实时行情数据</h4>
+                    <p><strong>功能描述</strong>: 获取股票的实时行情数据</p>
+                    
+                    <div class="function-signature">
+                        <pre>@classmethod
+def get_report_data(cls, stock_codes: str, isLevel2: bool = False) -> Dict</pre>
+                    </div>
+                    
+                    <h4>参数说明</h4>
+                    <table class="parameters-table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>stock_codes</td>
+                                <td>str</td>
+                                <td>是</td>
+                                <td>股票代码</td>
+                            </tr>
+                            <tr>
+                                <td>isLevel2</td>
+                                <td>bool</td>
+                                <td>否</td>
+                                <td>是否获取Level2数据，默认False</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><strong>返回值</strong>: Dict类型，包含实时行情数据</p>
+                </div>
+                
+                <div id="trading-api">
+                    <h3>2.5 交易下单接口 <span class="status-badge status-partial">部分实现</span></h3>
+                    
+                    <h4>order_stock() - 下单接口</h4>
+                    <p><strong>功能描述</strong>: 发送交易订单（部分实现，存在参数转换问题）</p>
+                    
+                    <div class="function-signature">
+                        <pre>@classmethod
+def order_stock(cls,
+                account:str, 
+                stock_code:str, 
+                order_type:int, 
+                order_volume:int, 
+                price_type:int, 
+                price:float, 
+                strategy_name:str, 
+                order_remark: str = '')</pre>
+                    </div>
+                    
+                    <h4>参数说明</h4>
+                    <table class="parameters-table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>account</td>
+                                <td>str</td>
+                                <td>是</td>
+                                <td>交易账户</td>
+                            </tr>
+                            <tr>
+                                <td>stock_code</td>
+                                <td>str</td>
+                                <td>是</td>
+                                <td>股票代码</td>
+                            </tr>
+                            <tr>
+                                <td>order_type</td>
+                                <td>int</td>
+                                <td>是</td>
+                                <td>订单类型</td>
+                            </tr>
+                            <tr>
+                                <td>order_volume</td>
+                                <td>int</td>
+                                <td>是</td>
+                                <td>订单数量</td>
+                            </tr>
+                            <tr>
+                                <td>price_type</td>
+                                <td>int</td>
+                                <td>是</td>
+                                <td>价格类型</td>
+                            </tr>
+                            <tr>
+                                <td>price</td>
+                                <td>float</td>
+                                <td>是</td>
+                                <td>订单价格</td>
+                            </tr>
+                            <tr>
+                                <td>strategy_name</td>
+                                <td>str</td>
+                                <td>是</td>
+                                <td>策略名称</td>
+                            </tr>
+                            <tr>
+                                <td>order_remark</td>
+                                <td>str</td>
+                                <td>否</td>
+                                <td>订单备注</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><strong>返回值</strong>: Dict类型，包含下单结果</p>
+                    
+                    <div class="warning">
+                        <p><strong>重要提醒</strong>: 经测试发现，此接口存在参数转换问题，无法正常调用。具体表现为：</p>
+                        <ul class="feature-list">
+                            <li>函数签名中声明了8个参数，但DLL调用时只有7个参数</li>
+                            <li>存在类型转换错误：TypeError: Don't know how to convert parameter 7</li>
+                            <li>根据测试报告，此功能未进行实际下单测试</li>
+                            <li>可能需要特殊的交易权限或配置才能正常使用</li>
+                        </ul>
+                        <p>建议在修复参数问题后再进行实际交易测试。</p>
+                    </div>
+                </div>
+                
+                <div id="connection-management">
+                    <h3>2.6 连接管理 <span class="status-badge status-implemented">已实现</span></h3>
+                    
+                    <h4>initialize() - 初始化连接</h4>
+                    <p><strong>功能描述</strong>: 初始化与通达信的连接</p>
+                    
+                    <div class="function-signature">
+                        <pre>@classmethod
+def initialize(cls, path:str)</pre>
+                    </div>
+                    
+                    <h4>close() - 关闭连接</h4>
+                    <p><strong>功能描述</strong>: 关闭与通达信的连接</p>
+                    
+                    <div class="function-signature">
+                        <pre>@classmethod
+def close(cls)</pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="partial-functions" class="section">
+                <h2>三、部分实现功能 <a class="anchor-link" href="#partial-functions">#</a></h2>
+                
+                <div class="warning">
+                    <p><strong>注意</strong>: 以下功能已部分实现，但在某些情况下可能无法正常工作或功能有限。</p>
+                </div>
+                
+                <h3>3.1 除权数据处理</h3>
+                <p><strong>功能描述</strong>: 获取和处理股票的除权除息数据</p>
+                
+                <h4>相关函数</h4>
+                <ul class="feature-list">
+                    <li>get_divid_factors(): 获取除权除息数据</li>
+                    <li>_add_forward_factor_to_data(): 添加前复权因子</li>
+                    <li>_calculate_stock_forward_factors(): 计算前复权因子</li>
+                </ul>
+                
+                <p><strong>当前状态</strong>: 部分实现，可以获取除权数据但可能存在计算精度问题</p>
+                
+                <h3>3.2 数据订阅功能</h3>
+                <p><strong>功能描述</strong>: 订阅实时数据更新</p>
+                
+                <h4>相关函数</h4>
+                <ul class="feature-list">
+                    <li>subscribe_quote(): 订阅单股行情数据回调</li>
+                </ul>
+                
+                <p><strong>当前状态</strong>: 接口已定义但实际功能可能受限</p>
+                
+                <h3>3.3 连接池管理</h3>
+                <p><strong>功能描述</strong>: 管理多个并发连接</p>
+                
+                <h4>相关类</h4>
+                <ul class="feature-list">
+                    <li>ConnectionPool: 连接池管理器</li>
+                </ul>
+                
+                <p><strong>当前状态</strong>: 基本框架已实现，但实际连接管理逻辑需要进一步完善</p>
+            </section>
+
+            <section id="unimplemented-functions" class="section">
+                <h2>四、未实现功能 <a class="anchor-link" href="#unimplemented-functions">#</a></h2>
+                
+                <div class="warning">
+                    <p><strong>注意</strong>: 以下功能尚未实现，需要进一步开发才能使用。</p>
+                </div>
+                
+                <h3>4.1 高级交易功能</h3>
+                <p>以下高级交易功能尚未完全实现：</p>
+                <ul class="feature-list">
+                    <li>撤单接口</li>
+                    <li>查询订单状态</li>
+                    <li>查询持仓信息</li>
+                    <li>资金查询接口</li>
+                    <li>条件单设置</li>
+                </ul>
+                
+                <h3>4.2 Level2数据处理</h3>
+                <ul class="feature-list">
+                    <li>十档行情数据获取</li>
+                    <li>逐笔成交数据处理</li>
+                    <li>委托队列数据分析</li>
+                </ul>
+                
+                <h3>4.3 实时数据推送</h3>
+                <ul class="feature-list">
+                    <li>WebSocket实时数据推送</li>
+                    <li>数据变更通知机制</li>
+                    <li>断线重连机制</li>
+                </ul>
+                
+                <h3>4.4 高频数据处理</h3>
+                <ul class="feature-list">
+                    <li>毫秒级数据处理</li>
+                    <li>数据流控机制</li>
+                    <li>大数据量处理优化</li>
+                </ul>
+            </section>
+
+            <section id="dll-mapping" class="section">
+                <h2>五、DLL接口映射关系 <a class="anchor-link" href="#dll-mapping">#</a></h2>
+                
+                <h3>5.1 已封装的DLL函数</h3>
+                <table class="parameters-table">
+                    <thead>
+                        <tr>
+                            <th>DLL函数名</th>
+                            <th>tqcenter.py封装函数</th>
+                            <th>功能说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>InitConnect</td>
+                            <td>initialize()</td>
+                            <td>初始化连接</td>
+                        </tr>
+                        <tr>
+                            <td>CloseConnect</td>
+                            <td>close()</td>
+                            <td>关闭连接</td>
+                        </tr>
+                        <tr>
+                            <td>GetHISDATsInStr</td>
+                            <td>get_market_data()</td>
+                            <td>获取历史数据</td>
+                        </tr>
+                        <tr>
+                            <td>GetCWDATAInStr</td>
+                            <td>get_divid_factors()</td>
+                            <td>获取除权数据</td>
+                        </tr>
+                        <tr>
+                            <td>GetFINANICALInStr</td>
+                            <td>get_financial_data()</td>
+                            <td>获取财务数据</td>
+                        </tr>
+                        <tr>
+                            <td>GetBlockListInStr</td>
+                            <td>get_sector_list()</td>
+                            <td>获取板块列表</td>
+                        </tr>
+                        <tr>
+                            <td>GetBlockStocksInStr</td>
+                            <td>get_stock_list_in_sector()</td>
+                            <td>获取板块成分股</td>
+                        </tr>
+                        <tr>
+                            <td>GetREPORTInStr</td>
+                            <td>get_report_data()</td>
+                            <td>获取实时行情</td>
+                        </tr>
+                        <tr>
+                            <td>SetNewOrder</td>
+                            <td>order_stock()</td>
+                            <td>下单接口</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>5.2 未封装的DLL函数</h3>
+                <p>以下DLL函数尚未在tqcenter.py中封装：</p>
+                <ul class="feature-list">
+                    <li>Register_DataTransferFunc: 注册数据传输回调函数</li>
+                    <li>SubscribeGPData: 订阅股票数据</li>
+                    <li>SetResToMain: 发送结果到主程序</li>
+                    <li>GetSTOCKInStr: 获取股票详细信息</li>
+                </ul>
+            </section>
+
+            <section id="usage-notes" class="section">
+                <h2>六、使用注意事项 <a class="anchor-link" href="#usage-notes">#</a></h2>
+                
+                <h3>6.1 初始化要求</h3>
+                <ol class="feature-list">
+                    <li>使用前必须调用<code>tdxdata.initialize(__file__)</code>初始化连接</li>
+                    <li>使用完毕后应调用<code>tdxdata.close()</code>关闭连接</li>
+                    <li>确保TPythClient.dll文件在正确路径下</li>
+                </ol>
+                
+                <h3>6.2 数据格式说明</h3>
+                <ol class="feature-list">
+                    <li>股票代码格式：6位数字+.市场后缀（如600519.SH）</li>
+                    <li>时间格式：YYYYMMDD或YYYYMMDDHHMMSS</li>
+                    <li>除权类型：'none'（不复权）、'front'（前复权）、'back'（后复权）</li>
+                </ol>
+                
+                <h3>6.3 异常处理</h3>
+                <ol class="feature-list">
+                    <li>网络异常可能导致数据获取失败</li>
+                    <li>数据量过大时可能出现超时</li>
+                    <li>股票代码格式错误会导致函数返回错误信息</li>
+                </ol>
+                
+                <h3>6.4 性能优化建议</h3>
+                <ol class="feature-list">
+                    <li>合理使用count参数避免获取过多数据</li>
+                    <li>批量获取多只股票数据以减少网络请求</li>
+                    <li>使用缓存机制避免重复获取相同数据</li>
+                </ol>
+            </section>
+
+            <section id="faq" class="section">
+                <h2>七、常见问题及解决方案 <a class="anchor-link" href="#faq">#</a></h2>
+                
+                <h3>7.1 数据获取失败</h3>
+                <p><strong>问题现象</strong>: get_market_data返回空数据或错误信息</p>
+                <p><strong>解决方案</strong>:</p>
+                <ol class="feature-list">
+                    <li>检查股票代码格式是否正确</li>
+                    <li>确认时间范围是否合理</li>
+                    <li>检查网络连接是否正常</li>
+                    <li>验证DLL文件是否正确加载</li>
+                </ol>
+                
+                <h3>7.2 连接初始化失败</h3>
+                <p><strong>问题现象</strong>: initialize()函数抛出异常</p>
+                <p><strong>解决方案</strong>:</p>
+                <ol class="feature-list">
+                    <li>确认TPythClient.dll文件存在且路径正确</li>
+                    <li>检查通达信客户端是否正常运行</li>
+                    <li>验证权限设置是否正确</li>
+                </ol>
+                
+                <h3>7.3 内存泄漏问题</h3>
+                <p><strong>问题现象</strong>: 长时间运行后内存占用持续增长</p>
+                <p><strong>解决方案</strong>:</p>
+                <ol class="feature-list">
+                    <li>确保每次使用完后调用close()方法</li>
+                    <li>合理使用连接池管理</li>
+                    <li>避免大量数据缓存在内存中</li>
+                </ol>
+            </section>
+
+            <section id="future-improvements" class="section">
+                <h2>八、未来改进建议 <a class="anchor-link" href="#future-improvements">#</a></h2>
+                
+                <h3>8.1 功能完善</h3>
+                <ol class="feature-list">
+                    <li>完善交易相关接口的封装</li>
+                    <li>实现完整的数据订阅机制</li>
+                    <li>增强异常处理和错误恢复能力</li>
+                </ol>
+                
+                <h3>8.2 性能优化</h3>
+                <ol class="feature-list">
+                    <li>实现数据缓存机制</li>
+                    <li>优化大数据量处理性能</li>
+                    <li>增加异步数据获取支持</li>
+                </ol>
+                
+                <h3>8.3 易用性提升</h3>
+                <ol class="feature-list">
+                    <li>提供更详细的文档和示例</li>
+                    <li>增加数据可视化功能</li>
+                    <li>提供配置文件支持</li>
+                </ol>
+            </section>
+
+            <footer class="footer">
+                <p><strong>文档版本</strong>: 1.0 | <strong>最后更新</strong>: 2025-12-12 | <strong>适用版本</strong>: TPythClient.dll + tqcenter.py v1.0</p>
+                <p>更多详细内容可关注微信公众号 王者quant 微信号 www_ptqmt_com</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // 侧边栏导航高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('.sidebar a');
+            const sections = document.querySelectorAll('section');
+            
+            function setActiveLink() {
+                let current = '';
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= (sectionTop - 100)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                links.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + current) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', setActiveLink);
+            setActiveLink();
+            
+            // 平滑滚动
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

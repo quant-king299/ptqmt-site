@@ -1,0 +1,101 @@
+/* 现代科技风格主题 - PTrade/QMT技术文档 */
+/* 保持Docsify原生结构，仅增强视觉效果 */
+
+/* 全局变量定义 */
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --tech-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --text-accent: #00f2fe;
+}
+
+/* 主体背景 - 保持渐变色彩 */
+body {
+  background: var(--primary-gradient);
+  background-attachment: fixed;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 动态背景粒子效果 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+  z-index: -1;
+  animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-20px) rotate(1deg); }
+  66% { transform: translateY(10px) rotate(-1deg); }
+}
+
+/* 玻璃态效果 - 侧边栏 */
+.sidebar {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--glass-border);
+}
+
+/* 玻璃态效果 - 主内容区 */
+.content {
+  background: rgba(255, 255, 255, 0.02) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+}
+
+/* 现代交互 - 侧边栏链接 */
+.sidebar-nav a {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-nav a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--tech-gradient);
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.sidebar-nav a:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+  color: white !important;
+}
+
+.sidebar-nav a:hover::before {
+  left: 0;
+}
+
+/* 渐变文字效果 */
+.gradient-text {
+  background: var(--tech-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* 响应式设计保持 */
+@media (max-width: 768px) {
+  .content {
+    border-radius: 8px;
+  }
+}
