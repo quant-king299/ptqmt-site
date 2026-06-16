@@ -34,6 +34,16 @@ Hello，各位好，我是王者quant！，需要开通PTtrade/QMT可以加我�
   </a>
 </div>
 
+### 🔄 在线工具
+
+<div class="tech-nav-buttons">
+  <a href="code-converter.html" class="tech-nav-button ai-code-button" style="background: linear-gradient(135deg, #c8a45c, #e8c97a);">
+    <span class="tech-icon">🔄</span>聚宽→PTrade/QMT 代码转换器
+  </a>
+</div>
+
+> 💡 **免费在线工具**，粘贴聚宽策略代码，一键转换为 PTrade 或 QMT 格式。完全在浏览器中运行，代码不上传服务器。
+
 ### 📋 文档特色
 
 - **🔥 实战导向** - 基于真实项目经验

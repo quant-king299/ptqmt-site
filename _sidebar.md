@@ -13,6 +13,7 @@
 
 <!-- 首页 -->
 * [🏠 前言](README.md)
+  * [🔄 聚宽代码转换器](code-converter.html)
 
 * **QMT 量化交易平台**
   * [软件安装与配置](./docs/Chapter-01.md)

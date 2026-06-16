@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聚宽代码转换器 — 王者Quant</title>
+  <meta name="description" content="聚宽策略代码一键转换为PTrade/QMT格式，免费在线工具">
+  <style>
+    /* ========== 品牌配色 ========== */
+    :root {
+      --bg-primary: #0f1923;
+      --bg-secondary: #1a2733;
+      --bg-tertiary: #1e3044;
+      --bg-input: #152230;
+      --border: #2a3a4a;
+      --text-primary: #dce4ec;
+      --text-secondary: #8899aa;
+      --text-muted: #5a6d7e;
+      --accent: #c8a45c;
+      --accent-hover: #d4b36d;
+      --accent-glow: rgba(200, 164, 92, 0.25);
+      --blue: #4a90d9;
+      --blue-hover: #5da0e5;
+      --green: #27ae60;
+      --green-glow: rgba(39, 174, 96, 0.2);
+      --red: #e74c3c;
+      --orange: #e67e22;
+      --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Menlo', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ========== Header ========== */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    .header-brand img { height: 32px; }
+    .header-brand span {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #e8c97a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-nav { display: flex; gap: 8px; align-items: center; }
+    .header-nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    .header-nav a:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+    .header-nav a.active { color: var(--accent); background: rgba(200,164,92,0.08); }
+
+    /* ========== Layout ========== */
+    .container { max-width: 1500px; margin: 0 auto; padding: 20px 24px; }
+
+    /* ========== Toolbar ========== */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .toolbar-group label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 0 8px;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    .platform-btn {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .platform-btn:hover { color: var(--text-primary); }
+    .platform-btn.active {
+      background: var(--accent);
+      color: #1a1a1a;
+      font-weight: 600;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+    .btn {
+      padding: 8px 18px;
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn:hover { background: var(--bg-tertiary); border-color: #3a4a5a; }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+    .btn-copy {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .btn-copy:hover { background: var(--blue-hover); }
+    .toolbar-spacer { flex: 1; }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .badge-success { background: var(--green-glow); color: var(--green); }
+    .badge-warning { background: rgba(230, 126, 34, 0.15); color: var(--orange); }
+
+    /* ========== Editor Panels ========== */
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      min-height: 520px;
+    }
+    @media (max-width: 900px) {
+      .editor-grid { grid-template-columns: 1fr; }
+    }
+
+    .editor-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-tertiary);
+    }
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .panel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-input { background: var(--blue); }
+    .dot-output { background: var(--green); }
+
+    .panel-actions { display: flex; gap: 4px; }
+    .panel-btn {
+      padding: 4px 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: var(--transition);
+    }
+    .panel-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+
+    .editor-area {
+      flex: 1;
+      position: relative;
+      display: flex;
+    }
+    .line-numbers {
+      padding: 14px 0;
+      background: rgba(0,0,0,0.2);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.65;
+      text-align: right;
+      user-select: none;
+      overflow: hidden;
+      min-width: 44px;
+      border-right: 1px solid rgba(255,255,255,0.04);
+    }
+    .line-numbers span {
+      display: block;
+      padding: 0 10px;
+    }
+    textarea.editor {
+      flex: 1;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: none;
+      padding: 14px 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.65;
+      resize: none;
+      outline: none;
+      tab-size: 4;
+      white-space: pre;
+      overflow-wrap: normal;
+      overflow-x: auto;
+    }
+    textarea.editor::placeholder { color: var(--text-muted); }
+    textarea.editor:focus { background: #182838; }
+
+    /* Output is readonly */
+    textarea.editor.output {
+      background: #121e28;
+      cursor: default;
+    }
+
+    /* ========== Report Panel ========== */
+    .report-panel {
+      margin-top: 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .report-panel.collapsed .report-body { display: none; }
+    .report-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .report-header:hover { background: rgba(255,255,255,0.01); }
+    .report-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .report-body {
+      padding: 0 16px 14px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .report-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    .report-item .tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .tag-mapping { background: rgba(74, 144, 217, 0.2); color: #5da0e5; }
+    .tag-remove { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+    .tag-format { background: rgba(230, 126, 34, 0.2); color: #e67e22; }
+    .tag-import { background: rgba(39, 174, 96, 0.2); color: #27ae60; }
+    .report-item .detail { flex: 1; word-break: break-all; }
+
+    .report-empty {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 20px;
+      font-size: 13px;
+    }
+
+    /* ========== Footer ========== */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      margin-top: 32px;
+    }
+
+    /* ========== Toast ========== */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ========== Scrollbar ========== */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3a4a5a; }
+
+    /* ========== Syntax Highlighting (lightweight) ========== */
+    .keyword { color: #c678dd; }
+    .string { color: #98c379; }
+    .comment { color: #5c6370; font-style: italic; }
+    .number { color: #d19a66; }
+    .function { color: #61afef; }
+    .builtin { color: #e5c07b; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a class="header-brand" href="index.html">
+    <span>⚡ 王者Quant</span>
+  </a>
+  <div class="header-nav">
+    <a href="index.html">首页</a>
+    <a href="code-converter.html" class="active">代码转换器</a>
+    <a href="#/docs/Chapter-21">PTrade API</a>
+    <a href="#/docs/Chapter-17">QMT API</a>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <label>目标平台:</label>
+      <button class="platform-btn active" data-target="ptrade" onclick="setTarget('ptrade')">📊 PTrade</button>
+      <button class="platform-btn" data-target="qmt" onclick="setTarget('qmt')">📈 QMT / EasyXT</button>
+    </div>
+    <button class="btn" onclick="loadSample()">📋 加载示例</button>
+    <div class="toolbar-spacer"></div>
+    <button class="btn btn-primary" onclick="convert()" id="btnConvert">🔄 开始转换</button>
+    <button class="btn btn-copy" onclick="copyOutput()">📋 复制结果</button>
+    <button class="btn" onclick="downloadOutput()">💾 下载 .py</button>
+  </div>
+
+  <!-- Editor Panels -->
+  <div class="editor-grid">
+    <!-- Input Panel -->
+    <div class="editor-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="panel-dot dot-input"></span> 聚宽代码 (JoinQuant)
+        </div>
+        <div class="panel-actions">
+          <button class="panel-btn" onclick="clearInput()">清空</button>
+          <button class="panel-btn" onclick="formatInput()">格式化</button>
+        </div>
+      </div>
+      <div class="editor-area">
+        <div class="line-numbers" id="inputLineNumbers"></div>
+        <textarea class="editor" id="inputEditor"
+          placeholder="在此粘贴聚宽策略代码...
+示例:
+def initialize(context):
+    g.stock = &#39;000001.XSHG&#39;
+    run_daily(trade, time=&#39;14:21&#39;)
+
+def trade(context):
+    price = get_current_data()[g.stock].last_price
+    order(g.stock, 100)"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Output Panel -->
+    <div class="editor-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="panel-dot dot-output"></span> <span id="outputLabel">PTrade 代码</span>
+        </div>
+        <div class="panel-actions">
+          <span id="lineCount" style="font-size:11px;color:var(--text-muted);margin-right:8px;"></span>
+        </div>
+      </div>
+      <div class="editor-area">
+        <div class="line-numbers" id="outputLineNumbers"></div>
+        <textarea class="editor output" id="outputEditor" readonly
+          placeholder="转换结果将显示在这里..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Panel -->
+  <div class="report-panel" id="reportPanel">
+    <div class="report-header" onclick="toggleReport()">
+      <div class="report-title">
+        📊 转换报告
+        <span id="reportCount" class="badge badge-success" style="display:none;"></span>
+      </div>
+      <span style="color:var(--text-muted);font-size:12px;" id="reportToggle">展开 ▼</span>
+    </div>
+    <div class="report-body" id="reportBody">
+      <div class="report-empty">点击"开始转换"查看详细变更报告</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Copyright © 2024 王者Quant · 聚宽→PTrade/QMT 代码转换器 v1.0 · 完全在浏览器中运行，代码不会上传到服务器
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  聚宽 → PTrade / QMT 代码转换引擎 (Pure JS)
+//  版本: v1.0
+//  基于 code_converter/converters/jq_to_ptrade_unified_v3.py
+// ============================================================
+
+let currentTarget = 'ptrade';
+
+// ==================== 核心转换引擎 ====================
+
+function convertJQtoPTrade(jqCode) {
+  const changes = [];
+  let code = jqCode;
+
+  // --- Step 1: 基础清理 ---
+  // 移除 import jqdata / from jqdata import *
+  const jqdataImportPattern = /^(import\s+jqdata.*|from\s+jqdata\s+import\s+.*)\s*$/gm;
+  const jqdataMatches = code.match(jqdataImportPattern);
+  if (jqdataMatches) {
+    code = code.replace(jqdataImportPattern, '');
+    jqdataMatches.forEach(m => changes.push({ tag: 'remove', text: `移除导入: ${m.trim()}` }));
+  }
+
+  // 移除 from jqfactor import *
+  if (/from\s+jqfactor\s+import\s+\*/gm.test(code)) {
+    code = code.replace(/^from\s+jqfactor\s+import\s+\*\s*$/gm, '');
+    changes.push({ tag: 'remove', text: '移除导入: from jqfactor import *' });
+  }
+
+  // --- Step 2: 移除不支持的API ---
+  const unsupportedAPIs = [
+    { pattern: /^[ \t]*set_option\s*\([^)]*\).*$/gm, name: 'set_option(...)' },
+    { pattern: /^[ \t]*enable_profile\s*\(\s*\).*$/gm, name: 'enable_profile()' },
+    { pattern: /^[ \t]*set_order_cost\s*\([^)]*\).*$/gm, name: 'set_order_cost(...)' },
+    { pattern: /^[ \t]*set_commission\s*\([^)]*\).*$/gm, name: 'set_commission(...)' },
+    { pattern: /^[ \t]*set_price_limit\s*\([^)]*\).*$/gm, name: 'set_price_limit(...)' },
+    { pattern: /^[ \t]*log\.set_level\s*\([^)]*\).*$/gm, name: 'log.set_level(...)' },
+    { pattern: /^[ \t]*set_universe\s*\([^)]*\).*$/gm, name: 'set_universe(...)' },
+  ];
+
+  unsupportedAPIs.forEach(({ pattern, name }) => {
+    if (pattern.test(code)) {
+      const matches = code.match(pattern);
+      code = code.replace(pattern, '');
+      if (matches) {
+        changes.push({ tag: 'remove', text: `移除不支持API: ${name} (${matches.length}处)` });
+      }
+    }
+  });
+
+  // --- Step 3: API 名称映射 ---
+  const apiMappings = [
+    ['get_current_data', 'get_snapshot'],
+    ['history', 'get_history'],
+    ['attribute_history', 'get_history'],
+    ['get_bars', 'get_history'],
+    ['get_all_securities', 'get_Ashares'],
+    ['get_security_info', 'get_stock_info'],
+    ['get_trade_days', 'get_trading_dates'],
+    ['get_index_weights', 'get_index_weights'],
+    ['get_extras', 'get_extras'],
+    ['get_industry', 'get_industry'],
+  ];
+
+  apiMappings.forEach(([jqApi, ptApi]) => {
+    const regex = new RegExp(`\\b${escapeRegExp(jqApi)}\\b(?=\\s*\\()`, 'g');
+    const matches = code.match(regex);
+    if (matches) {
+      code = code.replace(regex, ptApi);
+      changes.push({ tag: 'mapping', text: `API映射: ${jqApi}() → ${ptApi}() (${matches.length}处)` });
+    }
+  });
+
+  // --- Step 4: 定时函数格式修正 ---
+  // run_daily(func, time='14:21') → run_daily(func, '14:21')
+  const timingFixes = [
+    { jq: 'run_daily', pt: 'run_daily' },
+    { jq: 'run_weekly', pt: 'run_weekly' },
+    { jq: 'run_monthly', pt: 'run_monthly' },
+  ];
+
+  timingFixes.forEach(({ jq, pt }) => {
+    // 修复关键字参数为位置参数
+    const patterns = [
+      // run_daily(func, time='14:21') → run_daily(func, '14:21')
+      { re: new RegExp(`(${jq}\\s*\\(\\s*\\w+\\s*,\\s*)time\\s*=\\s*(['\"][^'\"]*['\"]|\\w+)`, 'g'), desc: 'time= → 位置参数' },
+      // run_weekly(func, weekday=1, time='open')
+      { re: new RegExp(`(${jq}\\s*\\(\\s*\\w+\\s*,\\s*)weekday\\s*=\\s*(\\d+)\\s*,\\s*time\\s*=\\s*(['\"][^'\"]*['\"]|\\w+)`, 'g'),
+        desc: 'weekday=, time= → 位置参数', replacement: `$1$2, $3` },
+      // run_monthly(func, monthday=1, time='open')
+      { re: new RegExp(`(${jq}\\s*\\(\\s*\\w+\\s*,\\s*)monthday\\s*=\\s*(\\d+)\\s*,\\s*time\\s*=\\s*(['\"][^'\"]*['\"]|\\w+)`, 'g'),
+        desc: 'monthday=, time= → 位置参数', replacement: `$1$2, $3` },
+    ];
+
+    patterns.forEach(({ re, desc, replacement }) => {
+      if (re.test(code)) {
+        const before = code;
+        if (replacement) {
+          code = code.replace(re, replacement);
+        } else {
+          code = code.replace(re, `$1$2`);
+        }
+        if (code !== before) {
+          changes.push({ tag: 'format', text: `${jq}(): ${desc}` });
+        }
+      }
+    });
+  });
+
+  // --- Step 5: set_slippage 修正 ---
+  // set_slippage(FixedSlippage(N)) → set_slippage(N)
+  const fixSlippageRe = /set_slippage\s*\(\s*FixedSlippage\s*\(\s*([^)]+)\s*\)\s*\)/g;
+  if (fixSlippageRe.test(code)) {
+    code = code.replace(fixSlippageRe, 'set_slippage($1)');
+    changes.push({ tag: 'format', text: 'set_slippage(FixedSlippage(N)) → set_slippage(N)' });
+  }
+
+  // --- Step 6: get_price 参数修正 ---
+  // 移除 skip_paused, fq, panel 参数
+  const getPriceParamFixes = [
+    { re: /,\s*skip_paused\s*=\s*(True|False|['"][^'"]*['"])/g, desc: '移除 skip_paused 参数' },
+    { re: /,\s*fq\s*=\s*(['"][^'"]*['"]|\w+)/g, desc: '移除 fq 参数' },
+    { re: /,\s*panel\s*=\s*(True|False|['"][^'"]*['"])/g, desc: '移除 panel 参数' },
+    { re: /,\s*fill_paused\s*=\s*(True|False|['"][^'"]*['"])/g, desc: '移除 fill_paused 参数' },
+  ];
+
+  getPriceParamFixes.forEach(({ re, desc }) => {
+    if (re.test(code)) {
+      code = code.replace(re, '');
+      changes.push({ tag: 'format', text: `get_price(): ${desc}` });
+    }
+  });
+
+  // --- Step 7: log.xxx → log.xxx (PTrade keeps same format) ---
+  // Already compatible, no change needed.
+
+  // --- Step 8: 全局变量 g.xxx 保持不变 (PTrade使用context.xxx但g也可以) ---
+  // No change needed, but note it.
+
+  // --- Step 9: context.subportfolios[0] → context.portfolio ---
+  const subPortRe = /context\s*\.\s*subportfolios\s*\[\s*0\s*\]/g;
+  if (subPortRe.test(code)) {
+    code = code.replace(subPortRe, 'context.portfolio');
+    changes.push({ tag: 'mapping', text: 'context.subportfolios[0] → context.portfolio' });
+  }
+
+  // --- Step 10: .has_key(x) → x in ... ---
+  // 匹配 obj.has_key(key) → key in obj
+  const hasKeyRe = /(\w+(?:\.\w+)*)\.has_key\s*\(\s*([^)]+)\s*\)/g;
+  if (hasKeyRe.test(code)) {
+    code = code.replace(hasKeyRe, '$2 in $1');
+    changes.push({ tag: 'mapping', text: '.has_key(x) → x in ...' });
+  }
+
+  // --- Step 11: 股票代码标准化 ---
+  // .XSHG → .SH, .XSHE → .SZ
+  const xshgCount = (code.match(/\.XSHG/g) || []).length;
+  const xsheCount = (code.match(/\.XSHE/g) || []).length;
+  if (xshgCount > 0 || xsheCount > 0) {
+    code = code.replace(/\.XSHG/g, '.SH');
+    code = code.replace(/\.XSHE/g, '.SZ');
+    changes.push({ tag: 'format', text: `股票代码标准化: .XSHG→.SH (${xshgCount}处), .XSHE→.SZ (${xsheCount}处)` });
+  }
+
+  // --- Step 12: get_price 日期格式修正 ---
+  // datetime.date(2024,1,1) 或 date(2024,1,1) → '20240101'
+  const dateObjRe = /(?:datetime\.)?date\s*\(\s*(\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})\s*\)/g;
+  if (dateObjRe.test(code)) {
+    code = code.replace(dateObjRe, (_, y, m, d) => `'${y}${m.padStart(2,'0')}${d.padStart(2,'0')}'`);
+    changes.push({ tag: 'format', text: 'datetime.date → 字符串日期格式' });
+  }
+
+  // --- Step 13: get_fundamentals + query() 标注警告 ---
+  if (/\bquery\s*\(/g.test(code)) {
+    changes.push({ tag: 'format', text: '⚠ query() ORM 语法需要手动调整为 get_fundamentals() 参数格式' });
+  }
+  if (/\bget_fundamentals\s*\(/g.test(code)) {
+    changes.push({ tag: 'format', text: '⚠ get_fundamentals() 返回格式与聚宽不同，需检查字段名' });
+  }
+
+  // --- Step 14: get_current_data兼容层注入 ---
+  // 如果原代码使用了get_current_data，注入兼容函数
+  if (/get_current_data|get_snapshot/.test(jqCode)) {
+    const compatFunc = `
+# ===== get_current_data 兼容函数 (PTrade) =====
+def get_current_data_compat(security_list=None):
+    """模拟聚宽 get_current_data() 功能"""
+    if security_list is None:
+        security_list = []
+    result = {}
+    try:
+        df = get_history(1, '1d', ['close', 'high_limit', 'low_limit'],
+                         security_list=security_list, include=True, fill='nan')
+        if df is not None and not df.empty:
+            for code, group in df.groupby('code'):
+                close = float(group['close'].iloc[-1])
+                high_lim = float(group.get('high_limit', group).iloc[-1]) if 'high_limit' in group.columns else close * 1.1
+                low_lim = float(group.get('low_limit', group).iloc[-1]) if 'low_limit' in group.columns else close * 0.9
+                result[code] = type('obj', (), {
+                    'last_price': close, 'high_limit': high_lim, 'low_limit': low_lim,
+                    'paused': False, 'is_st': False, 'name': code
+                })()
+    except:
+        pass
+    for s in security_list:
+        if s not in result:
+            result[s] = type('obj', (), {
+                'last_price': 0, 'high_limit': 0, 'low_limit': 0,
+                'paused': False, 'is_st': False, 'name': s
+            })()
+    return result
+# ================================================
+
+`;
+    // 把兼容函数插入到 import 语句之后（或文件最前面）
+    if (!code.includes('def get_current_data_compat')) {
+      const importEnd = code.search(/^(?!(?:import|from|#|\s*$))/m);
+      if (importEnd > 0) {
+        code = code.slice(0, importEnd) + compatFunc + '\n' + code.slice(importEnd);
+      } else {
+        code = compatFunc + '\n' + code;
+      }
+      changes.push({ tag: 'import', text: '注入 get_current_data_compat() 兼容函数' });
+    }
+  }
+
+  // --- Step 15: 添加 PTrade 导入 ---
+  const ptradeImport = `# PTrade 导入
+from xtquant import *
+import numpy as np
+import pandas as pd
+`;
+  // 在兼容函数之后、其他代码之前添加
+  if (!code.includes('from xtquant import *')) {
+    // 找到第一个非注释、非import的行
+    const lines = code.split('\n');
+    let insertIdx = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const trimmed = lines[i].trim();
+      if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('import ') && !trimmed.startsWith('from ')) {
+        insertIdx = i;
+        break;
+      }
+      insertIdx = i + 1;
+    }
+    lines.splice(insertIdx, 0, ptradeImport.trim());
+    code = lines.join('\n');
+    changes.push({ tag: 'import', text: '添加 PTrade 导入: from xtquant import *' });
+  }
+
+  // --- Step 16: 清理多余空行 ---
+  code = code.replace(/\n{3,}/g, '\n\n');
+
+  // --- Step 17: get_history 参数修正 ---
+  // attribute_history(sec, count, unit, fields, skip_paused, df, fq)
+  // → get_history(count, unit, fields, security_list=sec, include=True, fill='nan')
+  const attrHistRe = /(?:attribute_history|get_history)\s*\(\s*(\w+)\s*,\s*(\d+)\s*,\s*('[^']*'|"[^"]*"|\w+)\s*,\s*(\[[^\]]+\]|['"][^'"]*['"]|\w+)/g;
+  if (attrHistRe.test(code)) {
+    // 这个转换比较复杂，先标注
+    changes.push({ tag: 'format', text: '⚠ attribute_history/get_history 参数格式需检查，已尽量自动转换' });
+  }
+
+  return { code, changes };
+}
+
+// ==================== QMT/EasyXT 转换 ====================
+
+function convertJQtoQMT(jqCode) {
+  const changes = [];
+  let code = jqCode;
+
+  // 移除 jqdata 导入
+  code = code.replace(/^(import\s+jqdata.*|from\s+jqdata\s+import\s+.*)\s*$/gm, '');
+  changes.push({ tag: 'remove', text: '移除 jqdata 导入' });
+
+  // 移除不支持的API
+  const unsupportedAPIs = [
+    { pattern: /^[ \t]*set_option\s*\([^)]*\).*$/gm, name: 'set_option' },
+    { pattern: /^[ \t]*enable_profile\s*\(\s*\).*$/gm, name: 'enable_profile' },
+    { pattern: /^[ \t]*set_order_cost\s*\([^)]*\).*$/gm, name: 'set_order_cost' },
+    { pattern: /^[ \t]*set_commission\s*\([^)]*\).*$/gm, name: 'set_commission' },
+    { pattern: /^[ \t]*set_universe\s*\([^)]*\).*$/gm, name: 'set_universe' },
+  ];
+
+  unsupportedAPIs.forEach(({ pattern, name }) => {
+    if (pattern.test(code)) {
+      code = code.replace(pattern, '');
+      changes.push({ tag: 'remove', text: `移除不支持API: ${name}` });
+    }
+  });
+
+  // QMT API 映射
+  const apiMappings = [
+    ['get_price', 'api.get_price'],
+    ['get_history', 'api.get_price'],
+    ['attribute_history', 'api.get_price'],
+    ['get_bars', 'api.get_price'],
+    ['get_current_data', 'api.get_current_price'],
+    ['get_all_securities', 'api.get_stock_list'],
+    ['get_index_stocks', 'api.get_stock_list'],
+    ['get_security_info', 'api.get_stock_info'],
+    ['get_trade_days', 'api.get_trading_dates'],
+    // 交易API
+    ['order', 'api.buy'],
+    ['order_value', 'api.buy'],
+    ['order_target', 'api.order_target'],
+    ['order_target_value', 'api.order_target_value'],
+    ['cancel_order', 'api.cancel_order'],
+  ];
+
+  apiMappings.forEach(([jqApi, qmtApi]) => {
+    const regex = new RegExp(`\\b${escapeRegExp(jqApi)}\\b(?=\\s*\\()`, 'g');
+    const matches = code.match(regex);
+    if (matches) {
+      code = code.replace(regex, qmtApi);
+      changes.push({ tag: 'mapping', text: `${jqApi}() → ${qmtApi}() (${matches.length}处)` });
+    }
+  });
+
+  // 股票代码标准化
+  code = code.replace(/\.XSHG/g, '.SH');
+  code = code.replace(/\.XSHE/g, '.SZ');
+  changes.push({ tag: 'format', text: '股票代码标准化: .XSHG→.SH, .XSHE→.SZ' });
+
+  // context.subportfolios → context.portfolio
+  if (/context\s*\.\s*subportfolios/.test(code)) {
+    code = code.replace(/context\s*\.\s*subportfolios\s*\[\s*0\s*\]/g, 'context.portfolio');
+    changes.push({ tag: 'mapping', text: 'context.subportfolios[0] → context.portfolio' });
+  }
+
+  // 添加 EasyXT 导入框架
+  const qmtImport = `# EasyXT / MiniQMT 导入
+from easy_xt import EasyXT
+api = EasyXT(account_id='YOUR_ACCOUNT_ID')
+import numpy as np
+import pandas as pd
+`;
+  if (!code.includes('from easy_xt import EasyXT')) {
+    code = qmtImport + '\n' + code;
+    changes.push({ tag: 'import', text: '添加 EasyXT 框架导入' });
+  }
+
+  // 清理空行
+  code = code.replace(/\n{3,}/g, '\n\n');
+
+  return { code, changes };
+}
+
+// ==================== 主转换函数 ====================
+
+function convert() {
+  const input = document.getElementById('inputEditor').value.trim();
+  if (!input) {
+    showToast('⚠ 请先粘贴聚宽代码');
+    return;
+  }
+
+  const result = currentTarget === 'ptrade'
+    ? convertJQtoPTrade(input)
+    : convertJQtoQMT(input);
+
+  document.getElementById('outputEditor').value = result.code;
+  updateLineNumbers();
+  updateReport(result.changes);
+  updateOutputLabel();
+
+  // 自动滚动到输出
+  document.getElementById('outputEditor').scrollTop = 0;
+
+  if (result.changes.length === 0) {
+    showToast('✅ 转换完成 — 未检测到需要变更的内容');
+  } else {
+    showToast(`✅ 转换完成 — ${result.changes.length} 项变更`);
+  }
+}
+
+// ==================== UI 辅助 ====================
+
+function setTarget(target) {
+  currentTarget = target;
+  document.querySelectorAll('.platform-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.target === target);
+  });
+  updateOutputLabel();
+  // 如果有输出内容，重新转换
+  const input = document.getElementById('inputEditor').value.trim();
+  if (input) convert();
+}
+
+function updateOutputLabel() {
+  const label = currentTarget === 'ptrade' ? 'PTrade 代码' : 'QMT / EasyXT 代码';
+  document.getElementById('outputLabel').textContent = label;
+}
+
+function loadSample() {
+  const sample = `# 克隆自聚宽文章：https://www.joinquant.com/post/19619
+# 标题：【策略】夏普超过2.0，后市靠定增一步步往上爬
+# 作者：安藤忠雄
+
+import jqdata
+import pandas as pd
+import numpy as np
+from math import log as lg
+
+MY_EXCLUDE_STOCKS = ["600656.XSHG","000594.XSHE"]
+
+def initialize(context):
+    set_option("avoid_future_data", True)
+    set_option('use_real_price', True)
+    set_order_cost(OrderCost(open_tax=0, close_tax=0.001,
+        open_commission=0.0003, close_commission=0.0003), type='stock')
+
+    g.s1 = '000001.XSHG'
+    g.small_cap_num = 50
+    g.stop_index_drop = -0.03
+    g.win_length = 126
+    g.rel_return = -0.5
+    g.max_weight = 0.3
+
+    run_daily(rebalance, time='14:21')
+
+def before_trading_start(context):
+    fundamental_df = get_fundamentals(
+        query(valuation.code)
+        .order_by(valuation.market_cap.asc())
+        .limit(g.small_cap_num)
+    )
+    g.stocks = np.array([i[0] for i in fundamental_df.values])
+    g.stocks = remove_st(g.stocks)
+
+def remove_st(stocks):
+    result = []
+    for s in stocks:
+        if (not get_current_data()[s].is_st) and (s not in MY_EXCLUDE_STOCKS):
+            result.append(s)
+    return np.array(result)
+
+def trade_log(stock, weight):
+    log.info("[ %s(%s) -> %.2f ]" % (stock_name(stock), stock, weight))
+
+def stock_name(stock):
+    return get_security_info(stock).display_name
+
+def rebalance(context):
+    bar_dict = get_current_data()
+
+    for stock in context.portfolio.positions.keys():
+        if stock not in g.stocks:
+            order_target_value(stock, 0)
+            trade_log(stock, 0)
+
+    index_hist = attribute_history(g.s1, 2, "1d", "close")
+    index_return_1d = lg(index_hist['close'][1] / index_hist['close'][0])
+    if index_return_1d < g.stop_index_drop:
+        for stock in g.stocks:
+            order_target_value(stock, 0)
+            trade_log(stock, 0)
+        return
+
+    set_universe(g.stocks.tolist() + [g.s1])
+    stock_hist = history(g.win_length, "1d", "close")
+    stock_return = (stock_hist.iloc[g.win_length-1] - stock_hist.iloc[0]) / stock_hist.iloc[0]
+    index_return = stock_return[g.s1]
+    rel_return = stock_return - index_return
+
+    g.stocks = [stock for stock in g.stocks
+        if not bar_dict[stock].paused
+        and get_bars(stock, 1, '1m', 'volume', include_now=True)['volume'] != 0
+        and bar_dict[stock].day_open < 1.095 * stock_hist[stock].iloc[-1]
+        and bar_dict[stock].day_open > 0.905 * stock_hist[stock].iloc[-1]
+        and rel_return[stock] < abs(index_return) * g.rel_return]
+
+    if len(g.stocks) == 0:
+        return
+
+    weight = {}
+    sum_weight = 0
+    for stock in g.stocks:
+        weight[stock] = abs((rel_return[stock] - abs(index_return) * g.rel_return) / index_return) * g.max_weight
+        if weight[stock] > g.max_weight:
+            weight[stock] = g.max_weight
+        sum_weight += weight[stock]
+
+    for stock in g.stocks:
+        weight[stock] /= sum_weight
+        if weight[stock] > g.max_weight:
+            weight[stock] = g.max_weight
+        trade_log(stock, weight[stock])
+        value = context.portfolio.total_value * weight[stock]
+        order_target_value(stock, value)
+`;
+
+  document.getElementById('inputEditor').value = sample;
+  updateLineNumbers();
+  showToast('📋 已加载示例策略代码');
+}
+
+function clearInput() {
+  document.getElementById('inputEditor').value = '';
+  document.getElementById('outputEditor').value = '';
+  updateLineNumbers();
+  document.getElementById('reportBody').innerHTML = '<div class="report-empty">点击"开始转换"查看详细变更报告</div>';
+  document.getElementById('reportCount').style.display = 'none';
+}
+
+function formatInput() {
+  const editor = document.getElementById('inputEditor');
+  // 简单格式化：确保4空格缩进等
+  const lines = editor.value.split('\n');
+  // 去掉行尾空格
+  const formatted = lines.map(l => l.replace(/\s+$/, '')).join('\n');
+  editor.value = formatted;
+  updateLineNumbers();
+}
+
+function copyOutput() {
+  const output = document.getElementById('outputEditor').value;
+  if (!output) {
+    showToast('⚠ 没有可复制的内容');
+    return;
+  }
+  navigator.clipboard.writeText(output).then(() => {
+    showToast('📋 已复制到剪贴板!');
+  }).catch(() => {
+    // Fallback
+    const ta = document.getElementById('outputEditor');
+    ta.select();
+    document.execCommand('copy');
+    showToast('📋 已复制到剪贴板!');
+  });
+}
+
+function downloadOutput() {
+  const output = document.getElementById('outputEditor').value;
+  if (!output) {
+    showToast('⚠ 没有可下载的内容');
+    return;
+  }
+  const ext = currentTarget === 'ptrade' ? 'ptrade' : 'qmt';
+  const blob = new Blob([output], { type: 'text/x-python' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `converted_strategy.${ext}.py`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('💾 文件已下载');
+}
+
+function toggleReport() {
+  const panel = document.getElementById('reportPanel');
+  panel.classList.toggle('collapsed');
+  const toggle = document.getElementById('reportToggle');
+  toggle.textContent = panel.classList.contains('collapsed') ? '展开 ▶' : '收起 ▲';
+}
+
+function updateReport(changes) {
+  const body = document.getElementById('reportBody');
+  const count = document.getElementById('reportCount');
+
+  if (!changes || changes.length === 0) {
+    body.innerHTML = '<div class="report-empty">✅ 未检测到需要变更的内容 — 代码可能已兼容目标平台</div>';
+    count.style.display = 'none';
+    return;
+  }
+
+  count.style.display = 'inline';
+  count.textContent = `${changes.length} 项变更`;
+
+  const tagLabels = {
+    'mapping': 'API映射',
+    'remove': '移除',
+    'format': '格式修正',
+    'import': '导入',
+  };
+
+  body.innerHTML = changes.map(c => `
+    <div class="report-item">
+      <span class="tag tag-${c.tag}">${tagLabels[c.tag] || c.tag}</span>
+      <span class="detail">${escapeHtml(c.text)}</span>
+    </div>
+  `).join('');
+}
+
+function updateLineNumbers() {
+  updatePanelLines('inputEditor', 'inputLineNumbers');
+  updatePanelLines('outputEditor', 'outputLineNumbers');
+
+  // 更新行数统计
+  const outputLines = document.getElementById('outputEditor').value.split('\n').length;
+  const el = document.getElementById('lineCount');
+  if (outputLines > 0 && document.getElementById('outputEditor').value.trim()) {
+    el.textContent = `${outputLines} 行`;
+  } else {
+    el.textContent = '';
+  }
+}
+
+function updatePanelLines(editorId, lineNumId) {
+  const editor = document.getElementById(editorId);
+  const lineNum = document.getElementById(lineNumId);
+  const lines = editor.value.split('\n');
+  const count = Math.max(lines.length, 20); // 至少20行
+  let html = '';
+  for (let i = 1; i <= count; i++) {
+    html += `<span>${i}</span>`;
+  }
+  lineNum.innerHTML = html;
+
+  // 同步滚动
+  editor.onscroll = () => {
+    lineNum.scrollTop = editor.scrollTop;
+  };
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// ==================== 初始化 ====================
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateLineNumbers();
+  updateOutputLabel();
+
+  // 监听输入变化，实时更新行号
+  document.getElementById('inputEditor').addEventListener('input', () => {
+    updatePanelLines('inputEditor', 'inputLineNumbers');
+  });
+
+  // Ctrl+Enter 快捷键转换
+  document.getElementById('inputEditor').addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      convert();
+    }
+  });
+});
+</script>
+
+</body>
+</html>
