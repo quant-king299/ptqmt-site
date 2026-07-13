@@ -15,6 +15,14 @@
 * [🏠 前言](README.md)
   * [🔄 聚宽代码转换器](code-converter.html)
 
+* **EasyXT 官方文档** 🆕
+  * [📘 快速入门指南](docs/EasyXT快速入门指南.html)
+  * [📗 核心 API 手册](docs/EasyXT核心API手册.html)
+  * [📙 回测系统文档](docs/EasyXT回测系统文档.html)
+  * [📕 GUI 操作手册](docs/EasyXT_GUI操作手册.html)
+  * [📓 策略开发指南](docs/EasyXT策略开发指南.html)
+  * [📔 架构与部署](docs/EasyXT架构与部署.html)
+
 * **QMT 量化交易平台**
   * [软件安装与配置](./docs/Chapter-01.md)
   * [模型研究与回测](./docs/Chapter-15.md)
@@ -22,12 +30,12 @@
   * [数据获取与处理](./docs/Chapter-05.md)
   * [交易相关方法](./docs/Chapter-12.md)
   * [成交回报推送](./docs/Chapter-13.md)
-  * [QMT API 完整参考](./docs/Chapter-17.md)
   * [定时交易策略](./docs/Chapter-08.md)
   * [高级策略开发](./docs/Chapter-22.md)
+  * [QMT API 完整参考](./docs/Chapter-17.md)
   * [自动登录脚本](./docs/Chapter-11.md)
-  * [常见问题 FAQ](./docs/Chapter-19.md)
   * [实战案例](./docs/Chapter-20.md)
+  * [常见问题 FAQ](./docs/Chapter-19.md)
 
 * **MiniQMT 轻量版**
   * [下载与安装](./docs/Chapter-06.md)
@@ -38,18 +46,9 @@
 * **PTrade 交易平台**
   * [快速入门](./docs/Chapter-07.md)
   * [策略引擎与API](./docs/Chapter-21.md)
-  * [策略开发实例](./docs/Chapter-08.md)
   * [支持的第三方库](./docs/Chapter-09.md)
   * [客户端界面综览](./docs/Chapter-10.md)
   * [环境配置指南](./docs/Chapter-18.md)
-
-* **EasyXT 官方文档** 🆕
-  * [📘 快速入门指南](docs/EasyXT快速入门指南.html)
-  * [📗 核心 API 手册](docs/EasyXT核心API手册.html)
-  * [📙 回测系统文档](docs/EasyXT回测系统文档.html)
-  * [📕 GUI 操作手册](docs/EasyXT_GUI操作手册.html)
-  * [📓 策略开发指南](docs/EasyXT策略开发指南.html)
-  * [📔 架构与部署](docs/EasyXT架构与部署.html)
 
 * **学习案例**
   * [EasyXT 概览](学习案例/EasyXT.md)
