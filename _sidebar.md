@@ -23,6 +23,7 @@
   * [交易相关方法](./docs/Chapter-12.md)
   * [成交回报推送](./docs/Chapter-13.md)
   * [QMT API 完整参考](./docs/Chapter-17.md)
+  * [定时交易策略](./docs/Chapter-08.md)
   * [高级策略开发](./docs/Chapter-22.md)
   * [自动登录脚本](./docs/Chapter-11.md)
   * [常见问题 FAQ](./docs/Chapter-19.md)
@@ -35,12 +36,12 @@
   * [知识问答](./docs/Chapter-14.md)
 
 * **PTrade 交易平台**
-  * [快速了解 PTrade](./docs/Chapter-07.md)
+  * [快速入门](./docs/Chapter-07.md)
+  * [策略引擎与API](./docs/Chapter-21.md)
+  * [策略开发实例](./docs/Chapter-08.md)
   * [支持的第三方库](./docs/Chapter-09.md)
   * [客户端界面综览](./docs/Chapter-10.md)
   * [环境配置指南](./docs/Chapter-18.md)
-  * [PTrade API 完整参考](./docs/Chapter-21.md)
-  * [策略开发实例](./docs/Chapter-08.md)
 
 * **EasyXT 官方文档** 🆕
   * [📘 快速入门指南](docs/EasyXT快速入门指南.html)
