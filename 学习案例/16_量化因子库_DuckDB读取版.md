@@ -15,20 +15,6 @@
 作者：EasyXT团队
 日期：2026-02-06
 
-## 函数列表
-
-- **_detect_duckdb_path()** — 自动检测DuckDB数据库路径
-- **__init__()** — 计算所有因子
-- **_calculate_momentum()** — 计算动量因子
-- **_calculate_volatility()** — 计算波动率因子
-- **_calculate_max_drawdown()** — 计算最大回撤
-- **_calculate_volume_price()** — 计算量价因子
-- **_calculate_technical()** — 计算技术指标
-- **_calculate_composite_score()** — 计算综合评分
-- **_get_rating()** — 获取评级
-- **generate_report()** — 生成分析报告
-- **main()** — 主程序
-
 源码：[16_量化因子库_DuckDB读取版.py](https://github.com/quant-king299/EasyXT/blob/main/学习实例/16_量化因子库_DuckDB读取版.py)
 
 ---

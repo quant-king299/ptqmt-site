@@ -16,14 +16,13 @@
 
 贡献者：@jasonhu - 感谢贡献xqshare跨平台支持功能！
 
-## 函数列表
+## 学习要点
 
-- **lesson_01_environment_setup()** — 第1课：环境配置和数据服务连接
-- **lesson_02_query_daily_kline()** — 第2课：查询日K线数据
-- **lesson_03_query_date_range()** — 第3课：查询指定日期范围的K线数据
-- **lesson_04_query_account_assets()** — 第4课：查询账户资产信息
-- **lesson_05_query_positions()** — 第5课：查询持仓信息
-- **main()** — 主函数
+- 第1课：环境配置和数据服务连接
+- 第2课：查询日K线数据
+- 第3课：查询指定日期范围的K线数据
+- 第4课：查询账户资产信息
+- 第5课：查询持仓信息
 
 源码：[22_xqshare跨平台支持_MacLinux.py](https://github.com/quant-king299/EasyXT/blob/main/学习实例/22_xqshare跨平台支持_MacLinux.py)
 

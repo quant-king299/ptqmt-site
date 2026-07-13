@@ -18,17 +18,6 @@
 作者：王者quant
 日期：2025-02-24
 
-## 函数列表
-
-- **__init__()** — 初始化管理器
-- **init_trade_connection()** — 初始化交易连接
-- **create_advanced_stop_loss_order()** — 监控并执行条件单
-- **start_monitoring()** — 启动持续监控
-- **list_orders()** — 列出所有条件单
-- **demo_create_orders()** — 演示创建条件单
-- **demo_simple_usage()** — 演示简单用法
-- **main()** — 主函数
-
 源码：[15_qmt条件单止盈止损.py](https://github.com/quant-king299/EasyXT/blob/main/学习实例/15_qmt条件单止盈止损.py)
 
 ---

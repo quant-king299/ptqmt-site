@@ -13,17 +13,6 @@
 作者：王者quant
 日期：2025-01-09
 
-## 函数列表
-
-- **__init__()** — 初始化数据获取器
-- **get_stock_info()** — 获取股票基本信息
-- **get_realtime_data()** — 获取实时行情数据
-- **get_historical_data()** — 获取历史K线数据
-- **_add_technical_indicators()** — 添加基础技术指标
-- **visualize_data()** — 可视化股票数据
-- **get_market_summary()** — 获取市场概览
-- **main()** — 主函数 - 演示数据获取功能
-
 源码：[07_akshare数据获取学习案例.py](https://github.com/quant-king299/EasyXT/blob/main/学习实例/07_akshare数据获取学习案例.py)
 
 ---

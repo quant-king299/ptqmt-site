@@ -19,20 +19,6 @@
 日期：2025-01-26
 GitHub: https://github.com/quant-king299/EasyXT
 
-## 函数列表
-
-- **__init__()** — 初始化系统
-- **ensure_directories()** — 确保必要目录存在
-- **init_data_module()** — 初始化qstock数据获取模块
-- **init_trading_module()** — 初始化EasyXT交易执行模块
-- **get_multi_source_data()** — 启动实时监控
-- **_monitoring_loop()** — 监控主循环
-- **_display_account_status()** — 显示账户状态
-- **run_backtest()** — 生成回测报告
-- **run_comprehensive_demo()** — 运行综合演示
-- **create_visualization()** — 创建数据可视化
-- **main()** — 主函数 - 演示qstock与EasyXT的完美结合
-
 源码：[11_qstock与EasyXT结合案例.py](https://github.com/quant-king299/EasyXT/blob/main/学习实例/11_qstock与EasyXT结合案例.py)
 
 ---
