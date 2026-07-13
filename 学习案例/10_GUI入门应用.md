@@ -31,7 +31,7 @@ TEST_CODES = ["000001.SZ", "000002.SZ", "600000.SH"]     # 测试用股票
 
 ### 项目结构（聚焦 GUI 与学习实例）
 ```
-miniqmt扩展/
+EasyXT/
 ├── gui_app/
 │   ├── main_window.py               # 专业主窗口（策略管理与回测入口）
 │   ├── trading_interface_simple.py  # 简洁交易界面

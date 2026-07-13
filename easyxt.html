@@ -139,9 +139,9 @@
     <div class="grid">
       <section class="card">
         <div class="section-title" id="intro">项目简介</div>
-        <span class="badge">位置：MiniQMT/xtquant/EasyXT</span>
-        <span class="badge">适配语言：Python 3.6~3.12</span>
-        <span class="badge">场景：数据获取 / 交易执行 / 事件回调</span>
+        <span class="badge">位置：EasyXT 项目</span>
+        <span class="badge">适配语言：Python 3.9 ~ 3.12</span>
+        <span class="badge">场景：数据获取 / 交易执行 / 策略回测</span>
         <ul class="list">
           <li>统一 API：对 xtquant 的多模块进行统一命名与参数风格封装。</li>
           <li>智能参数：容错与默认值注入，减少样板代码。</li>
@@ -153,11 +153,11 @@
       <section class="card">
         <div class="section-title" id="features">功能亮点</div>
         <ul class="list">
-          <li>行情数据：K线/分时/快照等统一接口，一键订阅与缓存。</li>
+          <li>行情数据：K线/分时/快照等统一接口，支持多数据源降级。</li>
           <li>账户交易：下单、撤单、查询统一封装，支持风控钩子。</li>
-          <li>事件回调：撮合/成交/资金变动事件集中式处理。</li>
-          <li>日志与监控：可插拔日志适配器与性能指标采集。</li>
-          <li>插件扩展：策略组件与数据管线可扩展。</li>
+          <li>数据管理：内置 DuckDB 支持，本地数据秒级响应。</li>
+          <li>智能降级：QMT → TDX → 东方财富三级数据源自动切换。</li>
+          <li>配置管理：.env 文件统一管理，支持多账户配置。</li>
         </ul>
       </section>
     </div>
@@ -165,36 +165,68 @@
     <section class="card" id="install">
       <div class="section-title">安装与环境配置</div>
       <div class="kbd">
-pip install easyxt  # 若发布为 pip 包；否则使用本地路径安装
-# 本地开发（示例）
-# 假设 EasyXT 位于 MiniQMT 安装目录下的 xtquant/EasyXT
-# 例如：D:\QMT交易端\userdata_mini\xtquant\EasyXT
-import sys, os
-EASYXT_HOME = r"D:\QMT交易端\userdata_mini\xtquant\EasyXT"
-sys.path.append(EASYXT_HOME)
+# 1. 克隆项目
+git clone https://github.com/quant-king299/EasyXT.git
+cd EasyXT
 
-# 环境变量（根据你的 MiniQMT 实际路径调整）
-os.environ['XTQUANT_HOME'] = r"D:\QMT交易端\userdata_mini"
-os.environ['PTRADE_HOME'] = r"C:\PTrade"  # 如需对接 PTrade
+# 2. 安装依赖
+pip install -r requirements.txt
+
+# 3. 配置 .env 文件
+# 在项目根目录创建 .env 文件，填入以下内容：
+
+# ===== 必须配置 =====
+# 数据目录（必须）
+STOCK_DATA_ROOT=D:/StockData
+DUCKDB_PATH=D:/StockData/stock_data.ddb
+
+# QMT 配置（实盘必须）
+QMT_DATA_DIR=D:/国金QMT交易端模拟\userdata_mini
+QMT_ACCOUNT_ID=你的QMT账户ID
+QMT_EXE_PATH=D:/国金QMT交易端模拟\bin.x64\XtMiniQmt.exe
+QMT_PASSWORD=你的QMT密码
+
+# Tushare（可选，回测和因子分析用）
+# 建议充值到 2000 积分以上：https://tushare.pro/weborder/#/login?reg=344724
+TUSHARE_TOKEN=你的TushareToken
+
+# 4. 启动 QMT/miniQMT 并登录
       </div>
     </section>
 
     <section class="card" id="quickstart">
-      <div class="section-title">快速上手：三行订阅与获取</div>
+      <div class="section-title">快速上手：三步获取数据</div>
       <div class="kbd">
-from easyxt import Market, Trade, Events
+from easy_xt import get_api
 
-# 1) 订阅与拉取行情（自动处理市场/代码格式）
-df = Market.fetch_kline("SH.600000", period="1m", start="2024-10-01", end="2024-10-31", adjust="none")
+# 1) 初始化 API（自动读取 .env 配置）
+api = get_api()
+api.init_data()
 
-# 2) 下单示例（带风控与错误处理）
-order_id = Trade.buy("SH.600000", price=10.23, volume=100, account="模拟账户A")
+# 2) 获取行情数据（支持多数据源自动降级）
+df = api.get_price(
+    stock_code='600000.SH',
+    period='1d',
+    start_date='20240101',
+    end_date='20240618'
+)
+print(df.head())
 
-# 3) 事件回调（集中式）
-@Events.on("order_filled")
-def on_filled(event):
-    print("成交回报：", event)
+# 3) 交易功能（需要先初始化交易服务）
+api.init_trade(
+    qmt_path='D:/国金QMT交易端模拟',
+    session_id='my_strategy'
+)
+api.add_account('你的账户ID', 'STOCK')
 
+# 下单
+result = api.trade.buy(
+    account_id='你的账户ID',
+    code='600000.SH',
+    volume=100,
+    price=10.5
+)
+print(result)
       </div>
     </section>
 
@@ -202,38 +234,42 @@ def on_filled(event):
       <div class="section-title">常用 API 一览</div>
       <div class="grid">
         <div>
-          <h4>Market</h4>
+          <h4>行情数据</h4>
           <ul class="list">
-            <li>fetch_kline(code, period, start, end, adjust)</li>
-            <li>fetch_snapshot(code) / fetch_ticks(code, start, end)</li>
-            <li>subscribe(codes, fields, on_update)</li>
-            <li>cache.enable(ttl) / cache.clear()</li>
+            <li>get_price(code, period, start_date, end_date)</li>
+            <li>get_quote(code) - 实时行情快照</li>
+            <li>get_ticks(code, start_date, end_date)</li>
+            <li>subscribe(codes, on_update) - 订阅实时数据</li>
           </ul>
         </div>
         <div>
-          <h4>Trade</h4>
+          <h4>账户交易</h4>
           <ul class="list">
-            <li>buy(code, price, volume, account)</li>
-            <li>sell(code, price, volume, account)</li>
-            <li>cancel(order_id)</li>
-            <li>query_orders() / query_positions() / query_assets()</li>
-            <li>set_risk_guard(guard_fn)</li>
+            <li>init_trade(qmt_path, session_id)</li>
+            <li>add_account(account_id, account_type)</li>
+            <li>trade.buy(account_id, code, volume, price)</li>
+            <li>trade.sell(account_id, code, volume, price)</li>
+            <li>trade.cancel(account_id, order_id)</li>
+            <li>trade.get_positions(account_id)</li>
+            <li>trade.get_orders(account_id)</li>
+            <li>trade.get_balance(account_id)</li>
           </ul>
         </div>
         <div>
-          <h4>Events</h4>
+          <h4>数据管理</h4>
           <ul class="list">
-            <li>on(event_name)(handler)</li>
-            <li>start() / stop()</li>
-            <li>supported(): ['order_filled','order_rejected','asset_changed','tick']</li>
+            <li>DuckDB 本地数据库支持</li>
+            <li>get_stock_list() - 获取全市场股票列表</li>
+            <li>get_convertible_bonds() - 获取可转债列表</li>
+            <li>get_etf_list() - 获取 ETF 列表</li>
           </ul>
         </div>
         <div>
-          <h4>Utils</h4>
+          <h4>工具函数</h4>
           <ul class="list">
-            <li>normalize_code("600000") -> "SH.600000"</li>
-            <li>retry(fn, times=3, backoff=0.5)</li>
-            <li>log.set_level("INFO") / log.bind(handler)</li>
+            <li>normalize_code(code) - 代码格式化</li>
+            <li>format_datetime(dt) - 时间格式化</li>
+            <li>retry(func, times=3) - 重试装饰器</li>
           </ul>
         </div>
       </div>
@@ -243,25 +279,146 @@ def on_filled(event):
       <div class="section-title">架构示意</div>
       <div class="kbd">
 EasyXT
-├─ Market      # 行情层：统一订阅/拉取/缓存
-├─ Trade       # 交易层：下单/撤单/查询，风控钩子
-├─ Events      # 事件层：集中式回调分发
-├─ Utils       # 工具层：代码归一化/重试/日志
-└─ Adapters    # 适配层：对接 xtquant 原始 API
+├─ API 层 (api.py)
+│  ├─ get_price() - 统一行情接口
+│  ├─ init_trade() - 交易初始化
+│  └─ trade - 交易操作封装
+│
+├─ 数据源 (realtime_data/)
+│  ├─ qmt_provider.py - QMT/miniQMT 数据源
+│  ├─ tdx_provider.py - 通达信 TDX 数据源
+│  └─ eastmoney_provider.py - 东方财富数据源
+│
+├─ 数据管理 (data_manager/)
+│  ├─ duckdb_manager.py - DuckDB 管理
+│  ├─ hybrid_manager.py - 混合数据源管理
+│  └─ unified_duckdb_manager.py - 统一 DuckDB 接口
+│
+├─ 交易封装 (core/trade/)
+│  ├─ qmt_trade_api.py - QMT 交易 API
+│  └─ trade_executor.py - 交易执行器
+│
+└─ 工具函数 (utils/)
+   ├─ code_utils.py - 代码处理工具
+   └─ date_utils.py - 日期处理工具
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">数据源降级策略</div>
+      <div class="kbd">
+优先级顺序（自动切换）:
+
+1. DuckDB (本地数据) ⚡⚡⚡⚡⚡
+   └─ 秒级响应，适用于回测和历史数据查询
+
+2. QMT/miniQMT ⚡⚡⚡⚡
+   └─ 实时行情，适用于实盘交易场景
+   └─ 支持订阅推送
+
+3. 通达信 TDX ⚡⚡⚡
+   └─ 备用数据源，在线数据查询
+
+4. 东方财富 ⚡⚡
+   └─ 兜底数据源，可能会限流
+
+使用示例:
+# 自动降级获取数据（推荐）
+api = get_api()
+api.init_data()
+df = api.get_price('600000.SH', period='1d', count=10)
+# 如果 QMT 不可用，自动降级到 TDX 或东方财富
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">GUI 界面</div>
+      <ul class="list">
+        <li>📊 <strong>数据管理器</strong>：可视化下载全市场数据到 DuckDB</li>
+        <li>📈 <strong>Tushare 下载</strong>：财务数据、可转债数据、ETF 数据</li>
+        <li>📋 <strong>策略回测</strong>：策略回测和性能分析</li>
+        <li>⚙️ <strong>配置管理</strong>：可视化配置 .env 和账户信息</li>
+      </ul>
+      <div class="kbd">
+# 启动 GUI
+python run_gui.py
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">适用场景</div>
+      <div class="grid">
+        <div>
+          <h4>量化研究</h4>
+          <ul class="list">
+            <li>因子分析</li>
+            <li>策略回测</li>
+            <li>数据可视化</li>
+          </ul>
+        </div>
+        <div>
+          <h4>实盘交易</h4>
+          <ul class="list">
+            <li>策略自动交易</li>
+            <li>账户管理</li>
+            <li>风险控制</li>
+          </ul>
+        </div>
+        <div>
+          <h4>数据下载</h4>
+          <ul class="list">
+            <li>全市场日线数据</li>
+            <li>分钟线数据</li>
+            <li>财务数据</li>
+            <li>可转债数据</li>
+          </ul>
+        </div>
+        <div>
+          <h4>策略支持</h4>
+          <ul class="list">
+            <li>可转债双低/三低策略</li>
+            <li>ETF 轮动策略</li>
+            <li>红利低波策略</li>
+            <li>涨停板策略</li>
+          </ul>
+        </div>
       </div>
     </section>
 
     <section class="card">
       <div class="section-title">对比与优势</div>
       <ul class="list">
-        <li>更少样板代码：参数与代码格式智能填充。</li>
-        <li>更高健壮性：错误分级 + 重试回退策略。</li>
-        <li>更易维护：统一命名 + 返回数据结构明确。</li>
-        <li>可扩展：插件化组件，满足不同策略需求。</li>
+        <li><strong>更少样板代码</strong>：参数与代码格式智能填充，无需手动处理。</li>
+        <li><strong>更高健壮性</strong>：错误分级 + 重试回退策略，自动处理网络波动。</li>
+        <li><strong>更易维护</strong>：统一命名 + 返回数据结构明确，降低学习成本。</li>
+        <li><strong>数据源丰富</strong>：支持多数据源自动降级，确保数据可用性。</li>
+        <li><strong>本地数据支持</strong>：内置 DuckDB 支持，历史数据查询秒级响应。</li>
+        <li><strong>可视化界面</strong>：提供 GUI 界面，降低使用门槛。</li>
       </ul>
     </section>
 
-    <p class="footer-note">若需直接集成到 Docsify，可在 README 或 _sidebar 中添加链接：<code><a href="easyxt.html" class="tech-nav-button">EasyXT</a></code></p>
+    <section class="card">
+      <div class="section-title">常见问题</div>
+      <ul class="list">
+        <li><strong>Q: 如何获取 QMT 账户？</strong><br>
+        A: 需要在券商处开通 QMT/miniQMT 量化交易权限，登录后即可看到账户 ID。</li>
+
+        <li><strong>Q: 支持哪些券商？</strong><br>
+        A: 支持提供 QMT/miniQMT 的券商，如国金证券、国盛证券等。</li>
+
+        <li><strong>Q: 如何获取 Tushare Token？</strong><br>
+        A: 访问 https://tushare.pro/weborder/#/login?reg=344724 注册并充值到 2000 积分以上。</li>
+
+        <li><strong>Q: 可以同时运行多个策略吗？</strong><br>
+        A: 可以，每个策略使用不同的 session_id 即可。</li>
+      </ul>
+    </section>
+
+    <p class="footer-note">
+      <strong>项目地址</strong>: https://github.com/quant-king299/EasyXT<br>
+      <strong>文档地址</strong>: 点击导航栏中的文档链接查看详细 API 文档<br>
+      <strong>微信公众号</strong>: 王者quant (微信号: www_ptqmt_com)
+    </p>
   </main>
 </body>
-</html> 
+</html>
