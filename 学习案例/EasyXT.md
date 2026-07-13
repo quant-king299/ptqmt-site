@@ -1,102 +1,143 @@
-# EasyXT — 基于 MiniQMT xtquant 的易用封装库
+# EasyXT — 一站式量化交易框架
 
-> 统一接口 · 智能参数 · 完善错误处理，让量化开发更简单高效  
-> 仓库：https://github.com/quant-king299/EasyXT
+> `pip install easyxt` · 多源数据聚合 · QMT 直连交易 · 本地 DuckDB 加速 · 内置策略库
+> GitHub：https://github.com/quant-king299/EasyXT
 
 <div class="tech-nav-container">
-  <a href="https://github.com/quant-king299/EasyXT" class="tech-nav-button ai-code-button"><span class="tech-icon">🧭</span>GitHub</a>
-  <a href="#/学习案例/01基础入门教程" class="tech-nav-button docs-button"><span class="tech-icon">🚀</span>快速入门</a>
-  <a href="#/学习案例/01基础入门教程?id=环境准备" class="tech-nav-button tech-share-button"><span class="tech-icon">⚙️</span>安装指南</a>
-  <a href="easyxt.html" class="tech-nav-button resource-button"><span class="tech-icon">🔬</span>立即体验</a>
+  <a href="https://github.com/quant-king299/EasyXT" class="tech-nav-button ai-code-button"><span class="tech-icon">🧭</span> GitHub</a>
+  <a href="#/docs/EasyXT快速入门指南" class="tech-nav-button docs-button"><span class="tech-icon">📘</span> 官方文档</a>
+  <a href="https://pypi.org/project/easyxt/" class="tech-nav-button tech-share-button"><span class="tech-icon">📦</span> PyPI</a>
 </div>
 
 ## 功能亮点
-- 统一接口：对 xtquant 多模块统一命名与参数风格
-- 智能参数：自动容错与默认值注入，减少样板代码
-- 错误处理：分级异常与重试机制，提升稳定性
-- 开发友好：明确返回结构与类型提示，便于集成
 
-## 安装与环境配置
+| 能力 | 说明 |
+|------|------|
+| **多源数据** | QMT、Tushare、通达信(TDX)、东方财富，自动降级切换 |
+| **本地存储** | DuckDB 高性能列式数据库，回测速度提升 10-30 倍 |
+| **策略框架** | 内置红利低波、双低/三低可转债、ETF 趋势、涨停板等经典策略 |
+| **因子分析** | 101 因子分析平台，支持 191 个 Alpha 因子计算与回测 |
+| **QMT 直连** | 同时支持大 QMT（XtItClient）和 miniQMT，一键对接实盘/仿真交易 |
+| **跨平台** | Windows/Mac/Linux 均可（Mac/Linux 通过 xqshare 远程连接 QMT） |
+
+## 安装
+
+```bash
+# 一行安装
+pip install easyxt
+
+# 如需完整项目（含 GUI / 回测 / 策略）
+git clone https://github.com/quant-king299/EasyXT.git
+cd EasyXT
+pip install -e .
+```
+
+## 快速开始（3 行代码）
+
 ```python
-# 本地引入示例（根据你的 MiniQMT 实际路径调整）
-import sys, os
-EASYXT_HOME = r"D:\QMT交易端\userdata_mini\xtquant\EasyXT"
-sys.path.append(EASYXT_HOME)
+from easy_xt import get_api
 
-# 环境变量（如需）
-os.environ['XTQUANT_HOME'] = r"D:\QMT交易端\userdata_mini"
-# 对接 PTrade 可选：
-# os.environ['PTRADE_HOME'] = r"C:\PTrade"
+api = get_api()
+api.init_data()
+
+# 获取平安银行最近 20 根日线（前复权）
+df = api.get_price(['000001.SZ'], period='1d', count=20, adjust='front')
+print(df[['close', 'volume']])
 ```
 
-## 快速示例（3-6行即可跑）
+## 获取实时行情
+
 ```python
-from easyxt import Market, Trade
-
-# 拉取行情（自动处理代码/市场格式）
-df = Market.fetch_kline("SH.600000", period="1m", count=100)
-
-# 下单示例（带风控与错误处理）
-order_id = Trade.buy("SH.600000", price=10.23, volume=100)
-print(df.tail())
+# 多只股票实时快照
+df = api.get_current_price(['000001.SZ', '600519.SH', '300750.SZ'])
+for _, row in df.iterrows():
+    print(f"{row['code']}: {row['price']:.2f}")
 ```
 
-## 3.2 交易功能测试
+## 获取财务数据
 
-账户绑定完成后，需要验证交易功能是否正常：
-
-### 测试代码示例
 ```python
-# 交易功能连通性测试（示例）
-from easyxt import Trade
+# 获取三大报表
+data = api.get_financial_data(['000001.SZ'],
+    tables=['Balance', 'Income', 'CashFlow'],
+    start='20240101')
 
-# 1) 初始化并绑定账户（替换为你的实际路径与资金账号）
-api = Trade()
-api.init_trade(r"D:/国金QMT交易端模拟/userdata_mini", account="39020958")
-
-# 2) 查询账户与持仓，确认连接正常
-account_info = api.get_account_info()
-positions = api.get_positions()
-print("账户信息:", account_info.get("account_id", "N/A"))
-print("当前持仓数量:", len(positions))
-
-# 3) 下发一笔小额限价买入（示例代码，请在模拟环境中测试）
-order_id = api.buy("SH.600000", volume=100, price=10.50)  # 示例价格
-print("委托编号:", order_id)
-
-# 4) 撤单示例（如需）
-if order_id:
-    cancel_ok = api.cancel_order(order_id)
-    print("撤单结果:", cancel_ok)
+income = data['000001.SZ']['Income']
+print(income[['revenue', 'net_profit_incl_min_int_inc']])
 ```
 
-## 模块架构
-```
-EasyXT
-├─ Market      # 行情层：统一订阅/拉取/缓存
-├─ Trade       # 交易层：下单/撤单/查询（支持风控钩子）
-├─ Events      # 事件层：集中式回调分发
-├─ Utils       # 工具层：代码归一化/重试/日志
-└─ Adapters    # 适配层：对接 xtquant 原始 API
+## 下单交易
+
+```python
+# 初始化交易（需 QMT 在线）
+api.init_trade(r'D:/QMT交易端/userdata_mini', session_id=99)
+api.add_account('你的资金账号', 'STOCK')
+
+# 限价买入
+order_id = api.trade.buy('你的资金账号', '000001.SZ',
+                         volume=100, price=12.50, price_type='limit')
 ```
 
-## 与原生 xtquant 的对比优势
-- 接口统一 vs 原始接口分散
-- 参数智能 vs 手动校验
-- 错误分级与重试 vs 自行处理异常
-- 统一返回结构 vs 数据形态多样
-- 插件化扩展 vs 需自拼装
+## 运行内置策略
+
+```bash
+# 红利低波策略（安全模式，不下单）
+python strategies/quant_strategies/run_dividend_lowvol.py
+
+# 确认信号后实盘
+python strategies/quant_strategies/run_dividend_lowvol.py --trade
+```
+
+## 启动 GUI
+
+```bash
+python run_gui.py
+```
+
+GUI 功能：数据下载、Tushare 批量下载、五维复权查看器、网格交易配置、多策略管理
+
+## 系统架构
+
+```
+用户界面（GUI / CLI / Streamlit）
+    ↓
+EasyXT API 层（DataAPI / TradeAPI / ExtendedAPI）
+    ↓
+核心引擎（FallbackFetcher / BacktestEngine / Scheduler / AutoLogin）
+    ↓
+数据 & 交易层（DuckDB / QMT xtquant / Tushare / TDX / 东方财富 / xqshare）
+```
+
+## 官方文档
+
+| 文档 | 说明 |
+|------|------|
+| [快速入门指南](docs/EasyXT快速入门指南.html) | 安装配置 → 启动 GUI → 下载数据 → 跑通第一个策略 |
+| [核心 API 手册](docs/EasyXT核心API手册.html) | `get_price`、`get_financial_data`、交易接口完整参数 |
+| [回测系统文档](docs/EasyXT回测系统文档.html) | DataManager → BacktestEngine → 绩效分析 → 因子平台 |
+| [GUI 操作手册](docs/EasyXT_GUI操作手册.html) | 界面导览、数据下载、网格交易、多策略管理 |
+| [策略开发指南](docs/EasyXT策略开发指南.html) | 策略模板、DuckDB→QMT 降级、多因子排名、实盘部署 |
+| [架构与部署](docs/EasyXT架构与部署.html) | 系统架构、数据管道、自动登录、跨平台、生产部署 |
+
+## 数据源降级链
+
+```
+QMT (xtquant) → 通达信 (TDX) → 东方财富 → 兜底备份
+```
+
+无需手动切换，系统自动选择最佳可用数据源。
+
+## 支持的周期
+
+`tick` / `1m` / `5m` / `15m` / `30m` / `1h` / `1d`
+
+## 复权类型
+
+`none`（不复权）/ `front`（前复权）/ `back`（后复权）/ `front_ratio`（等比前复权，回测推荐）/ `back_ratio`（等比后复权）
 
 ## FAQ
-- Q: QMT未启动如何学习？  
-  A: 支持模拟模式，先跑“01基础入门教程”中的示例。
-- Q: 推荐的数据周期？  
-  A: 推荐 1d/1m/5m，避免 15m/30m/1h。
-- Q: 实时价格拿不到？  
-  A: 检查代码格式（如 SH.600000）和交易时段。
 
-## 关联资源
-- GitHub仓库：<https://github.com/quant-king299/EasyXT>  
-- 入门教程：[#/学习案例/01基础入门教程](#/学习案例/01基础入门教程)  
-- 体验页：<easyxt.html>
-
+- **Q: Python 版本？** A: 3.8 - 3.12，推荐 3.11。xtquant 不支持 3.13。
+- **Q: Mac/Linux 能用吗？** A: 通过 xqshare 远程连接 Windows QMT。数据获取和回测完全支持。
+- **Q: 没有 Tushare 积分怎么办？** A: 不影响，用 QMT 本地数据即可。分红策略也支持 QMT `get_divid_factors` 降级。
+- **Q: 大 QMT 和 miniQMT 用哪个？** A: 都可以。大 QMT 数据更全，GUI 支持直接导入。同时运行大 QMT 时自动跳过 miniQMT 检测。
