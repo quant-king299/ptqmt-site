@@ -51,12 +51,16 @@ Python：3.9+（建议 3.10+），并将 Python 加入 PATH
 
 ### 📌 旧方式（慢且繁琐）
 
+```python
 from xtquant import xtdata
 
+```
 # 每次都要在线下载
+```python
 xtdata.download_history_data('511380.SH', '1d', '20240101', '20241231')
 data = xtdata.get_market_data(['511380.SH'], '1d')
 
+```
 # 问题：
 # - 每次都要等2-3秒
 # - 网络不稳定会失败
@@ -64,11 +68,15 @@ data = xtdata.get_market_data(['511380.SH'], '1d')
 
 ### 🚀 新方式（快且简单）
 
+```python
 from data_manager.unified_data_interface import get_stock_data
 
+```
 # 一行代码搞定！
+```python
 data = get_stock_data('511380.SH', '2024-01-01', '2024-12-31')
 
+```
 # 优势：
 # ✅ 首次从QMT获取，自动保存到DuckDB
 # ✅ 二次从DuckDB读取，速度快100倍
@@ -134,12 +142,11 @@ data = get_stock_data('511380.SH', '2024-01-01', '2024-12-31')
 ### 使用示例
 
 # 一行代码切换复权方式，零延迟！
-
 ```python
 data = get_stock_data('511380.SH', '2024-01-01', '2024-12-31', adjust='front')
 data = get_stock_data('511380.SH', '2024-01-01', '2024-12-31', adjust='back')
-```
 
+```
 # 瞬间完成，无需重新计算！
 
 **技术原理**：在数据导入时，预先计算并存储5种复权数据，查询时直接读取对应列，实现真正的"零延迟切换"。
@@ -150,14 +157,18 @@ data = get_stock_data('511380.SH', '2024-01-01', '2024-12-31', adjust='back')
 
 ### 导入整个板块
 
+```python
 from data_manager.universal_data_importer import UniversalDataImporter
 
 importer = UniversalDataImporter()
 importer.connect()
 
+```
 # 一键导入上证50成分股2024年数据
+```python
 result = importer.import_board_stocks('上证50', '2024-01-01', '2024-12-31')
 
+```
 # 输出：
 # 总计: 50只
 # 成功: 50只
@@ -170,26 +181,34 @@ result = importer.import_board_stocks('上证50', '2024-01-01', '2024-12-31')
 ### 自定义股票列表
 
 # 导入自己的自选股
+```python
 my_stocks = ['511380.SH', '511880.SH', '512000.SH']
 importer.import_custom_stocks(my_stocks, '2024-01-01', '2024-12-31')
 
+```
 # 或从CSV导入
+```python
 importer.import_from_csv('my_stocks.csv', '2024-01-01', '2024-12-31')
 
+```
 ## 六、智能缺失检测
 
 **痛点**：如何知道哪些数据缺失？哪些需要补充？
 
 **解决方案**：内置A股交易日历（2000-2030），自动识别缺失数据
 
+```python
 from data_manager.smart_data_detector import SmartDataDetector
 
 detector = SmartDataDetector()
 detector.connect()
 
+```
 # 检测缺失数据
+```python
 report = detector.detect_missing_data('511380.SH', '2024-01-01', '2024-12-31')
 
+```
 # 输出：
 # 缺失交易日: 11天
 # 缺失日期范围: [2024-01-01 ~ 2024-01-05], ...
@@ -211,20 +230,21 @@ report = detector.detect_missing_data('511380.SH', '2024-01-01', '2024-12-31')
 
 ✅ 成交量异常检查
 
+```python
 from data_manager.data_integrity_checker import DataIntegrityChecker
 
 checker = DataIntegrityChecker()
 checker.connect()
 
+```
 # 检查数据完整性
+```python
 report = checker.check_integrity('511380.SH', '2024-01-01', '2024-12-31')
 
-
-```python
 print(f"完整度: {report['completeness_ratio']*100:.2f}%")
 print(f"状态: {report['status']}")
-```
 
+```
 ## 八、可视化数据管理
 
 我们还提供了一个**GUI数据管理界面**：
@@ -278,21 +298,29 @@ pip install duckdb
 
 ### 初始化数据库
 
+```python
 from data_manager.universal_data_importer import UniversalDataImporter
 
 importer = UniversalDataImporter()
 importer.connect()
 
+```
 # 导入您关注的板块
+```python
 importer.import_board_stocks('沪深300', '2024-01-01', '2024-12-31')
 
+```
 ### 在策略中使用
 
+```python
 from data_manager.unified_data_interface import get_stock_data
 
+```
 # 获取数据（自动优先使用DuckDB）
+```python
 data = get_stock_data('000001.SZ', '2024-01-01', '2024-12-31', adjust='front')
 
+```
 # 开始您的回测...
 
 ## 十一、最佳实践
@@ -305,15 +333,19 @@ python data_manager/auto_data_updater.py --start
 ### 2. 批量初始化
 
 # 先导入常用板块，一次性完成
+```python
 boards = ['沪深300', '中证500', '上证50']
 for board in boards:
  importer.import_board_stocks(board, '2024-01-01', '2024-12-31')
 
+```
 ### 3. 定期检查数据质量
 
 # 每月检查一次数据完整性
+```python
 reports = checker.batch_check_integrity(stock_list, '2024-01-01', '2024-12-31')
 
+```
 ## 十二、常见问题
 
 ### Q1: DuckDB文件会很大吗？

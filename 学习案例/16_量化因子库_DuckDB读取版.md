@@ -137,16 +137,23 @@ pip install pandas numpy duckdb
 
 ### 3分钟上手示例
 
+```python
 from easy_xt.factor_library import EasyFactor, create_easy_factor
 
+```
 # 1. 初始化（只需指定DuckDB数据库路径）
+```python
 ef = create_easy_factor('D:/StockData/stock_data.ddb')
 
+```
 # 2. 计算单个因子
+```python
 momentum = ef.get_factor('000001.SZ', 'momentum_20d', '2024-01-01', '2024-11-30')
 print(f"20日动量: {momentum['momentum_20d'].iloc[-1]:.2%}")
 
+```
 # 3. 批量分析多只股票（高效！）
+```python
 stock_list = ['000001.SZ', '600000.SH', '600519.SH', '000858.SZ']
 results = ef.analyze_batch(
  stock_list=stock_list,
@@ -154,9 +161,12 @@ results = ef.analyze_batch(
  end_date='2024-11-30'
 )
 
+```
 # 4. 查看综合评分
+```python
 print(results['score'].sort_values('score', ascending=False))
 
+```
 **输出示例：**
 
  score rating max_score
@@ -169,38 +179,47 @@ print(results['score'].sort_values('score', ascending=False))
 
 ### 场景：从全市场筛选动量强势股
 
+```python
 from easy_xt.factor_library import create_easy_factor
 
+```
 # 初始化
+```python
 ef = create_easy_factor('D:/StockData/stock_data.ddb')
 
+```
 # 获取股票列表
+```python
 all_stocks = ef.get_stock_list(limit=100) # 获取前100只股票
 
+```
 # 批量计算动量因子
+```python
 stock_list = all_stocks['stock_code'].tolist()
 results = ef.analyze_batch(stock_list, '2024-01-01', '2024-11-30')
 
+```
 # 筛选条件：
 # 1. 20日动量 > 10%
 # 2. RSI 在 30-70 之间（不超买也不超卖）
 # 3. 波动率 < 30%（风险可控）
+```python
 momentum_20 = results['momentum'][results['momentum']['period'] == '20日']
 rsi = results['technical'][results['technical']['indicator'] == 'rsi']
 volatility = results['volatility']
 
+```
 # 综合筛选
 selected_stocks = momentum_20[
  (momentum_20['momentum_pct'] > 10) &
  (momentum_20['momentum_pct'] < 50) # 排除过度投机
 ]
 
-
 ```python
 print(f"筛选出 {len(selected_stocks)} 只强势股：")
 print(selected_stocks[['stock_code', 'momentum_pct', 'current_price']].head(10))
-```
 
+```
 ## 📊 四、性能优势
 
 ### 本地计算 vs 远程API
@@ -242,6 +261,7 @@ EasyFactor（本地DuckDB）
 ### 1. 市场数据获取
 
 # 获取日线数据
+```python
 df = ef.get_market_data_ex(
  stock_code='000001.SZ',
  start_time='2024-01-01',
@@ -249,20 +269,28 @@ df = ef.get_market_data_ex(
  period='daily'
 )
 
+```
 ### 2. 单个因子计算
 
 # 计算动量因子
+```python
 momentum = ef.get_factor('000001.SZ', 'momentum_20d', '2024-01-01', '2024-11-30')
 
+```
 # 计算RSI
+```python
 rsi = ef.get_factor('000001.SZ', 'rsi', '2024-01-01', '2024-11-30')
 
+```
 # 计算波动率
+```python
 volatility = ef.get_factor('000001.SZ', 'volatility_20d', '2024-01-01', '2024-11-30')
 
+```
 ### 3. 批量因子分析 ⭐推荐
 
 # 一次计算多个因子类型
+```python
 results = ef.analyze_batch(
  stock_list=['000001.SZ', '600000.SH'],
  start_date='2024-01-01',
@@ -270,24 +298,28 @@ results = ef.analyze_batch(
  factors=['momentum', 'volatility', 'technical', 'score']
 )
 
+```
 # 查看各类因子
-
 ```python
 print(results['momentum']) # 动量因子
 print(results['volatility']) # 波动率
 print(results['technical']) # 技术指标
 print(results['score']) # 综合评分
-```
 
+```
 ### 4. 综合评分选股
 
 # 多因子加权评分
+```python
 scores = ef.get_comprehensive_score(stock_list)
 
+```
 # 筛选A级股票
+```python
 a_stocks = scores[scores['rating'] == 'A']
 print(f"推荐股票: {a_stocks.index.tolist()}")
 
+```
 ## 📁 六、项目结构
 
 easy_xt/
@@ -373,22 +405,27 @@ CREATE TABLE stock_daily (
  volume BIGINT,
  amount DECIMAL,
  PRIMARY KEY (stock_code, date)
+```python
 );
 
+```
 **Q2: 支持哪些日期格式？**
 
 A: DuckDB要求使用 YYYY-MM-DD 格式，例如：
 
 # ✅ 正确
+```python
 df = ef.get_market_data_ex('000001.SZ', '2024-01-01', '2024-12-31')
 
+```
 # ❌ 错误
+```python
 df = ef.get_market_data_ex('000001.SZ', '20240101', '20241231')
 
+```
 **Q3: 如何添加自定义因子？**
 
 A: 可以继承 EasyFactor 类，添加自己的因子计算方法：
-
 
 ```python
 class CustomEasyFactor(EasyFactor):
@@ -396,8 +433,10 @@ class CustomEasyFactor(EasyFactor):
 ```
  """自定义因子计算"""
  # 你的计算逻辑
+```python
  pass
 
+```
 ## 🎉 十、总结
 
 ### EasyFactor 核心优势：
@@ -432,11 +471,13 @@ https://github.com/quant-king299/EasyXT
 pip install pandas numpy duckdb
 
 # 使用
+```python
 from easy_xt.factor_library import EasyFactor, create_easy_factor
 
 ef = create_easy_factor('你的数据路径.ddb')
 results = ef.analyze_batch(stock_list, '2024-01-01', '2024-11-30')
 
+```
 ## 💬 互动话题
 
 💬 **你平时使用哪些因子进行选股？**💬 **在量化交易中遇到过哪些痛点？**💬 **希望EasyFactor增加哪些功能？**

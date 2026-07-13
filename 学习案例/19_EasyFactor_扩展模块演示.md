@@ -149,8 +149,10 @@ A股每年有50+只股票退市，如果策略选到了退市股，损失巨大�
 直接从选股池中剔除
 第二层：价格数据时效性验证
 # 检查价格数据的日期
+```python
 price_date = get_price_date(stock, date)
 
+```
 # 如果价格数据超过7天，认为已过期
 if days_diff > 7:
  [FILTER] 股票 - 价格数据过期(20240627，34天前)，已过滤
@@ -165,7 +167,6 @@ A股最长停牌不超过5个交易日
 第三层：调仓前二次确认
 [20240801] 调仓...
  # 检查当前持仓是否有退市股票
-
 ```python
  for stock in current_positions:
  if is_delisted(stock):
@@ -324,30 +325,40 @@ def get_fundamentals(codes, date, fields):
  ifself.duckdb_con:
  df = query_duckdb(codes, date, fields)
  ifnot df.empty:
+```python
  return df
 
+```
  # 2. Fallback到Tushare
  ifself.tushare_pro:
  df = query_tushare(codes, date, fields)
  ifnot df.empty:
+```python
  return df
 
+```
  # 3. Fallback到QMT
  ifself.qmt_connected:
  df = query_qmt(codes, date, fields)
  ifnot df.empty:
+```python
  return df
 
+```
  # 4. 全部失败
+```python
  return pd.DataFrame()
 
+```
 ### 3.3 性能优化
 批量查询优化
 **传统方式（逐只查询）**：
 
 # 查询5000只股票
+```python
 for stock in stocks:
  df = tushare.daily_basic(ts_code=stock) # 5000次API调用
+```
 # 耗时：约30分钟
 
 **本平台方式（批量查询）**：
@@ -368,12 +379,11 @@ self.fundamentals_cache = {
 }
 
 # 后续查询直接读缓存
-
 ```python
 if date in cache:
  return cache[date]
-```
 
+```
 **效果**：
 
 首次查询：6秒
@@ -502,31 +512,38 @@ python run_gui.py
 ### 5.1 完整的交易模拟
 手续费计算
 # 双向收取
+```python
 买入手续费 = 买入金额 × 0.0001 （万分之一）
 卖出手续费 = 卖出金额 × 0.0001 （万分之一）
 
+```
 # 最低5元
 手续费 = max(手续费, 5元)
 滑点模拟
 # 可配置滑点率
+```python
 买入滑点 = 当前价 × (1 + 滑点率)
 卖出滑点 = 当前价 × (1 - 滑点率)
 
+```
 # 默认滑点率：0%（可调整）
 整手交易
 # A股买入必须是100股的整数倍
+```python
 买入股数 = int(买入金额 / 价格 / 100) × 100
 
+```
 # 卖出可以是任意数量（但要≤持仓）
+```python
 卖出股数 = min(计划卖出, 当前持仓)
 
+```
 ### 5.2 持仓管理
 每日估值
+```python
 def get_market_value(date):
  总资产 = 现金 + 持仓市值
 
-
-```python
  for 股票 in 持仓:
  价格 = get_price(股票, date)
  if 价格:
@@ -540,7 +557,6 @@ def get_market_value(date):
 持仓调整
 def rebalance(date, target_weights):
  # 1. 卖出不在目标中的股票
-
 ```python
  for 股票 in 当前持仓:
  if 股票 notin target_weights:
@@ -548,12 +564,14 @@ def rebalance(date, target_weights):
  sell(股票, 全部持仓)
 
  # 2. 买入目标股票
+```python
  for 股票, 权重 in target_weights.items():
  目标金额 = 总资产 × 权重
  当前金额 = 持仓数量 × 当前价格
  调整金额 = 目标金额 - 当前金额
 
  if 调整金额 > 0:
+```
  buy(股票, 调整金额)
  elif 调整金额 < 0:
  sell(股票, abs(调整金额))
@@ -561,36 +579,41 @@ def rebalance(date, target_weights):
 ### 5.3 性能计算
 收益率计算
 # 每日收益率
+```python
 日收益率 = (今日总资产 - 昨日总资产) / 昨日总资产
 
+```
 # 累计收益率
+```python
 累计收益率 = (最终总资产 - 初始资金) / 初始资金
 
+```
 # 年化收益率
 年化收益率 = (1 + 累计收益率)^(365/回测天数) - 1
 最大回撤计算
 # 回撤 = (峰值 - 当前值) / 峰值
+```python
 回撤序列 = []
 峰值 = 0
 
-
-```python
 for 总资产 in 每日资产:
  if 总资产 > 峰值:
-```
  峰值 = 总资产
  回撤 = (峰值 - 总资产) / 峰值
  回撤序列.append(回撤)
 
 最大回撤 = max(回撤序列)
+```
 夏普比率计算
 # 夏普比率 = (年化收益 - 无风险利率) / 年化波动率
+```python
 年化收益 = 12.58%
 无风险利率 = 3%（假设）
 年化波动率 = 49.83%
 
 夏普比率 = (0.1258 - 0.03) / 0.4983 = -0.02
 
+```
 ## 📊 六、实战案例：小市值策略回测
 
 ### 6.1 策略定义
@@ -731,31 +754,38 @@ class YourStrategy(StrategyBase):
  defselect_stocks(self, date):
  """选股逻辑"""
  # 1. 获取股票池
+```python
  stocks = get_all_stocks()
 
+```
  # 2. 你的选股条件
- filtered = []
-
 ```python
+ filtered = []
  for stock in stocks:
  if your_condition(stock):
-```
  filtered.append(stock)
 
+```
  # 3. 返回选中的股票
+```python
  return filtered[:N]
 
+```
  defget_target_weights(self, date, selected_stocks):
  """权重计算"""
  # 等权重
+```python
  weight = 1.0 / len(selected_stocks)
  return {stock: weight for stock in selected_stocks}
 
+```
  defget_rebalance_dates(self, start_date, end_date):
  """调仓日期"""
  # 每月、每周或每日
+```python
  return get_first_trading_days_monthly(start_date, end_date)
 
+```
 ### 8.2 即将上线的策略
 
 📈 **动量策略**：选择涨势最好的股票

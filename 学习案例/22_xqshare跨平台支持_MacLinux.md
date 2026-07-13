@@ -124,16 +124,23 @@ python -m xqshare.server
 
 在你的 MacBook 上：
 
+```python
 from xqshare import XtQuantRemote
 
+```
 # 连接到家里的 Windows 电脑
+```python
 xt = XtQuantRemote("192.168.1.100") # 改成你Windows电脑的IP
 
+```
 # 然后就和在本地完全一样了！
+```python
 stocks = xt.xtdata.get_stock_list_in_sector("沪深A股")
 print(f"获取到 {len(stocks)} 只股票")
 
+```
 # 获取行情数据
+```python
 df = xt.xtdata.get_market_data(
  stock_list=["000001.SZ", "600000.SH"],
  period="1d",
@@ -141,10 +148,13 @@ df = xt.xtdata.get_market_data(
 )
 print(df)
 
+```
 # 看实时行情
+```python
 ticks = xt.xtdata.get_full_tick(["000001.SZ"])
 print(ticks)
 
+```
 **看！和平时写代码一模一样！** 你根本感觉不到是在远程调用！
 
 ### 使用场景举例
@@ -195,8 +205,10 @@ xtdata get_full_tick --stock-list "['000001.SZ', '600000.SH']"
 就像你家门锁一样，连接需要输入"密码"：
 
 # 只有知道密码的人才能连接
+```python
 xt = XtQuantRemote("192.168.1.100", client_secret="你的密码")
 
+```
 **第二道锁：加密传输（可选）**
 
 如果你特别在意安全，可以开启加密模式：
@@ -228,19 +240,27 @@ xt = XtQuantRemote("192.168.1.100", client_secret="你的密码")
 **EasyXT 正在计划原生支持远程模式：**
 
 # 未来会更简单
+```python
 from easy_xt import EasyXT
 
+```
 # 告诉 EasyXT：我要用远程模式
+```python
 api = EasyXT(mode="remote", host="192.168.1.100")
 
+```
 # 然后... 就和本地一模一样了！
+```python
 api.init_data()
 data = api.get_price(['000001.SZ'], count=100)
 print(data.head())
 
+```
 # 交易也一样简单
+```python
 api.init_trade(USERDATA_PATH)
 api.buy(account_id=ACCOUNT_ID, code='000001.SZ', volume=100)
+```
 ## 📊 和其他方案比怎么样？
 
 来看看各种解决方案的对比：

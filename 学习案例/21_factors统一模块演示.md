@@ -363,35 +363,48 @@ OLS回归估计Beta
 # 20日动量因子
 df_raw['factor'] = df_raw.groupby('stock_code')['close'].transform(
  lambda x: x.pct_change(20)
+```python
 )
 
+```
 # 60日动量因子
 df_raw['factor_60'] = df_raw.groupby('stock_code')['close'].transform(
  lambda x: x.pct_change(60)
+```python
 )
 
+```
 # 波动率因子
 df_raw['factor_vol'] = df_raw.groupby('stock_code')['close'].transform(
  lambda x: x.pct_change().rolling(20).std()
+```python
 )
 
+```
 # 反转因子
 df_raw['factor_reversal'] = -df_raw.groupby('stock_code')['close'].transform(
  lambda x: x.pct_change(20)
+```python
 )
 
+```
 ### 技巧2：多因子组合
 
 # 标准化因子
+```python
 factor1 = df['factor'] / df['factor'].std()
 factor2 = df['factor_vol'] / df['factor_vol'].std()
 
+```
 # 组合因子（加权）
+```python
 combined_factor = 0.6 * factor1 + 0.4 * factor2
 
+```
 ### 技巧3：调整回测参数
 
 # 更细的分组，周度调仓
+```python
 backtest_result = engine.run_backtest(
  factor_data=factor_df,
  returns_data=returns_df,
@@ -401,6 +414,7 @@ backtest_result = engine.run_backtest(
  slippage=0.002 # 千二滑点
 )
 
+```
 ## 🐛 常见问题解决
 
 ### Q1：找不到DuckDB数据库怎么办？
@@ -413,34 +427,34 @@ python scripts/download_stocks.py
 
 **创建测试数据库**
 
-
 ```python
 import pandas as pd
 import duckdb
 import numpy as np
-```
 
+```
 # 创建测试数据
+```python
 dates = pd.date_range('2023-01-01', periods=500, freq='D')
 stocks = ['000001.SZ', '000002.SZ', '600000.SH']
 
 data = []
-
-```python
 for stock in stocks:
  for date in dates:
-```
  data.append({
+```
  'date': date,
  'stock_code': stock,
  'close': 10 + np.random.randn() * 2
  })
 
+```python
 df = pd.DataFrame(data)
 conn = duckdb.connect('data/stock_data.ddb')
 conn.execute('CREATE TABLE stock_daily AS SELECT * FROM df')
 conn.close()
 
+```
 **设置环境变量**
 
 set DUCKDB_PATH=你的数据库路径

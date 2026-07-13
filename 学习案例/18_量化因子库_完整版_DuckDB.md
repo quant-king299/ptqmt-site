@@ -126,11 +126,13 @@ IC 0.062 在日频预测里不算差。更重要的是 **Top 20% 和 Bottom 20% 
 
 训练好的模型保存为 pickle，预测单日只需一行：
 
+```python
 from easyxt_backtest.ml import ModelPredictor
 
 predictor = ModelPredictor("models/lightgbm_model.pkl")
 scores = predictor.predict("2023-07-03", stock_pool=all_stocks)
 
+```
 # scores = {"000007.SZ": 0.031, "600519.SH": 0.025, ...}
 # 分数越高 = 预期收益越高
 

@@ -75,19 +75,22 @@ pip install pandas numpy duckdb qstock
 
 ### 3行代码开始量化选股
 
+```python
 from easy_xt.factor_library import create_easy_factor
 
+```
 # 初始化（自动连接767万条本地数据）
+```python
 ef = create_easy_factor(r'D:/StockData/stock_data.ddb', enable_extended_modules=True)
 
+```
 # 获取29个基本面因子
-
 ```python
 from easy_xt.fundamental_enhanced import get_enhanced_fundamental_factors
 df = get_enhanced_fundamental_factors('000001.SZ', ef.duckdb_reader)
 print(df)
-```
 
+```
 **输出**：
 
  price_to_ma20 price_to_ma60 price_percentile ... rsi_14
@@ -154,11 +157,15 @@ turnover_5/20d - 换手率
 ### 📈 同花顺行业/概念资金流向
 
 # 获取90个行业的资金流向
+```python
 industry_flow = ef.get_ths_industry_money_flow(top_n=20, use_cache=True)
 
+```
 # 获取387个概念的资金流向
+```python
 concept_flow = ef.get_ths_concept_money_flow(top_n=20, use_cache=True)
 
+```
 **数据字段**：
 
 行业名称、涨跌幅
@@ -178,14 +185,20 @@ concept_flow = ef.get_ths_concept_money_flow(top_n=20, use_cache=True)
 ### 🌊 北向资金流向（外资）
 
 # 获取北向资金历史流向（2,616条记录）
+```python
 north_flow = ef.get_north_money_flow(days=30, use_cache=True)
 
+```
 # 获取北向资金行业流向（86个行业）
+```python
 north_sector = ef.get_north_money_sector(top_n=20)
 
+```
 # 获取北向资金个股流向（2,767只股票）
+```python
 north_stock = ef.get_north_money_stock(top_n=20)
 
+```
 **数据覆盖**：
 
 历史记录：2,616条（2014-11-17 至 2026-02-06）
@@ -197,28 +210,37 @@ north_stock = ef.get_north_money_stock(top_n=20)
 ### 🎯 个股资金流向（5,175只股票）
 
 # 获取个股资金流向排名TOP20
+```python
 stock_flow = ef.get_ths_stock_money_flow(top_n=20, use_cache=True)
 
+```
 # 查询特定股票
+```python
 single = ef.get_ths_stock_money_flow(stock_code='000001')
 
+```
 ## 🎯 实战案例1：多因子选股
-
 
 ```python
 from easy_xt.factor_library import create_easy_factor
 from easy_xt.fundamental_enhanced import get_batch_enhanced_factors
-```
 
+```
 # 初始化
+```python
 ef = create_easy_factor(r'D:/StockData/stock_data.ddb', enable_extended_modules=True)
 
+```
 # 获取股票池
+```python
 stock_list = ['000001.SZ', '000002.SZ', '600000.SH', '600036.SH', '600519.SH']
 
+```
 # 计算基本面因子
+```python
 df = get_batch_enhanced_factors(stock_list, ef.duckdb_reader)
 
+```
 # 多因子筛选
 df_selected = df[
  (df['momentum_20d'] > 0) & # 20日动量>0
@@ -227,46 +249,54 @@ df_selected = df[
  (df['volatility_20d'] < 0.3) # 风险适中
 ]
 
-
 ```python
 print("符合条件的股票：")
 print(df_selected[['momentum_20d', 'momentum_60d', 'rsi_14']])
-```
 
+```
 ## 🎯 实战案例2：资金流向+技术面双筛选
 
 # 1. 获取资金流入TOP20的股票
+```python
 stock_flow = ef.get_ths_stock_money_flow(top_n=20, use_cache=True)
 
+```
 # 2. 计算这些股票的基本面因子
+```python
 stock_list = stock_flow['股票代码'].tolist()
 df_factors = get_batch_enhanced_factors(stock_list, ef.duckdb_reader)
 
+```
 # 3. 双筛选：资金流入 + 技术面向好
 df_selected = df_factors[
  (df_factors['momentum_20d'] > 0) & # 趋势向上
  (df_factors['trend_strength_60d'] > 0) # 趋势强度高
 ]
 
-
 ```python
 print("资金流入且技术面强势的股票：")
 print(df_selected)
-```
 
+```
 ## 🎯 实战案例3：板块轮动策略
 
 # 1. 获取行业资金流向
+```python
 industry_flow = ef.get_ths_industry_money_flow(top_n=10, use_cache=True)
 
+```
 # 2. 筛选资金流入>1亿元的热门行业
+```python
 hot_industries = industry_flow[industry_flow['净流入(万)'] > 10000]
 
+```
 # 3. 获取热门行业的成分股
+```python
 for _, row in hot_industries.iterrows():
  industry_name = row['行业名称']
  print(f"\n🔥 热门行业：{industry_name}，净流入：{row['净流入(万)']}万")
 
+```
 ## ⚡ 性能对比
 
 ### 场景：获取20只股票的基本面因子
@@ -476,17 +506,23 @@ python EasyFactor_扩展模块演示.py
 # 使用智能缓存，速度快
 ef = create_easy_factor(
  r'D:/StockData/stock_data.ddb',
+```python
  enable_extended_modules=True
 )
 
+```
 # 所有数据都会自动缓存
+```python
 industry = ef.get_ths_industry_money_flow(top_n=20)
 
+```
 ### 更新缓存
 
 # 每天运行一次，更新数据
+```python
 result = ef.update_ths_money_flow()
 
+```
 ## 📊 总结
 
 EasyFactor v3.1 是一个**完全本地化、高速、稳定**的量化交易工具箱：

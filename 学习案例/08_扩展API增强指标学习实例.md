@@ -91,8 +91,10 @@ miniqmt扩展/
 
 基于数据质量检查，推荐以下高质量股票用于学习：
 
+```python
 RECOMMENDED_STOCKS = ['000001.SZ', '600000.SH', '000002.SZ']
 
+```
 ## 📊 第1课：数据质量检查
 
 ### 学习目标
@@ -111,36 +113,34 @@ RECOMMENDED_STOCKS = ['000001.SZ', '600000.SH', '000002.SZ']
 
 ### 代码示例
 
-
 ```python
 import pandas as pd
 import numpy as np
 import xtquant.xtdata as xt
 from datetime import datetime
 import warnings
-```
 warnings.filterwarnings('ignore')
 
+```
 classDataManager:
  """数据管理器 - 负责数据获取、清理和质量检查"""
  
  def__init__(self):
-
 ```python
  self.cache = {}
  self.quality_threshold = 0.8# 数据质量阈值
-```
  
+```
  defget_clean_data(self, stock_code, period='1d', count=100, show_details=True):
  """获取清洁的高质量数据"""
-
 ```python
  try:
  if show_details:
  print(f" 🔍 正在获取{stock_code}的{period}数据...")
-```
  
+```
  # 使用get_market_data_ex获取前复权数据
+```python
  data = xt.get_market_data_ex(
  stock_list=[stock_code],
  period=period,
@@ -149,22 +149,21 @@ classDataManager:
  fill_data=True
  )
  
-
-```python
  if stock_code notin data orlen(data[stock_code]) == 0:
  if show_details:
  print(f" ❌ 无法获取{stock_code}数据")
 ```
  returnNone
  
+```python
  df = data[stock_code].copy()
  
+```
  # 数据质量检查
+```python
  valid_close = df['close'].notna().sum()
  quality_ratio = valid_close / len(df)
  
-
-```python
  if quality_ratio < self.quality_threshold:
  if show_details:
  print(f" ⚠️ 数据质量不佳，有效数据: {valid_close}/{len(df)} ({quality_ratio:.1%})")
@@ -172,10 +171,9 @@ classDataManager:
  returnNone
  
  # 数据清理
+```python
  df = self._clean_dataframe(df, show_details)
  
-
-```python
  if df isnotNoneandlen(df) > 0:
  if show_details:
  print(f" ✅ 成功获取{len(df)}条高质量数据 (质量: {quality_ratio:.1%})")
@@ -186,7 +184,6 @@ classDataManager:
 ```
  returnNone
  
-
 ```python
  except Exception as e:
  if show_details:
@@ -196,21 +193,24 @@ classDataManager:
  
  def_clean_dataframe(self, df, show_details=False):
  """清理DataFrame数据"""
-
 ```python
  try:
  if df isNoneorlen(df) == 0:
 ```
  returnNone
  
+```python
  original_len = len(df)
  
+```
  # 1. 处理时间索引
  if'time'in df.columns:
+```python
  try:
  time_col = df['time']
  sample_time = str(time_col.iloc[0])
  
+```
  iflen(sample_time) == 13and sample_time.isdigit():
  df.index = pd.to_datetime(time_col, unit='ms')
  eliflen(sample_time) == 10and sample_time.isdigit():
@@ -220,24 +220,27 @@ classDataManager:
  else:
  df.index = pd.to_datetime(time_col)
  
+```python
  df = df.drop('time', axis=1)
  except:
+```
  pass# 时间转换失败不影响数据使用
  
  # 2. 移除无效价格数据
  if'close'in df.columns:
+```python
  valid_mask = (df['close'] > 0) & df['close'].notna()
  df = df[valid_mask]
  
+```
  # 3. 填充NaN值
- price_cols = ['open', 'high', 'low', 'close', 'preClose']
-
 ```python
+ price_cols = ['open', 'high', 'low', 'close', 'preClose']
  for col in price_cols:
  if col in df.columns:
-```
  df[col] = df[col].fillna(method='ffill').fillna(method='bfill')
  
+```
  # 4. 处理成交量
  if'volume'in df.columns:
  df['volume'] = df['volume'].fillna(0)
@@ -249,81 +252,80 @@ classDataManager:
  
  # 5. 修复OHLC逻辑
  ifall(col in df.columns for col in ['open', 'high', 'low', 'close']):
+```python
  for idx in df.index:
  row = df.loc[idx]
+```
  ifall(pd.notna(row[col]) for col in ['open', 'high', 'low', 'close']):
  prices = [row['open'], row['close']]
  df.loc[idx, 'high'] = max(row['high'], max(prices))
  df.loc[idx, 'low'] = min(row['low'], min(prices))
  
-
 ```python
  final_len = len(df)
  if show_details and final_len < original_len:
  print(f" 数据清理: {original_len}→{final_len}条")
-```
  
  return df if final_len > 0elseNone
  
-
-```python
  except Exception as e:
  if show_details:
  print(f" 数据清理失败: {e}")
  return df
-```
  
+```
  defcheck_data_quality(self, stock_codes, periods=['1d']):
  """检查数据质量"""
+```python
  print("🔍 开始数据质量检查...")
  
  quality_report = {}
  
-
-```python
  for period in periods:
  print(f"\n📊 检查{period}周期数据:")
-```
  period_report = {}
  
-
-```python
  for stock_code in stock_codes:
  print(f" 检查 {stock_code}...")
-```
  
  df = self.get_clean_data(stock_code, period, count=50, show_details=False)
  
  if df isnotNone:
+```
  # 计算质量评分
+```python
  score = self._calculate_quality_score(df)
  period_report[stock_code] = {
+```
  'status': 'success',
  'data_count': len(df),
  'quality_score': score,
  'latest_price': df['close'].iloc[-1] iflen(df) > 0else0
  }
-
 ```python
  print(f" ✅ 质量评分: {score:.1f}/10.0, 数据量: {len(df)}条")
  else:
-```
  period_report[stock_code] = {
+```
  'status': 'failed',
  'data_count': 0,
  'quality_score': 0,
  'latest_price': 0
  }
+```python
  print(f" ❌ 数据获取失败")
  
  quality_report[period] = period_report
  
  return quality_report
  
+```
  def_calculate_quality_score(self, df):
  """计算数据质量评分"""
+```python
  score = 10.0
  
+```
  iflen(df) == 0:
  return0
  
@@ -333,15 +335,19 @@ classDataManager:
  
  # 检查零成交量比例
  if'volume'in df.columns:
+```python
  zero_volume_ratio = (df['volume'] == 0).sum() / len(df)
  if zero_volume_ratio > 0.5: # 超过50%零成交量
+```
  score -= 2
  
  # 检查价格连续性
  if'close'in df.columns andlen(df) > 1:
+```python
  price_changes = df['close'].pct_change().abs()
  extreme_changes = (price_changes > 0.2).sum() # 超过20%变化
  if extreme_changes > len(df) * 0.1: # 超过10%的数据有极端变化
+```
  score -= 1
  
  returnmax(0, score)
@@ -349,23 +355,25 @@ classDataManager:
 # 演示数据质量检查
 defdemo_data_quality_check():
  """演示数据质量检查"""
-
 ```python
  print("📚 第1课：数据质量检查")
  print("=" * 60)
-```
  
+```
  # 推荐的高质量股票
+```python
  recommended_stocks = ['000001.SZ', '600000.SH', '000002.SZ']
  
+```
  # 创建数据管理器
+```python
  data_manager = DataManager()
  
+```
  # 检查数据质量
+```python
  quality_report = data_manager.check_data_quality(recommended_stocks, ['1d'])
  
-
-```python
  print("\n📊 数据质量报告总结:")
  for period, stocks in quality_report.items():
  print(f"\n{period}周期数据质量:")
@@ -374,13 +382,15 @@ defdemo_data_quality_check():
  print(f" ✅ {stock_code}: 评分{info['quality_score']:.1f}/10.0, 最新价格{info['latest_price']:.2f}元")
  else:
  print(f" ❌ {stock_code}: 数据获取失败")
-```
  
  return data_manager
 
+```
 # 运行第1课
+```python
 data_manager = demo_data_quality_check()
 
+```
 ### 运行效果预览
 
 📚 第1课：数据质量检查
@@ -452,34 +462,49 @@ class TechnicalIndicators:
  iflen(df) < slow + signal:
  returnNone
  
+```python
  close = df['close']
  
+```
  # 计算EMA
+```python
  ema_fast = close.ewm(span=fast).mean()
  ema_slow = close.ewm(span=slow).mean()
  
+```
  # MACD线
+```python
  macd_line = ema_fast - ema_slow
  
+```
  # 信号线
+```python
  signal_line = macd_line.ewm(span=signal).mean()
  
+```
  # 柱状图
+```python
  histogram = macd_line - signal_line
  
+```
  # 最新值
+```python
  latest_macd = macd_line.iloc[-1]
  latest_signal = signal_line.iloc[-1]
  latest_hist = histogram.iloc[-1]
  
+```
  # 趋势判断
  iflen(macd_line) > 1:
+```python
  macd_trend = "上升"if latest_macd > macd_line.iloc[-2] else"下降"
  else:
  macd_trend = "中性"
  
+```
  # 金叉死叉判断
  iflen(macd_line) > 1:
+```python
  prev_diff = macd_line.iloc[-2] - signal_line.iloc[-2]
  curr_diff = latest_macd - latest_signal
  
@@ -493,6 +518,7 @@ class TechnicalIndicators:
  cross_signal = "无"
  
  return {
+```
  'macd': latest_macd,
  'signal': latest_signal,
  'histogram': latest_hist,
@@ -502,7 +528,6 @@ class TechnicalIndicators:
  'sell_signal': cross_signal == "死叉"
  }
  
-
 ```python
  except Exception as e:
  print(f" MACD计算失败: {e}")
@@ -512,35 +537,25 @@ class TechnicalIndicators:
 # 演示MACD指标分析
 defdemo_macd_analysis(data_manager):
  """演示MACD指标分析"""
-
 ```python
  print("\n📚 第2课：MACD指标详解")
  print("=" * 60)
-```
  
-
-```python
  print("📋 本课程将教您:")
  print(" • MACD指标的计算原理")
  print(" • 金叉死叉信号的识别")
  print(" • MACD趋势分析方法")
  print()
-```
  
  recommended_stocks = ['000001.SZ', '600000.SH']
  
-
-```python
  for i, stock_code inenumerate(recommended_stocks):
  print(f"\n📊 分析 {stock_code} 的MACD指标:")
-```
  
  df = data_manager.get_clean_data(stock_code, period='1d', count=60)
  if df isnotNone:
  macd_result = TechnicalIndicators.calculate_macd(df)
  
-
-```python
  if macd_result:
  print(f" 📈 数据期间: {len(df)}个交易日")
  print(f" 📊 MACD线: {macd_result['macd']:.4f}")
@@ -548,20 +563,16 @@ defdemo_macd_analysis(data_manager):
  print(f" 📊 柱状图: {macd_result['histogram']:.4f}")
  print(f" 📈 趋势方向: {macd_result['trend']}")
  print(f" 🎯 交叉信号: {macd_result['cross']}")
-```
  
-
-```python
  if macd_result['cross'] == '金叉':
  print(f" 🟢 出现金叉信号，可能是买入机会")
  elif macd_result['cross'] == '死叉':
  print(f" 🔴 出现死叉信号，需要注意风险")
  else:
  print(f" ⚪ 暂无明显交叉信号")
-```
  
+```
  # 投资建议
-
 ```python
  if macd_result['buy_signal']:
  print(f" 💡 投资建议: 关注买入机会")
@@ -571,14 +582,11 @@ defdemo_macd_analysis(data_manager):
  print(f" 💡 投资建议: 继续观察，等待明确信号")
  else:
  print(f" ❌ MACD计算失败，可能是数据不足")
-```
  
-
-```python
  if i < len(recommended_stocks) - 1:
  print()
-```
 
+```
 # 运行第2课
 demo_macd_analysis(data_manager)
 
@@ -663,29 +671,31 @@ defcalculate_kdj(df, n=9, m1=3, m2=3):
  iflen(df) < n:
  returnNone
  
+```python
  high = df['high']
  low = df['low']
  close = df['close']
  
+```
  # 计算RSV
+```python
  lowest_low = low.rolling(window=n).min()
  highest_high = high.rolling(window=n).max()
  
  rsv = (close - lowest_low) / (highest_high - lowest_low) * 100
  rsv = rsv.fillna(50) # 填充NaN为50
  
+```
  # 计算K、D、J
+```python
  k_values = []
  d_values = []
  
  k_prev = 50# 初始K值
  d_prev = 50# 初始D值
  
-
-```python
  for rsv_val in rsv:
  if pd.notna(rsv_val):
-```
  k_curr = (2/3) * k_prev + (1/3) * rsv_val
  d_curr = (2/3) * d_prev + (1/3) * k_curr
  
@@ -702,19 +712,25 @@ defcalculate_kdj(df, n=9, m1=3, m2=3):
  d_series = pd.Series(d_values, index=df.index)
  j_series = 3 * k_series - 2 * d_series
  
+```
  # 最新值
+```python
  latest_k = k_series.iloc[-1]
  latest_d = d_series.iloc[-1]
  latest_j = j_series.iloc[-1]
  
+```
  # 趋势判断
  iflen(k_series) > 1:
+```python
  k_trend = "上升"if latest_k > k_series.iloc[-2] else"下降"
  d_trend = "上升"if latest_d > d_series.iloc[-2] else"下降"
  else:
  k_trend = d_trend = "中性"
  
+```
  # 信号判断
+```python
  if latest_k > 80and latest_d > 80:
  signal = "超买"
  buy_signal = False
@@ -729,6 +745,7 @@ defcalculate_kdj(df, n=9, m1=3, m2=3):
  sell_signal = False
  
  return {
+```
  'k': latest_k,
  'd': latest_d,
  'j': latest_j,
@@ -739,7 +756,6 @@ defcalculate_kdj(df, n=9, m1=3, m2=3):
  'sell_signal': sell_signal
  }
  
-
 ```python
  except Exception as e:
  print(f" KDJ计算失败: {e}")
@@ -749,44 +765,31 @@ defcalculate_kdj(df, n=9, m1=3, m2=3):
 # 演示KDJ指标分析
 defdemo_kdj_analysis(data_manager):
  """演示KDJ指标分析"""
-
 ```python
  print("\n📚 第3课：KDJ指标详解")
  print("=" * 60)
-```
  
-
-```python
  print("📋 本课程将教您:")
  print(" • KDJ指标的K、D、J值含义")
  print(" • 超买超卖区域的判断")
  print(" • KDJ指标的买卖信号")
  print()
-```
  
  recommended_stocks = ['000001.SZ', '600000.SH']
  
-
-```python
  for i, stock_code inenumerate(recommended_stocks):
  print(f"\n📊 分析 {stock_code} 的KDJ指标:")
-```
  
  df = data_manager.get_clean_data(stock_code, period='1d', count=60)
  if df isnotNone:
  kdj_result = TechnicalIndicators.calculate_kdj(df)
  
-
-```python
  if kdj_result:
  print(f" 📈 K值: {kdj_result['k']:.2f} (趋势: {kdj_result['k_trend']})")
  print(f" 📈 D值: {kdj_result['d']:.2f} (趋势: {kdj_result['d_trend']})")
  print(f" 📈 J值: {kdj_result['j']:.2f}")
  print(f" 🎯 市场状态: {kdj_result['signal']}")
-```
  
-
-```python
  if kdj_result['signal'] == '超买':
  print(f" 🔴 当前处于超买区域，股价可能回调")
  print(f" 💡 投资建议: 谨慎追高，可考虑减仓")
@@ -798,14 +801,11 @@ defdemo_kdj_analysis(data_manager):
  print(f" 💡 投资建议: 结合其他指标综合判断")
  else:
  print(f" ❌ KDJ计算失败")
-```
  
-
-```python
  if i < len(recommended_stocks) - 1:
  print()
-```
 
+```
 # 运行第3课
 demo_kdj_analysis(data_manager)
 
@@ -887,6 +887,7 @@ defcalculate_rsi(df, period=14):
  iflen(df) < period + 1:
  returnNone
  
+```python
  close = df['close']
  delta = close.diff()
  
@@ -898,13 +899,17 @@ defcalculate_rsi(df, period=14):
  
  latest_rsi = rsi.iloc[-1]
  
+```
  # 趋势判断
  iflen(rsi) > 1:
+```python
  rsi_trend = "上升"if latest_rsi > rsi.iloc[-2] else"下降"
  else:
  rsi_trend = "中性"
  
+```
  # 信号判断
+```python
  if latest_rsi > 70:
  signal = "超买"
  overbought = True
@@ -924,14 +929,17 @@ defcalculate_rsi(df, period=14):
  buy_signal = False
  sell_signal = False
  
+```
  # 背离检测（简化版）
  divergence = False
  iflen(rsi) > 10andlen(close) > 10:
+```python
  recent_price_trend = close.iloc[-5:].is_monotonic_increasing
  recent_rsi_trend = rsi.iloc[-5:].is_monotonic_increasing
  divergence = recent_price_trend != recent_rsi_trend
  
  return {
+```
  'rsi': latest_rsi,
  'trend': rsi_trend,
  'signal': signal,
@@ -942,7 +950,6 @@ defcalculate_rsi(df, period=14):
  'sell_signal': sell_signal
  }
  
-
 ```python
  except Exception as e:
  print(f" RSI计算失败: {e}")
@@ -952,20 +959,15 @@ defcalculate_rsi(df, period=14):
 # 演示RSI指标分析
 defdemo_rsi_analysis(data_manager):
  """演示RSI指标分析"""
-
 ```python
  print("\n📚 第4课：RSI指标详解")
  print("=" * 60)
-```
  
-
-```python
  print("📋 本课程将教您:")
  print(" • RSI指标的强弱判断")
  print(" • 超买超卖的数值标准")
  print(" • 价格与RSI的背离分析")
  print()
-```
  
  stock_code = '000001.SZ'# 详细分析一只
  print(f"\n📊 深度分析 {stock_code} 的RSI指标:")
@@ -974,8 +976,6 @@ defdemo_rsi_analysis(data_manager):
  if df isnotNone:
  rsi_result = TechnicalIndicators.calculate_rsi(df)
  
-
-```python
  if rsi_result:
  print(f" 📈 RSI值: {rsi_result['rsi']:.2f}")
  print(f" 📈 趋势方向: {rsi_result['trend']}")
@@ -983,10 +983,9 @@ defdemo_rsi_analysis(data_manager):
  print(f" 📊 超买状态: {'是' if rsi_result['overbought'] else '否'}")
  print(f" 📊 超卖状态: {'是' if rsi_result['oversold'] else '否'}")
  print(f" 🔍 背离检测: {'发现背离' if rsi_result['divergence'] else '无背离'}")
-```
  
+```
  # 详细解释
-
 ```python
  if rsi_result['rsi'] > 70:
  print(f"\n 📚 RSI解读:")
@@ -1003,18 +1002,15 @@ defdemo_rsi_analysis(data_manager):
  print(f" RSI在30-70之间，属于正常波动区间")
  print(f" 市场情绪相对平衡")
  print(f" 💡 操作建议: 结合趋势和其他指标判断")
-```
  
-
-```python
  if rsi_result['divergence']:
  print(f"\n ⚠️ 背离警告:")
  print(f" 价格走势与RSI出现背离")
  print(f" 这可能预示着趋势即将发生变化")
  else:
  print(f" ❌ RSI计算失败")
-```
 
+```
 # 运行第4课
 demo_rsi_analysis(data_manager)
 
@@ -1091,31 +1087,46 @@ defcalculate_bollinger_bands(df, period=20, std_dev=2):
  iflen(df) < period:
  returnNone
  
+```python
  close = df['close']
  
+```
  # 中轨（移动平均线）
+```python
  middle_band = close.rolling(window=period).mean()
  
+```
  # 标准差
+```python
  std = close.rolling(window=period).std()
  
+```
  # 上轨和下轨
+```python
  upper_band = middle_band + (std * std_dev)
  lower_band = middle_band - (std * std_dev)
  
+```
  # 最新值
+```python
  latest_close = close.iloc[-1]
  latest_upper = upper_band.iloc[-1]
  latest_middle = middle_band.iloc[-1]
  latest_lower = lower_band.iloc[-1]
  
+```
  # 带宽
+```python
  bandwidth = ((latest_upper - latest_lower) / latest_middle) * 100
  
+```
  # %B指标
+```python
  percent_b = (latest_close - latest_lower) / (latest_upper - latest_lower)
  
+```
  # 位置判断
+```python
  if latest_close > latest_upper:
  position = "上轨上方"
  buy_signal = False
@@ -1133,7 +1144,9 @@ defcalculate_bollinger_bands(df, period=20, std_dev=2):
  buy_signal = False
  sell_signal = False
  
+```
  # 信号判断
+```python
  if latest_close > latest_upper:
  signal = "卖出"
  elif latest_close < latest_lower:
@@ -1142,6 +1155,7 @@ defcalculate_bollinger_bands(df, period=20, std_dev=2):
  signal = "持有"
  
  return {
+```
  'upper': latest_upper,
  'middle': latest_middle,
  'lower': latest_lower,
@@ -1154,7 +1168,6 @@ defcalculate_bollinger_bands(df, period=20, std_dev=2):
  'sell_signal': sell_signal
  }
  
-
 ```python
  except Exception as e:
  print(f" 布林带计算失败: {e}")
@@ -1164,20 +1177,15 @@ defcalculate_bollinger_bands(df, period=20, std_dev=2):
 # 演示布林带指标分析
 defdemo_bollinger_analysis(data_manager):
  """演示布林带指标分析"""
-
 ```python
  print("\n📚 第5课：布林带指标详解")
  print("=" * 60)
-```
  
-
-```python
  print("📋 本课程将教您:")
  print(" • 布林带上中下轨的含义")
  print(" • %B指标的应用")
  print(" • 布林带的买卖信号")
  print()
-```
  
  stock_code = '000001.SZ'
  print(f"\n📊 分析 {stock_code} 的布林带指标:")
@@ -1186,8 +1194,6 @@ defdemo_bollinger_analysis(data_manager):
  if df isnotNone:
  boll_result = TechnicalIndicators.calculate_bollinger_bands(df)
  
-
-```python
  if boll_result:
  print(f" 📈 当前价格: {boll_result['current_price']:.2f}元")
  print(f" 📊 上轨价格: {boll_result['upper']:.2f}元")
@@ -1197,10 +1203,9 @@ defdemo_bollinger_analysis(data_manager):
  print(f" 📍 %B指标: {boll_result['percent_b']:.2f}")
  print(f" 🎯 价格位置: {boll_result['position']}")
  print(f" 🎯 交易信号: {boll_result['signal']}")
-```
  
+```
  # 详细解释
-
 ```python
  print(f"\n 📚 布林带解读:")
  if boll_result['position'] == '上轨上方':
@@ -1217,10 +1222,9 @@ defdemo_bollinger_analysis(data_manager):
  else:
  print(f" 价格在中轨下方，趋势相对弱势")
  print(f" 💡 操作建议: 谨慎操作，关注中轨支撑")
-```
  
+```
  # %B指标解释
-
 ```python
  print(f"\n 📊 %B指标解读:")
  if boll_result['percent_b'] > 1:
@@ -1235,8 +1239,8 @@ defdemo_bollinger_analysis(data_manager):
  print(f" %B在正常范围内，价格波动相对平稳")
  else:
  print(f" ❌ 布林带计算失败")
-```
 
+```
 # 运行第5课
 demo_bollinger_analysis(data_manager)
 
@@ -1313,36 +1317,40 @@ class ComprehensiveAnalyzer:
  """综合分析器"""
  
  def__init__(self):
-
 ```python
  self.data_manager = DataManager()
  self.indicators = TechnicalIndicators()
-```
  
+```
  defanalyze_stock(self, stock_code, period='1d', count=60):
  """综合分析单只股票"""
+```python
  print(f"📊 开始分析 {stock_code}...")
  
+```
  # 获取数据
- df = self.data_manager.get_clean_data(stock_code, period, count)
-
 ```python
+ df = self.data_manager.get_clean_data(stock_code, period, count)
  if df isNone:
  print(f" ❌ 无法获取{stock_code}的数据")
 ```
  returnNone
  
  # 计算各项指标
+```python
  macd_result = self.indicators.calculate_macd(df)
  kdj_result = self.indicators.calculate_kdj(df)
  rsi_result = self.indicators.calculate_rsi(df)
  boll_result = self.indicators.calculate_bollinger_bands(df)
  
+```
  # 综合信号分析
+```python
  buy_signals = 0
  sell_signals = 0
  
  if macd_result and macd_result['buy_signal']:
+```
  buy_signals += 2# MACD权重较高
  if macd_result and macd_result['sell_signal']:
  sell_signals += 2
@@ -1363,6 +1371,7 @@ class ComprehensiveAnalyzer:
  sell_signals += 1
  
  # 综合判断
+```python
  signal_strength = buy_signals - sell_signals
  
  if signal_strength >= 3:
@@ -1382,6 +1391,7 @@ class ComprehensiveAnalyzer:
  signal_emoji = "⚪"
  
  return {
+```
  'stock_code': stock_code,
  'data_length': len(df),
  'latest_price': df['close'].iloc[-1],
@@ -1399,20 +1409,15 @@ class ComprehensiveAnalyzer:
 # 演示综合技术分析
 defdemo_comprehensive_analysis():
  """演示综合技术分析"""
-
 ```python
  print("\n📚 第6课：综合技术分析")
  print("=" * 60)
-```
  
-
-```python
  print("📋 本课程将教您:")
  print(" • 如何综合多个技术指标")
  print(" • 信号强度的评估方法")
  print(" • 制定综合投资策略")
  print()
-```
  
  print("🔍 开始综合分析推荐股票...")
  
@@ -1425,15 +1430,10 @@ defdemo_comprehensive_analysis():
  if result:
  analysis_results.append(result)
  
-
-```python
  print(f"\n📊 {stock_code} 综合分析报告:")
  print(f" 💰 最新价格: {result['latest_price']:.2f}元")
  print(f" 📊 数据期间: {result['data_length']}个交易日")
-```
  
-
-```python
  print(f"\n 🔍 各指标信号:")
  if result['macd']:
  print(f" MACD: {result['macd']['cross']} (趋势: {result['macd']['trend']})")
@@ -1443,17 +1443,13 @@ defdemo_comprehensive_analysis():
  print(f" RSI: {result['rsi']['signal']} (数值: {result['rsi']['rsi']:.1f})")
  if result['bollinger']:
  print(f" 布林带: {result['bollinger']['signal']} (位置: {result['bollinger']['position']})")
-```
  
-
-```python
  print(f"\n 🎯 综合判断:")
  print(f" 最终信号: {result['signal_emoji']} {result['final_signal']}")
  print(f" 信号强度: {result['signal_strength']} (买入信号: {result['buy_signals']}, 卖出信号: {result['sell_signals']})")
-```
  
+```
  # 投资建议
-
 ```python
  print(f"\n 💡 投资建议:")
  if result['final_signal'] in ['强烈买入', '买入']:
@@ -1465,13 +1461,15 @@ defdemo_comprehensive_analysis():
  else:
  print(f" 信号不够明确，建议继续观察")
  print(f" 等待更明确的买卖信号出现")
-```
  
  return analysis_results
 
+```
 # 运行第6课
+```python
 analysis_results = demo_comprehensive_analysis()
 
+```
 ### 运行效果预览
 
 📚 第6课：综合技术分析
@@ -1568,107 +1566,79 @@ analysis_results = demo_comprehensive_analysis()
 
 def demo_portfolio_analysis(analysis_results):
  """演示批量分析和投资组合"""
-
 ```python
  print("\n📚 第7课：批量分析和投资组合")
  print("=" * 60)
-```
  
-
-```python
  print("📋 本课程将教您:")
  print(" • 批量分析多只股票的方法")
  print(" • 投资组合的构建原则")
  print(" • 风险分散和收益优化")
  print()
-```
  
-
-```python
  if analysis_results:
  print("📊 投资组合分析报告:")
  print("=" * 60)
-```
  
+```
  # 按信号强度排序
+```python
  sorted_results = sorted(analysis_results, key=lambda x: x['signal_strength'], reverse=True)
  
  buy_candidates = []
  sell_candidates = []
  hold_candidates = []
  
-
-```python
  for result in sorted_results:
  print(f"\n{result['stock_code']} - {result['latest_price']:.2f}元")
  print(f" 信号: {result['signal_emoji']} {result['final_signal']} (强度: {result['signal_strength']})")
-```
  
  if result['final_signal'] in ['强烈买入', '买入']:
  buy_candidates.append(result)
-
-```python
  print(f" 💡 推荐操作: 可考虑买入")
  elif result['final_signal'] in ['强烈卖出', '卖出']:
-```
  sell_candidates.append(result)
-
-```python
  print(f" 💡 推荐操作: 建议卖出")
  else:
-```
  hold_candidates.append(result)
  print(f" 💡 推荐操作: 继续观察")
  
+```
  # 投资组合建议
-
 ```python
  print(f"\n📋 投资组合建议:")
  print("=" * 40)
-```
  
-
-```python
  if buy_candidates:
  print(f"\n🟢 买入候选 ({len(buy_candidates)}只):")
  for candidate in buy_candidates:
  print(f" • {candidate['stock_code']}: {candidate['final_signal']} (强度: {candidate['signal_strength']})")
-```
  
-
-```python
  print(f"\n💡 建仓建议:")
  print(f" • 可将资金分配给信号强度最高的股票")
  print(f" • 建议分批建仓，控制单只股票仓位不超过30%")
  print(f" • 设置止损位，一般为买入价的5-10%")
-```
  
-
-```python
  if sell_candidates:
  print(f"\n🔴 卖出候选 ({len(sell_candidates)}只):")
  for candidate in sell_candidates:
  print(f" • {candidate['stock_code']}: {candidate['final_signal']} (强度: {candidate['signal_strength']})")
-```
  
-
-```python
  if hold_candidates:
  print(f"\n⚪ 观察候选 ({len(hold_candidates)}只):")
  for candidate in hold_candidates:
  print(f" • {candidate['stock_code']}: 信号不明确，继续观察")
-```
  
+```
  # 风险提示
-
 ```python
  print(f"\n⚠️ 风险提示:")
  print(f" • 技术分析仅供参考，不构成投资建议")
  print(f" • 投资有风险，请根据自身情况谨慎决策")
  print(f" • 建议结合基本面分析和市场环境综合判断")
  print(f" • 严格执行止损策略，控制投资风险")
-```
 
+```
 # 运行第7课
 demo_portfolio_analysis(analysis_results)
 
@@ -1756,28 +1726,28 @@ demo_portfolio_analysis(analysis_results)
 
 ### 代码示例
 
-
 ```python
 import sqlite3
 from datetime import datetime
-```
 
+```
 classDatabaseManager:
  """数据库管理器"""
  
  def__init__(self, db_path="market_analysis.db"):
-
 ```python
  self.db_path = db_path
  self.init_database()
-```
  
+```
  definit_database(self):
  """初始化数据库"""
+```python
  try:
  conn = sqlite3.connect(self.db_path)
  cursor = conn.cursor()
  
+```
  # 创建分析结果表
  cursor.execute('''
  CREATE TABLE IF NOT EXISTS analysis_results (
@@ -1795,23 +1765,24 @@ classDatabaseManager:
  )
  ''')
  
+```python
  conn.commit()
  conn.close()
  print("✅ 数据库初始化完成")
  
-
-```python
  except Exception as e:
  print(f"❌ 数据库初始化失败: {e}")
-```
  
+```
  defsave_analysis_result(self, result):
  """保存分析结果"""
+```python
  try:
  conn = sqlite3.connect(self.db_path)
  cursor = conn.cursor()
  
  cursor.execute('''
+```
  INSERT INTO analysis_results 
  (stock_code, analysis_date, latest_price, macd_signal, kdj_signal, 
  rsi_signal, boll_signal, final_signal, signal_strength)
@@ -1826,13 +1797,14 @@ classDatabaseManager:
  result['bollinger']['signal'] if result['bollinger'] elseNone,
  result['final_signal'],
  result['signal_strength']
+```python
  ))
  
  conn.commit()
  conn.close()
+```
  returnTrue
  
-
 ```python
  except Exception as e:
  print(f"保存分析结果失败: {e}")
@@ -1842,81 +1814,76 @@ classDatabaseManager:
 # 演示数据管理和历史回顾
 defdemo_data_management(analysis_results):
  """演示数据管理和历史回顾"""
-
 ```python
  print("\n📚 第8课：数据管理和历史回顾")
  print("=" * 60)
-```
  
-
-```python
  print("📋 本课程将教您:")
  print(" • 如何存储分析结果")
  print(" • 历史数据的管理方法")
  print(" • 分析结果的回顾和总结")
  print()
-```
  
+```
  # 创建数据库管理器
+```python
  db_manager = DatabaseManager()
  
+```
  # 保存分析结果
-
 ```python
  if analysis_results:
  print("💾 保存分析结果到数据库...")
-```
  saved_count = 0
-
-```python
  for result in analysis_results:
  if db_manager.save_analysis_result(result):
 ```
  saved_count += 1
+```python
  print(f"✅ 成功保存 {saved_count} 条分析结果")
  
+```
  # 查询历史记录
+```python
  try:
  conn = sqlite3.connect(db_manager.db_path)
  cursor = conn.cursor()
  
+```
  # 查询今日分析结果
+```python
  today = datetime.now().strftime('%Y-%m-%d')
  cursor.execute('''
+```
  SELECT stock_code, latest_price, final_signal, signal_strength, created_time
  FROM analysis_results 
  WHERE analysis_date = ?
  ORDER BY signal_strength DESC
  ''', (today,))
  
+```python
  results = cursor.fetchall()
  conn.close()
  
-
-```python
  if results:
  print(f"\n📊 今日分析结果回顾 ({len(results)}条记录):")
  print("=" * 50)
-```
  
  for result in results:
+```
  stock_code, price, signal, strength, created_time = result
+```python
  print(f"{stock_code}: {price:.2f}元 - {signal} (强度: {strength}) [{created_time}]")
  
-
-```python
  print(f"\n💾 数据存储位置: {db_manager.db_path}")
  print(f"📈 可用于后续的历史分析和策略回测")
  else:
  print(f"📊 暂无今日分析记录")
-```
  
-
-```python
  except Exception as e:
  print(f"❌ 数据库查询失败: {e}")
-```
 
+```
 # 运行第8课
 demo_data_management(analysis_results)
 

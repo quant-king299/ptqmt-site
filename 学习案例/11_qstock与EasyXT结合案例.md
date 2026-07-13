@@ -107,56 +107,45 @@ python 09_qstock与EasyXT结合案例.py
 **1. 模块导入策略**
 
 # qstock数据获取模块
-
 ```python
 try:
  import qstock as qs
-```
  QSTOCK_AVAILABLE = True
-
-```python
  print("✅ qstock数据模块加载成功")
 except ImportError as e:
  print(f"❌ qstock模块导入失败: {e}")
-```
  QSTOCK_AVAILABLE = False
 
+```
 # EasyXT交易执行模块
-
 ```python
 try:
  from easy_xt.api import EasyXT
-```
  EASYXT_AVAILABLE = True
-
-```python
  print("✅ EasyXT交易模块加载成功")
 except ImportError as e:
  print(f"❌ EasyXT模块导入失败: {e}")
-```
  EASYXT_AVAILABLE = False
 
+```
 **2. 系统初始化流程**
 
 class QStockEasyXTIntegration:
  def__init__(self):
  # 数据存储
-
 ```python
  self.data_cache = {}
  self.signal_history = []
  self.trade_history = []
-```
  
+```
  # 系统状态
-
 ```python
  self.is_trading_enabled = False
  self.is_monitoring = False
-```
  
+```
  # 初始化模块
-
 ```python
  self.init_data_module() # qstock数据模块
  self.init_trading_module() # EasyXT交易模块
@@ -207,8 +196,10 @@ class QStockEasyXTIntegration:
 
 def get_multi_source_data(self, symbol: str, period: int = 60):
  """使用qstock获取多源数据"""
+```python
  data_dict = {}
  
+```
  # 1. K线数据
  kline_data = qs.get_data(symbol, start=start_date, end=end_date)
  data_dict['kline'] = self.clean_kline_data(kline_data)
@@ -229,8 +220,10 @@ def get_multi_source_data(self, symbol: str, period: int = 60):
  news_data = qs.get_news(symbol)
  data_dict['news'] = news_data
  
+```python
  return data_dict
 
+```
 **2. 数据清洗标准化**
 
 def clean_kline_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -242,14 +235,18 @@ def clean_kline_data(self, data: pd.DataFrame) -> pd.DataFrame:
  }
  
  # 数据清洗
+```python
  data = data.dropna()
  data = data[data['volume'] > 0]
  
+```
  # 数据类型转换
+```python
  for col in ['open', 'high', 'low', 'close', 'volume']:
  data[col] = pd.to_numeric(data[col], errors='coerce')
  
  return data
+```
 🖥️ 运行效果预览
 📊 使用qstock获取 000001 的多源数据...
  📈 获取K线数据...
@@ -303,9 +300,11 @@ def calculate_technical_indicators(self, data: pd.DataFrame):
  data['MACD'] = data['EMA12'] - data['EMA26']
  
  # RSI
+```python
  delta = data['close'].diff()
  gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
  loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+```
  data['RSI'] = 100 - (100 / (1 + gain / loss))
  
  # 布林带
@@ -314,15 +313,19 @@ def calculate_technical_indicators(self, data: pd.DataFrame):
  data['BB_upper'] = data['BB_middle'] + (bb_std * 2)
  data['BB_lower'] = data['BB_middle'] - (bb_std * 2)
  
+```python
  return data
 
+```
 **2. 多策略信号生成**
 
 def generate_trading_signals(self, symbol: str, data: pd.DataFrame):
  """生成交易信号"""
+```python
  signal_strength = 0
  signal_reasons = []
  
+```
  # 策略1: 趋势跟踪
  trend_signals = self._trend_following_strategy(data)
  signal_strength += trend_signals['strength']
@@ -344,9 +347,11 @@ def generate_trading_signals(self, symbol: str, data: pd.DataFrame):
  signal_strength += pattern_signals['strength']
  
  # 综合评估
+```python
  confidence = min(95, max(0, 50 + signal_strength * 10))
  
  return signals
+```
 🖥️ 运行效果预览
 📈 计算技术指标...
 ✅ 技术指标计算完成，共 26 个指标
@@ -390,20 +395,29 @@ def generate_trading_signals(self, symbol: str, data: pd.DataFrame):
 def execute_trading_signal(self, signal: Dict):
  """执行交易信号"""
  # 获取账户信息
+```python
  account_info = self.get_account_info()
  
+```
  # 获取持仓信息
+```python
  position_info = self.get_position_info(signal['symbol'])
  
+```
  # 风险检查
  risk_check = self.risk_management_check(signal, account_info, position_info)
  ifnot risk_check['passed']:
+```python
  return {'status': 'rejected', 'message': risk_check['reason']}
  
+```
  # 计算交易数量
+```python
  quantity = self.calculate_trade_quantity(signal, account_info, position_info)
  
+```
  # 执行交易
+```python
  if signal['signal_type'] == 'BUY':
  result = self.execute_buy_order(signal['symbol'], quantity, signal['price'])
  else:
@@ -411,12 +425,15 @@ def execute_trading_signal(self, signal: Dict):
  
  return result
 
+```
 **2. 账户管理**
 
 def get_account_info(self):
  """获取账户信息"""
+```python
  account_info = self.trader.get_account_asset(TRADING_CONFIG['account_id'])
  return {
+```
  'total_asset': account_info.get('total_asset', 0),
  'cash': account_info.get('cash', 0),
  'market_value': account_info.get('market_value', 0),
@@ -427,8 +444,10 @@ defget_position_info(self, symbol: str):
  """获取持仓信息"""
  positions = self.trader.get_positions(TRADING_CONFIG['account_id'], symbol)
  ifnot positions.empty:
+```python
  position = positions.iloc[0]
  return {
+```
  'volume': position.get('volume', 0),
  'can_use_volume': position.get('can_use_volume', 0),
  'cost_price': position.get('cost_price', 0),
@@ -478,67 +497,68 @@ EasyXT提供完整的交易执行能力
 def risk_management_check(self, signal, account_info, position_info):
  """风险管理检查"""
  # 检查1: 最大仓位限制
+```python
  total_asset = account_info.get('total_asset', 100000)
  current_position_value = position_info.get('market_value', 0)
  max_position_value = total_asset * TRADING_CONFIG['max_position_ratio']
  
  if signal['signal_type'] == 'BUY':
  trade_value = signal['price'] * 100
-
-```python
  if current_position_value + trade_value > max_position_value:
  return {'passed': False, 'reason': '超过最大仓位限制'}
-```
  
+```
  # 检查2: 单股仓位限制
- single_stock_max = total_asset * TRADING_CONFIG['single_stock_ratio']
-
 ```python
+ single_stock_max = total_asset * TRADING_CONFIG['single_stock_ratio']
  if current_position_value > single_stock_max:
  return {'passed': False, 'reason': '超过单股最大仓位'}
-```
  
+```
  # 检查3: 止损检查
+```python
  if position_info.get('volume', 0) > 0:
  cost_price = position_info.get('cost_price', 0)
  current_price = signal['price']
  loss_ratio = (cost_price - current_price) / cost_price
  
-
-```python
  if loss_ratio > TRADING_CONFIG['stop_loss_ratio']:
  return {'passed': False, 'reason': '触发止损'}
-```
  
+```
  # 检查4: 信号置信度
-
 ```python
  if signal['confidence'] < STRATEGY_CONFIG['signal_threshold']:
  return {'passed': False, 'reason': '信号置信度不足'}
-```
  
  return {'passed': True, 'reason': '风险检查通过'}
 
+```
 **2. 交易数量计算**
 
 def calculate_trade_quantity(self, signal, account_info, position_info):
  """计算交易数量"""
  if signal['signal_type'] == 'BUY':
  # 买入数量计算
+```python
  available_cash = account_info.get('cash', 0)
  trade_amount = available_cash * 0.3# 使用30%资金
  
+```
  # 考虑手续费
+```python
  price_with_fee = signal['price'] * 1.001
  quantity = int(trade_amount / price_with_fee) // 100 * 100
  
+```
  returnmax(100, quantity) # 最少1手
  else:
  # 卖出数量计算
+```python
  can_sell = position_info.get('can_use_volume', 0)
  if can_sell > 0:
+```
  # 根据信号强度决定卖出比例
-
 ```python
  sell_ratio = min(0.5, abs(signal['strength']))
  quantity = int(can_sell * sell_ratio) // 100 * 100
@@ -588,67 +608,82 @@ def calculate_trade_quantity(self, signal, account_info, position_info):
 
 def start_real_time_monitoring(self):
  """启动实时监控"""
+```python
  self.is_monitoring = True
  
+```
  # 创建监控线程
+```python
  monitor_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
  monitor_thread.start()
  
  print("✅ 实时监控系统已启动")
 
+```
 def_monitoring_loop(self):
  """监控主循环"""
  whileself.is_monitoring:
+```python
  print(f"🔄 实时监控更新 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
  
+```
  # 监控股票池
+```python
  all_signals = []
  
-
-```python
  for category, stocks in STOCK_POOL.items():
  print(f"📊 监控 {category}...")
-```
  
  for stock in stocks[:2]: # 限制监控数量
+```
  # 获取数据
+```python
  data_dict = self.get_multi_source_data(stock, period=30)
  
+```
  if'kline'in data_dict andnot data_dict['kline'].empty:
  # 计算技术指标
+```python
  kline_data = self.calculate_technical_indicators(data_dict['kline'])
  
+```
  # 生成信号
+```python
  signals = self.generate_trading_signals(stock, kline_data)
  all_signals.extend(signals)
  
+```
  # 显示关键信息
+```python
  latest = kline_data.iloc[-1]
  print(f" {stock}: 价格 {latest['close']:.2f}, RSI {latest.get('RSI', 50):.1f}")
  
+```
  # 处理信号
-
 ```python
  if all_signals:
  for signal in all_signals:
  if signal['confidence'] >= STRATEGY_CONFIG['signal_threshold']:
  print(f"🔥 高质量信号: {signal['symbol']} {signal['signal_type']}")
-```
  
+```
  # 显示账户状态
+```python
  self._display_account_status()
  
+```
  # 等待下次更新
+```python
  time.sleep(STRATEGY_CONFIG['update_interval'])
 
+```
 **2. 账户状态显示**
 
 def _display_account_status(self):
  """显示账户状态"""
+```python
  account_info = self.get_account_info()
  
-
-```python
  print(f"\n💼 账户状态:")
  print(f" 总资产: {account_info.get('total_asset', 0):,.2f}")
  print(f" 可用资金: {account_info.get('cash', 0):,.2f}")
@@ -710,24 +745,36 @@ def _display_account_status(self):
 def run_backtest(self, symbol: str, start_date: str, end_date: str):
  """运行策略回测"""
  # 获取历史数据
+```python
  historical_data = qs.get_data(symbol, start=start_date, end=end_date)
  
+```
  # 清洗数据
+```python
  historical_data = self.clean_kline_data(historical_data)
  
+```
  # 计算技术指标
+```python
  historical_data = self.calculate_technical_indicators(historical_data)
  
+```
  # 模拟交易
+```python
  backtest_results = self._simulate_trading(symbol, historical_data)
  
+```
  # 计算绩效指标
+```python
  performance_metrics = self._calculate_performance_metrics(backtest_results)
  
+```
  # 生成报告
+```python
  self._generate_backtest_report(symbol, backtest_results, performance_metrics)
  
  return {
+```
  'symbol': symbol,
  'period': f"{start_date} 至 {end_date}",
  'trades': backtest_results,
@@ -739,16 +786,21 @@ def run_backtest(self, symbol: str, start_date: str, end_date: str):
 def _calculate_performance_metrics(self, trades):
  """计算绩效指标"""
  # 基础统计
+```python
  total_trades = len(trades)
  buy_trades = [t for t in trades if t['action'] == 'BUY']
  sell_trades = [t for t in trades if t['action'] == 'SELL']
  
+```
  # 收益计算
+```python
  initial_value = 100000
  final_value = trades[-1]['total_value']
  total_return = (final_value - initial_value) / initial_value
  
+```
  # 交易对分析
+```python
  trade_pairs = []
  for i inrange(min(len(buy_trades), len(sell_trades))):
  buy_trade = buy_trades[i]
@@ -758,15 +810,18 @@ def _calculate_performance_metrics(self, trades):
  profit_rate = profit / (buy_trade['price'] * buy_trade['quantity'])
  
  trade_pairs.append({
+```
  'profit': profit,
  'profit_rate': profit_rate
  })
  
  # 胜率计算
+```python
  winning_trades = [tp for tp in trade_pairs if tp['profit'] > 0]
  win_rate = len(winning_trades) / len(trade_pairs) if trade_pairs else0
  
  return {
+```
  'total_trades': total_trades,
  'trade_pairs': len(trade_pairs),
  'total_return': total_return,
@@ -835,31 +890,37 @@ def _calculate_performance_metrics(self, trades):
 def create_visualization(self, symbol: str, data: pd.DataFrame, signals: List[Dict]):
  """创建数据可视化"""
  fig, axes = plt.subplots(3, 1, figsize=(15, 12))
+```python
  fig.suptitle(f'{symbol} qstock+EasyXT 量化分析', fontsize=16, fontweight='bold')
  
+```
  # 子图1: 价格和移动平均线
+```python
  ax1 = axes[0]
  ax1.plot(data.index, data['close'], label='收盘价', linewidth=2)
  ax1.plot(data.index, data['MA5'], label='MA5', alpha=0.7)
  ax1.plot(data.index, data['MA20'], label='MA20', alpha=0.7)
  
+```
  # 标记交易信号
-
 ```python
  for signal in signals:
  if signal['signal_type'] == 'BUY':
-```
  ax1.scatter(data.index[-1], signal['price'], color='red', marker='^', s=100)
  else:
  ax1.scatter(data.index[-1], signal['price'], color='green', marker='v', s=100)
  
+```
  # 子图2: RSI指标
+```python
  ax2 = axes[1]
  ax2.plot(data.index, data['RSI'], label='RSI', color='purple')
  ax2.axhline(y=70, color='r', linestyle='--', alpha=0.5, label='超买线')
  ax2.axhline(y=30, color='g', linestyle='--', alpha=0.5, label='超卖线')
  
+```
  # 子图3: MACD
+```python
  ax3 = axes[2]
  ax3.plot(data.index, data['MACD'], label='MACD', color='blue')
  ax3.plot(data.index, data['MACD_signal'], label='Signal', color='red')
@@ -867,11 +928,14 @@ def create_visualization(self, symbol: str, data: pd.DataFrame, signals: List[Di
  
  plt.tight_layout()
  
+```
  # 保存图表
+```python
  chart_file = f"reports/{symbol}_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
  plt.savefig(chart_file, dpi=300, bbox_inches='tight')
  
  return chart_file
+```
 🖥️ 运行效果预览
 📊 创建 000001 数据可视化...
 

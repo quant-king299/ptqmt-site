@@ -123,20 +123,30 @@ IR < 0.3：不稳定因子 ⚠️
 
 **使用示例**
 
+```python
 from easy_xt.alpha_analysis import ICIRAnalyzer
 
+```
 # 初始化分析器
+```python
 analyzer = ICIRAnalyzer(price_data, factor_data)
 
+```
 # 计算IC值（预测1期收益）
+```python
 analyzer.calculate_ic(periods=1, method='spearman')
 
+```
 # 打印分析报告
+```python
 analyzer.print_report()
 
+```
 # 保存报告
+```python
 analyzer.save_report('my_factor_ic_report.csv')
 
+```
 **输出示例**
 
 ========== IC/IR分析报告 ==========
@@ -158,8 +168,10 @@ t统计量 : 6.2341 ✓
 
 **使用场景**
 
+```python
 from easy_xt.alpha_analysis import FactorCorrelationAnalyzer
 
+```
 # 准备多个因子数据
 factor_dict = {
  'alpha001': factor_data_1,
@@ -169,11 +181,15 @@ factor_dict = {
 }
 
 # 初始化分析器
+```python
 correlation_analyzer = FactorCorrelationAnalyzer(factor_dict)
 
+```
 # 找出高相关性因子对（阈值0.7）
+```python
 correlation_analyzer.print_report(threshold=0.7)
 
+```
 **输出示例**
 
 ========== 因子相关性分析报告 ==========
@@ -249,20 +265,30 @@ alpha002 ↔ alpha005: 0.76 ⚠️ 强相关
 
 **使用示例**
 
+```python
 from easy_xt.alpha_analysis import LayeredBacktester
 
+```
 # 初始化回测器
+```python
 backtester = LayeredBacktester(price_data, factor_data)
 
+```
 # 计算5层收益
+```python
 backtester.calculate_layer_returns(n_layers=5, periods=1)
 
+```
 # 计算多空策略收益
+```python
 backtester.calculate_long_short_returns(n_layers=5)
 
+```
 # 打印回测报告
+```python
 backtester.print_report()
 
+```
 **输出示例**
 
 ========== 分层回测报告 ==========
@@ -287,8 +313,10 @@ backtester.print_report()
 
 ### 场景：从10个因子中筛选最优组合
 
+```python
 from easy_xt.alpha_analysis import ICIRAnalyzer, FactorCorrelationAnalyzer, LayeredBacktester
 
+```
 # 准备数据：10个因子
 factor_dict = {
  'alpha001': factor_data_1,
@@ -297,50 +325,50 @@ factor_dict = {
 }
 
 # ========== Step 1: IC/IR分析 ==========
+```python
 print("【Step 1】IC/IR分析 - 筛选有效因子")
 results = {}
-
-```python
 for name, data in factor_dict.items():
  analyzer = ICIRAnalyzer(price_data, data)
-```
  analyzer.calculate_ic()
  results[name] = analyzer.calculate_ic_stats()
 
+```
 # 按IR排序
-
 ```python
 sorted_factors = sorted(results.items(), key=lambda x: x[1]['ir'], reverse=True)
 print("\n因子排名（按IR）：")
 for name, stats in sorted_factors:
  print(f"{name}: IR={stats['ir']:.3f}, IC均值={stats['ic_mean']:.3f}")
-```
 
+```
 # 选择前5个因子
+```python
 top_5 = dict(sorted_factors[:5])
 
+```
 # ========== Step 2: 相关性分析 ==========
-
 ```python
 print("\n【Step 2】相关性分析 - 去除冗余因子")
 correlation_analyzer = FactorCorrelationAnalyzer(
 ```
  {name: factor_dict[name] for name in top_5}
+```python
 )
 correlation_analyzer.print_report(threshold=0.7)
 
+```
 # ========== Step 3: 分层回测验证 ==========
-
 ```python
 print("\n【Step 3】分层回测 - 验证实际效果")
 for name in top_5:
  print(f"\n--- {name} 回测结果 ---")
  backtester = LayeredBacktester(price_data, factor_dict[name])
-```
  backtester.calculate_layer_returns(n_layers=5)
  backtester.calculate_long_short_returns(n_layers=5)
  backtester.print_report()
 
+```
 # ========== Step 4: 选择最终因子 ==========
 # 综合IC、IR、回测表现，选择最优的2-3个因子
 
@@ -348,30 +376,38 @@ for name in top_5:
 
 ### 价格数据格式
 
+```python
 import pandas as pd
 
 price_data = pd.DataFrame(
  data=[
+```
  [10.5, 20.3, 15.2], # 2023-01-01 的价格
  [10.6, 20.1, 15.4], # 2023-01-02 的价格
  # ... 更多日期
  ],
+```python
  index=pd.to_datetime(['2023-01-01', '2023-01-02', ...]),
  columns=['000001.SZ', '000002.SZ', '000003.SZ']
 )
 
+```
 ### 因子数据格式
 
+```python
 factor_data = pd.DataFrame(
  data=[
+```
  [0.5, -0.3, 1.2], # 2023-01-01 的因子值
  [0.6, -0.2, 1.1], # 2023-01-02 的因子值
  # ... 更多日期
  ],
+```python
  index=pd.to_datetime(['2023-01-01', '2023-01-02', ...]),
  columns=['000001.SZ', '000002.SZ', '000003.SZ']
 )
 
+```
 ⚠️ **重要提醒**：
 
 索引必须是**日期格式**
@@ -385,26 +421,34 @@ factor_data = pd.DataFrame(
 ### 技巧1：多周期IC分析
 
 # 测试不同持有期的IC表现
+```python
 for period in [1, 5, 10, 20]:
  analyzer.calculate_ic(periods=period)
  stats = analyzer.calculate_ic_stats()
  print(f"持有{period}期: IC={stats['ic_mean']:.3f}, IR={stats['ir']:.3f}")
 
+```
 ### 技巧2：不同分层数对比
 
 # 测试3层、5层、10层的效果
+```python
 for n_layers in [3, 5, 10]:
  backtester.calculate_layer_returns(n_layers=n_layers)
+```
  # 比较单调性和收益差异
 
 ### 技巧3：动态相关性阈值
 
 # 严格模式（去重更彻底）
+```python
 correlation_analyzer.print_report(threshold=0.7)
 
+```
 # 宽松模式（保留更多因子）
+```python
 correlation_analyzer.print_report(threshold=0.8)
 
+```
 ## ❓ 常见问题解答
 
 ### Q1: IC为负数怎么办？

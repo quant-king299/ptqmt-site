@@ -35,55 +35,61 @@ pip install -e .
 ## 快速开始（3 行代码）
 
 ```python
+```python
 from easy_xt import get_api
 
 api = get_api()
 api.init_data()
 
+```
 # 获取平安银行最近 20 根日线（前复权）
+```
+```python
 df = api.get_price(['000001.SZ'], period='1d', count=20, adjust='front')
 print(df[['close', 'volume']])
-```
 
+```
 ## 获取实时行情
 
 ```python
 # 多只股票实时快照
-df = api.get_current_price(['000001.SZ', '600519.SH', '300750.SZ'])
-
+```
 ```python
+df = api.get_current_price(['000001.SZ', '600519.SH', '300750.SZ'])
 for _, row in df.iterrows():
     print(f"{row['code']}: {row['price']:.2f}")
-```
-```
 
+```
 ## 获取财务数据
 
 ```python
 # 获取三大报表
-data = api.get_financial_data(['000001.SZ'],
-
+```
 ```python
+data = api.get_financial_data(['000001.SZ'],
     tables=['Balance', 'Income', 'CashFlow'],
     start='20240101')
-```
 
 income = data['000001.SZ']['Income']
 print(income[['revenue', 'net_profit_incl_min_int_inc']])
-```
 
+```
 ## 下单交易
 
 ```python
 # 初始化交易（需 QMT 在线）
+```python
 api.init_trade(r'D:/QMT交易端/userdata_mini', session_id=99)
 api.add_account('你的资金账号', 'STOCK')
 
+```
 # 限价买入
+```
+```python
 order_id = api.trade.buy('你的资金账号', '000001.SZ',
                          volume=100, price=12.50, price_type='limit')
-```
 
+```
 ## 运行内置策略
 
 ```bash

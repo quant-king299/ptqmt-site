@@ -234,11 +234,15 @@ python gui_app/main_window.py
 
 ### 方式二：Python代码调用（推荐有经验用户）
 
+```python
 from 学习实例.09_qmt条件单止盈止损策略实战案例 import StopLossConditionOrderManager
 
+```
 # 创建管理器
+```python
 manager = StopLossConditionOrderManager()
 
+```
 # 创建止盈止损条件单
 order = manager.create_advanced_stop_loss_order({
  'stock_code': '511090.SH', # 股票代码
@@ -250,8 +254,10 @@ order = manager.create_advanced_stop_loss_order({
 })
 
 # 启动监控（自动检查并执行）
+```python
 manager.start_monitoring(interval_seconds=5)
 
+```
 ## 🔥 核心优势
 
 ### 1. 真实交易委托
