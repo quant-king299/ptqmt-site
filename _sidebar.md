@@ -42,6 +42,14 @@
   * [PTrade API 完整参考](./docs/Chapter-21.md)
   * [策略开发实例](./docs/Chapter-08.md)
 
+* **EasyXT 官方文档** 🆕
+  * [📘 快速入门指南](docs/EasyXT快速入门指南.pdf)
+  * [📗 核心 API 手册](docs/EasyXT核心API手册.pdf)
+  * [📙 回测系统文档](docs/EasyXT回测系统文档.pdf)
+  * [📕 GUI 操作手册](docs/EasyXT GUI操作手册.pdf)
+  * [📓 策略开发指南](docs/EasyXT策略开发指南.pdf)
+  * [📔 架构与部署](docs/EasyXT架构与部署.pdf)
+
 * **学习案例**
   * [EasyXT 概览](学习案例/EasyXT.md)
   * [基础入门教程](学习案例/01基础入门教程.md)
