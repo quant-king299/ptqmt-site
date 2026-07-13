@@ -1,444 +1,801 @@
-本文档主要描述 量化程序交易 回测的功能。因此 迅投QMT 的基本操作教程，并未涉及。如果对 QMT 基础操作还不熟悉的朋友，建议先熟悉一下界面风格、基本操作，可联系我获取单均线回测示例以用来快速上手。
+# QMT核心编程框架详解
 
+## 概述
 
+QMT量化交易平台采用面向对象的编程架构，为策略开发提供了标准化的编程框架。本章将深入解析QMT的核心编程组件，包括关键函数、重要对象以及它们之间的协作机制。
 
-### 2.1 策略列表
+---
 
+## 1. QMT编程架构基础
 
+### 1.1 策略类继承机制
 
-成功登录 迅投QMT之后，在主页界面中间部分即可看到 “策略列表”，其中应该包含的是 “我的策略”。如果点击 “返回”按钮，可以看到全部的（更多的）策略列表，如下图所示：
+在QMT中开发Python策略时，实际上是在一个预定义的基类框架内进行编程。这个基类为策略开发提供了标准化的接口和生命周期管理。
 
-![全部策略](./Chapter-15.assets/xtqmt09.9b7d81e0.png)
+**核心组件包括：**
+- **初始化函数** `init()` - 策略启动时的配置入口
+- **行情处理函数** `handlebar()` - 核心交易逻辑执行器
+- **上下文对象** `ContextInfo` - 策略运行环境的数据中心
 
+### 1.2 策略生命周期
 
-
-#### 2.1.1 导入导出策略
-
-QMT系统支持将策略以**加密**的模式进行导出或导入，用户可以便捷的迁移系统本地策略，可以通过点击`导入策略`将单均线回测示例导入到qmt里面，如下图所示：
-
-![](./Chapter-15.assets/Snipaste_2022-08-10_18-32-20-fd9d8884.png)
-
-
-
-#### 2.1.2 新建策略
-
-也可以在【模型研究】界面，点击`新建模型`，选择 Python 模型，在弹出的【策略编辑器】中从头到尾编写一个用户自己的量化模型。
-
-![](./Chapter-15.assets/xtqmt04.16b29b4a.jpg)
-
-
-
-现在我们来创建第一个策略程序吧。如之前在安装步骤中的操作，请点击中间上侧的 “新建策略”按钮，然后选择 “Python” 策略，然后把下列代码复制到窗口中。
-
-```python
-#---------------------------------------------------
-#coding:gbk
-import pandas as pd
-import numpy as np
-import talib
-import time
-#---------------------------------------------------
-
-
-#---------------------------------------------------
-def init(C):
-	C.accid ='55002616'#设定资金账户账户
-	C.stock=['000568.SZ']#SH,SZ必须大写
-	down_history_data("000568.SZ","1d","","")
-	C.cycle=60#均线周期
-	print('')
-	print('---------------------------------------------------')
-	print('股票池:',C.stock)
-	print('---------------------------------------------------')
-#---------------------------------------------------
-
-
-#---------------------------------------------------
-def handlebar(C):
-#---------------------------------------------------
-#获得系统时间，回测bar-1
-	bar_date=timetag_to_datetime(C.get_bar_timetag(C.barpos-1),'%Y%m%d%H%M%S')#专门获取历史数据的
-	index =C.barpos
-	realtimetag=C.get_bar_timetag(index-1)
-	shi_jian=timetag_to_datetime(realtimetag, '%Y-%m-%d %H:%M:%S')
-	shi_jian_shi=int(timetag_to_datetime(realtimetag,'%H'))
-	shi_jian_fen=int(timetag_to_datetime(realtimetag,'%M'))
-	shi_jian_miao=int(timetag_to_datetime(realtimetag,'%S'))
-	shi_jian_zong=shi_jian_shi*60+shi_jian_fen
-	print('K线时间',shi_jian)
-#---------------------------------------------------
-
-
-#---------------------------------------------------
-#显示仓位曲线
-	x1=get_zong_zichan(C.accid)-get_avaliable(C.accid)
-	y1=get_zong_zichan(C.accid)
-	value=x1/y1
-	C.paint('持仓比例',value,-1,2,'red','noaxis')
-#---------------------------------------------------
-
-
-#---------------------------------------------------
-#测试窗口
-	xianshi_zhanghu(C.accid)#显示资金账户的信息
-#	xianshi_chichang(C.accid)#显示持仓的信息	
-#---------------------------------------------------
-
-
-#---------------------------------------------------
-	holdings=get_holdings(C.accid)#获取持仓数据，数据类型是dict
-#---------------------------------------------------
-	for  stock  in  C.stock:#循环提前股票池中的股票
-		local_data=C.get_market_data_ex(['close'],stock_code=[stock],end_time = bar_date,
-		period='1d',count=60,dividend_type='front',fill_data=True,subscribe=True)
-		close_list=list(local_data[stock].iloc[:, 0])
-#---------------------------------
-		stock_price=close_list[-1]
-		name=C.get_stock_name(stock)
-		print(shi_jian,'名称:',name,'当前价格',stock_price)
-		stock_junjia=round(np.sum(close_list)/C.cycle,2)
-		print(shi_jian,'名称:',name,';',C.cycle,'日均线是:',stock_junjia)
-#--------------------------
-
-#--------------------------
-		if stock_junjia<stock_price and stock  not  in  list(holdings):#站上均线，买进
-			buytarget_num=int(get_zong_zichan(C.accid)*(1.0)/stock_price/100)#买入单位是手，没有小数
-			buy_num=buytarget_num*100#手转换成股
-			if buy_num>0:#单位是股
-				passorder(23,1101,C.accid,stock,11,stock_price*1.0,buy_num,'名称',1,'委托号',C)#买入
-				print('买入', '名称:',name,stock,'股数',buy_num,'价格:',stock_price,'市值',round(buy_num*stock_price,2))
-#--------------------------
-
-#--------------------------
-		elif stock_junjia>stock_price  and  stock  in  list(holdings):#均线压着股价，卖出
-			sell_num=holdings[stock]
-			if sell_num>0:#单位是股
-				passorder(24,1101,C.accid,stock,11,stock_price*1.0,sell_num,'名称',1,'委托号',C)#卖出
-				print('卖出', '名称:',name,stock,'股数',sell_num,'价格:',stock_price,'市值',round(sell_num*stock_price,2))
-#---------------------------------------------------
-
-
-
-#---------------------------------------------------分函数
-#---------------------------------------------------
-def bardate_translations(X,Y):
-	Z=X*60+Y
-	return Z
-#---------------------------------------------------
-
-
-
-#---------------------------------------------------
-def get_holdings2(accid,stock):
-#查询股票当前持仓，如果没有持仓，则返回0，这是一个小优化
-	holdinglist={}
-	resultlist=get_trade_detail_data(accid,'STOCK',"POSITION")
-	for obj in resultlist:
-		holdinglist[obj.m_strInstrumentID+"."+obj.m_strExchangeID]=obj.m_nVolume
-#---------------------------------------------------
-	if  stock in list(holdinglist):
-		return holdinglist[stock]
-	else:
-		return 0
-#---------------------------------------------------
-
-
-
-#---------------------------------------------------
-#获取持仓，返回dict，如果查询未持有的持仓，会报错
-def get_holdings(accid):
-	holdinglist={}
-	resultlist=get_trade_detail_data(accid,'STOCK',"POSITION")
-	for obj in resultlist:
-		holdinglist[obj.m_strInstrumentID+"."+obj.m_strExchangeID]=obj.m_nVolume
-	return holdinglist
-#---------------------------------------------------
-
-
-
-
-#---------------------------------------------------
-#获取总资产
-def get_zong_zichan(accid):
-	zichan=0
-	account= get_trade_detail_data(accid,'stock', "ACCOUNT")
-	for  i in account:
-		zichan=i.m_dBalance
-	return zichan
-#---------------------------------------------------
-
-
-
-#---------------------------------------------------
-#显示持仓
-def xianshi_chichang(accid,time):
-	position_info= get_trade_detail_data(accid,'stock','position')
-	for i in position_info:
-		print(
-		time,
-		'名称',i.m_strInstrumentID+"."+i.m_strExchangeID,
-		'数量',i.m_nVolume,
-		'盈亏比例',round(i.m_dProfitRate,2),
-		'持有市值',i.m_dMarketValue,
-		'持仓成本',i.m_dOpenPrice,
-		'建仓日期',i.m_strOpenDate
-		)
-#---------------------------------------------------
-
-
-
-
-
-
-#---------------------------------------------------
-#显示账户信息
-def xianshi_zhanghu(accid):
-	account= get_trade_detail_data(accid,'stock', "ACCOUNT")
-	for  i in account:
-		print(
-		'总资产',i.m_dBalance,
-		'可用金额',i.m_dAvailable,
-		'持仓盈亏',i.m_dPositionProfit
-		)
-#---------------------------------------------------
-
-
-
-#---------------------------------------------------
-#获取可用资产
-def get_avaliable(accid):
-	result=0
-	account= get_trade_detail_data(accid,'stock', "ACCOUNT")
-	for  i in account:
-		result=i.m_dAvailable
-	return result
-#---------------------------------------------------
-
+```mermaid
+graph TD
+    A[策略启动] --> B[执行init函数]
+    B --> C[订阅行情数据]
+    C --> D[等待行情触发]
+    D --> E[执行handlebar函数]
+    E --> F{策略是否停止?}
+    F -->|否| D
+    F -->|是| G[策略结束]
 ```
 
-
-
-#### 2.1.3 策略编写
-
-【策略编辑器】是迅投专门为模型开发者设计的，集成了模型列表、函数列表、函数帮助、模型基本信息、参数设置、回测参数等多个部分，拥有代码高亮、自动补全等便捷功能于一体的便捷的模型编辑、开发环境。
-
-![](./Chapter-15.assets/image12-caa10435.png)
-
-
-
-**模型编辑页面 右侧可选择策略默认的周期、品种**
-
-编写 Python 策略需在开始时定义编码格式，如 `gbk`。
-
-之后可选择导入第三方库，所选第三方库要在券商管理端白名单内才可运行。
-
-Init 方法和 handlebar 方法的定义是必须的。Init 方法会在策略运行开始时调用一次，用以初始化所需对象（包裹在 ContextInfo 对象中传递），设定股票池等。
-
-![](./Chapter-15.assets/image13-1a01b323.png)
-
-**Handlebar 方法会在历史 K 线上逐 K 线调用，系统会保存函数所做更改。**
-
-在盘中交易时间，handlebar 函数会随行情推送（tick 数据）被调用，当一个 tick 数据为所在 K 线最后一个 tick 时，此 tick 调用的 handlebar 所做的更改会被系统保存，如有交易指令，会在下一根K 线的第一个 tick 到来时发送；其他 tick 可以打印运行结果，但 handlebar 所做更改不会被保存，也不会发送交易信号。
-
-编写创建完模型后，对应模型的基本信息和回测参数进行设置。
-
-**基本信息-字段描述**
-
-| 字段               | 描述                                                         |
-| ------------------ | ------------------------------------------------------------ |
-| **名称**           | 填写模型名称                                                 |
-| **快捷码**         | 默认根据模型名称自动生成拼音首字母拼写，如需自定义可以手动进行更改，用于键盘精灵快速引用模型 |
-| **说明**           | 简单的说明模型功能                                           |
-| **分类**           | 保存当前模型到某个分类下面                                   |
-| **位置**           | 模型回测或运行时的位置，有副图、主图叠加、主图三种显示位置   |
-| **默认周期**       | 点击模型回测或运行时的默认主图周期，可手动切换               |
-| **默认品种**       | 点击模型回测或运行时的默认主图品种，可手动切换               |
-| **复权方式**       | 提供不复权、前复权、后复权、等比前复权、等比后复权 5 种复权方式 |
-| **快速计算**       | 限制计算范围，默认为 0 时模型运行会从模型设置的默认品种（主图）的第一根 K 线开始计算，设置为 n 则从当前 K 线再往前 n 个 K 线开始计算 |
-| **刷新间隔**       | 用来设置策略运行的时间间隔。设置了刷新间隔，即每隔一段时间策略按照当前行情运行一次 |
-| **加密公式**       | 加密后的公式只有输入密码才可以查看源代码                     |
-| **凭密码导出公式** | 此项只有在开启 “加密公式” 后才能生效，生效后只能使用密码导出到本地 |
-| **用法注释**       | 简短的说明模型使用的一些注意项，可不填                       |
-
-![](./Chapter-15.assets/image14-b74f4979.png)
-
-**策略编辑器-基本信息**
-
-回测模式指策略以历史行情为依据进行运算，投资者可观察该策略在历史行情所获得的年化收益率、夏普比率、最大回撤、信息比率等指标表现。
-
-**回测参数-字段描述**
-
-| 字段                  | 描述                                                         |
-| --------------------- | ------------------------------------------------------------ |
-| **开始时间 结束时间** | 设置模型回测时间区间                                         |
-| **基准**              | 设置模型收益的参考基准                                       |
-| **初始资金**          | 设置模型回测的初始资金                                       |
-| **保证金比例**        | 设置期货的保证金比例                                         |
-| **滑点**              | 设置回测撮合时的滑点，模拟真实交易的冲击成本                 |
-| **手续费类型**        | 支持按成交额比例或者固定值计算手续费                         |
-| **买入印花税**        | 设置买入印花税比例                                           |
-| **卖出印花税**        | 设置卖出印花税比例                                           |
-| **最低佣金**          | 设置单笔交易的最低佣金数额                                   |
-| **买入佣金**          | 设置买入标的时的佣金比例                                     |
-| **平昨佣金**          | 设置股票、期货平昨佣金比例                                   |
-| **平今佣金**          | 设置期货平今佣金比例                                         |
-| **最大成交比例**      | 控制回测中最大成交量不超过同期成交量*最大成交比例。可以点击此参数旁边的'？'按钮了解详情 |
-
-![](./Chapter-15.assets/image15-19860147.png)
-
-在这个简单示例中，可以看到。在 迅投QMT中，编写 Python 程序，第一行声明了字符集是 `#coding:gbk` 。其中最重要的两个自定义函数就是 **init()** 和 **handlebar()**
-
-init() —— 是初始化函数，即策略程序一启动，首先执行此函数。通常在这个函数中，书写获取股票池、验证帐号、声明全局变量等语句；
-
-handlebar() —— 表示每一根 K 线收盘后，即执行一次此函数。策略的核心逻辑都是写在该函数中的，比如，需要获取什么数据，获取后如何计算，得出结果后是否下单交易等等。通常用户还可以通过 paint() 方法将需要绘图输出的结果展示出来。
-
-其中 **ContextInfo** 是整个 Python 框架中的核心对象。它包含了各种与 Python 底层框架交互的 API 方法，也是一个全局的关联上下文的对象（object），可以在 init 以及 handlebar 这两个函数中自由地传递用户创建的各种自定义数据。
-
-
-
-### 2.2 参数设置
-
-在“策略编辑器”的右侧，基本信息面板的底部，中间的标签是“参数设置”，用鼠标点击一下该标签，即可在这里可以设置策略程序中的外部参数。通常用于策略程序源码必须加密，但同时又要允许用户可以自己修改参数的需求；或者用历史数据回测时，优化参数时使用。最多允许设置20个外部参数。在对应的栏位中填上“参数名”、“最新（值）”、“最小（值）”、“最大（值）”、“步长”、“初始（值）”，填完之后回车即可。
-
-![](./Chapter-15.assets/image16-304d077f.png)
-
-
-
-
-
-在“参数设置”面板中填写的参数，可以理解为就是在策略程序中声明的全局变量，在策略中的各个方法（函数）中都是可见的，包括用户自定义的函数中，也是可见的。因此在程序中可以直接使用，赋值、参与运算都可以。如上图中的示例，在参数设置中，填写了3个变量，`period,sell_v,buy_va`，并且填写了各自的值。回车之后，在策略程序中，就可以直接打印出这些变量的值。并不需要提前声明或赋值操作。
-
-
-
-## 2.3 策略运行
-
-策略编写完毕后，点击编译，可保存策略。编译按钮在 Python 策略中只起保存功能，不会检查语法与引用的正误。之后点击运行可以看到策略运行效果（如有错误，会在日志输出的位置报错）。
-
-![](./Chapter-15.assets/image20-d65db891.png)
-
-*策略编辑器-运行*
-
-如当前系统所处界面为“行情”界面或“交易”界面，点击运行之前，需在行情中手动设置好 K 线品种和周期，点击运行后，策略即可在当前主图下运行，如下图所示。
-
-![](./Chapter-15.assets/image21-b4348bce.png)
-
-*策略运行状态之一*
-
-如系统当前界面处于“我的主页”界面或“模型研究”和“模型交易”等非行情界面，点击运行时，会基于策略编辑器 - 基本信息中所设置的默认周期和默认品种运行。
-
-![](./Chapter-15.assets/image22-dd4db57c.png)
-
-*策略运行状态之二*
-
-当选择的运行位置为副图时，![img](data:image/png;base64,iVBORw0K...snip...)
-
-如想关闭策略，将主图下方策略运行的附图关闭即可。
-
-![](./Chapter-15.assets/image22-dd4db57c.png)
-
-*关闭运行中的策略之一*
-
-![](./Chapter-15.assets/image25-43ffcc17.png)
-
-*关闭运行中的策略之二*
-
-当选择的运行位置为主图叠加时，如想关闭策略，在主图上右键单击取消叠加指标即可。
-
-当选择的运行位置为主图时，键盘精灵输入KLINE即可结束模型运行。
-
-*关闭运行中的策略之三*
-
-点击策略编辑器上放的停止按钮
-
-![](./Chapter-15.assets/stop-9d614ae0.png)
-
-## 2.4 策略调试
-
-如果策略运行不成功，需要进行策略调试这一步。当运行出错时，报错信息会显示在日志输出面板，以供修改调试之用。
-
-![](./Chapter-15.assets/image26-32b1efd6.png)
-
-*策略调试-输出日志*
-
-## 3 历史数据回测
-
-在 迅投 的主界面中，“我的” --> “模型研究” 中，有一个 “PY模型回测示例” ，如下图所示：
-
-![](./Chapter-15.assets/BNPsGLbuM1T3rQX.png)
-
-点击其后的编辑按钮，即可看到源代码。策略说明描述大致如下：
-设定股票池为`000568.SZ`，关注 60日均线。
-如果当前价格高于60日均线，并且该股票不在持仓中，则执行买入操作。
-果当前价格低于60日均线，并且该股票在持仓中，则执行卖出操作。
-
-该示例中，导入了 time, talib 和 numpy 模块，分别用来计算日期时间和平均值（均线）。同时还用到自定义函数来获取持仓股票列表。调取历史数据（如果之前没有补齐历史数据，会导致失败和错误）等功能，具体代码的解析，在阅读理解了 api 手册之后会有更详细的讨论。
-
-第一步，点击右侧面板底部的“回测参数”按钮，以切换到 回测参数 面板。在此处可以选择回测的时间段，前提条件是下载过历史数据。其它参数可按需填写，如：初始资金、保证金比例、印花税等......
-
-![](./Chapter-15.assets/dpYTJjUCfwG61ao.png)
-
-第二步，点击“策略编辑器”顶部的 “回测”按钮，即可开始历史数据回测。如果有历史数据，回测过程会顺利进行。在“模型研究”窗口，可以看到数据变化。
-
-![](./Chapter-15.assets/xtqmt19.c915a129.png)
-
-*操作-数据管理*
-
-如果回测正常的话，主界面会跳转到模型设置的默认标的和默认周期界面，并输出模型绩效分析结果。
-
-![](./Chapter-15.assets/image28-ded030fa.png)
-
-*策略编辑器-模型回测*
-
-此时，可最小化或者关闭【策略编辑器】，并对回测结果进行分析，随着光标在 K 线主图上的移动，右边回测结果展示窗口会动态显示截止光标所在当日的绩效分析结果（包括年化收益，基准年化收益，单位净值，下方差，信息比率，夏普比率，波动率，索提诺比率，阿尔法系数，贝塔系数，跟踪误差，最大回撤，胜率等）、当日买入、当日卖出、持仓列表。
-
-以上列表均可鼠标右键复制和导出数据。
-
-![](./Chapter-15.assets/image29-c5ed0bcd.png)
-
-*回测结果分析-回测结果随十字光标移动动态展示*
-
-如需根据模型生成的买入、卖出列表进行手工交易，则可直接点击“买入'或“卖出'按钮，系统会弹出下单界面由用户进行确认后进行普通交易下单或算法交易下单。交易方式可点击卖出按钮右侧的普通交易进行切换设置。
-
-![](./Chapter-15.assets/image30-42b93a46.png)
-
-*回测结果买入*
-
-副图回测指标：提供图形化的展示，除去绩效分析的相关指标外，用户可以通过编辑模型代码自定义输出一些特色指标，鼠标右键可以选择复制模型运行结果（每一天的数据）。
-
-![](./Chapter-15.assets/image31-c99b7e64.png)
-
-*回测结果分析-附图指标输出*
-
-另外，回测结果还提供了持仓分析、历史板块汇总、操作明细、日志输出等信息，方便用户进行深入分析。
-
-<div style="border-left: 5px solid #008000; padding-left: 10px; margin: 10px 0;">
-    <p>说明</p>
-    <p>持仓分析： 可查看光标所在当天持仓的行业分布，展示在相关行业的市值情况、盈利情况、权重以及股票数量情况，右键可以复制和导出数据；可切换对比基准，和模型持仓进行对比。</p
-     p>历史板块汇总： 可查看模型自回测日期以来到光标所在日期该模型交易标的的汇总信息，包括累计盈亏、累计交易量、累计交易额、持仓天数等；点击选择板块，可以自行选择其常用板块进行板块的各项数据累计汇总；汇总数据均可以进行排序，鼠标右键可以复制和导出数据。</p
-     <p>操作明细：可查看模型回测的历史每一笔交易的明细。</p>
-     <p>日志输出： 可用于调试输出模型回测和运行情况
-         。</p>
-
-![](./Chapter-15.assets/image32-bd498984.png)
-
-*回测结果分析-绩效分析、当日买入、当日卖出、当日持仓*
-
-![](./Chapter-15.assets/image33-b8a3fd0c.png)
-
-*回测结果分析-持仓分析*
-
-![](./Chapter-15.assets/image34-4cb93cc9.png)
-
-*回测结果分析-历史品种汇总、历史板块汇总*
-
-![](./Chapter-15.assets/image35-bdafc2cc.png)
-
-*回测结果分析-操作明细、日志输出*
-
-<div style="border-left: 5px solid #008000; padding-left: 10px; margin: 10px 0;">
-    <p>提示</p>
-    <p>一般约定 在 迅投 中编写一个 Python 策略时，第一行我们写上</p
-     p># coding:gbk</p
-</div>
-
-  这表示程序的编码格式统一是GBK
+---
+
+## 2. 初始化函数 init()
+
+### 2.1 函数定义与作用
+
+`init()` 函数是策略的初始化入口，在整个策略生命周期中仅执行一次。它负责完成策略运行前的所有准备工作。
+
+**函数签名：**
+```python
+def init(ContextInfo):
+    """
+    策略初始化函数
+    
+    Args:
+        ContextInfo: 策略运行环境对象，用于存储全局变量和配置
+    
+    Returns:
+        None
+    """
+    pass
+```
+
+**主要职责：**
+1. 设置交易账户信息
+2. 配置策略参数（手续费、滑点等）
+3. 订阅行情数据
+4. 初始化全局变量
+5. 设置定时任务
+
+### 2.2 典型初始化示例
+
+```python
+def init(ContextInfo):
+    """完整的策略初始化示例"""
+    
+    # 1. 设置交易账户
+    ContextInfo.set_account('模拟账户号')
+    
+    # 2. 配置回测参数
+    ContextInfo.capital = 1000000  # 初始资金100万
+    ContextInfo.set_commission(0.0003)  # 万三手续费
+    ContextInfo.set_slippage(1, 0.01)  # 固定滑点1分钱
+    
+    # 3. 初始化策略变量
+    ContextInfo.strategy_params = {
+        'ma_short': 5,    # 短期均线周期
+        'ma_long': 20,    # 长期均线周期
+        'position_size': 0.1  # 单次建仓比例
+    }
+    
+    # 4. 设置股票池
+    stock_pool = ['000001.SZ', '000002.SZ', '600000.SH']
+    ContextInfo.target_stocks = stock_pool
+    
+    # 5. 订阅行情数据
+    for stock in stock_pool:
+        ContextInfo.subscribe_quote(stock, period='1d')
+    
+    print("策略初始化完成")
+```
+
+### 2.3 行情订阅机制
+
+在`init()`函数中可以设置自定义的行情回调函数：
+
+```python
+def init(ContextInfo):
+    """行情订阅示例"""
+    
+    def market_data_callback(data):
+        """自定义行情回调函数"""
+        symbol = data.get('symbol')
+        price = data.get('last_price')
+        volume = data.get('volume')
+        
+        print(f"收到行情: {symbol} 价格:{price} 成交量:{volume}")
+        
+        # 在回调中可以执行交易逻辑
+        # 注意：需要传入ContextInfo对象
+        if price > data.get('pre_close') * 1.05:  # 涨停
+            print(f"{symbol} 涨停，执行相应策略")
+    
+    # 订阅5分钟K线数据
+    target_stock = '600000.SH'
+    ContextInfo.subscribe_quote(
+        target_stock, 
+        period='5m', 
+        callback=market_data_callback
+    )
+    
+    print("行情订阅设置完成")
+```
+
+---
+
+## 3. 行情处理函数 handlebar()
+
+### 3.1 函数定义与触发机制
+
+`handlebar()` 函数是策略的核心执行器，负责处理每次行情更新时的交易逻辑。
+
+**函数签名：**
+```python
+def handlebar(ContextInfo):
+    """
+    行情处理函数
+    
+    触发条件：
+    - 回测模式：每根K线触发一次
+    - 实盘模式：每次tick数据到达时触发
+    
+    Args:
+        ContextInfo: 策略运行环境对象
+    
+    Returns:
+        None
+    """
+    pass
+```
+
+**触发机制详解：**
+
+| 运行模式 | 触发频率 | 说明 |
+|---------|---------|------|
+| 历史回测 | 每根K线一次 | 按照历史K线数据逐根执行 |
+| 实盘交易 | 每个tick一次 | 实时行情每次跳动都会触发 |
+| 模拟交易 | 每个tick一次 | 与实盘模式相同 |
+
+### 3.2 策略逻辑实现示例
+
+```python
+def handlebar(ContextInfo):
+    """双均线策略示例"""
+    
+    # 获取当前处理的K线位置
+    current_bar = ContextInfo.barpos
+    
+    # 只在最新K线执行交易逻辑（实盘模式）
+    if not ContextInfo.is_last_bar():
+        return
+    
+    # 获取策略参数
+    params = ContextInfo.strategy_params
+    ma_short = params['ma_short']
+    ma_long = params['ma_long']
+    
+    # 遍历股票池
+    for stock in ContextInfo.target_stocks:
+        try:
+            # 获取历史价格数据
+            close_prices = ContextInfo.get_market_data_ex(
+                [stock], 
+                period='1d', 
+                dividend_type='front_ratio',
+                count=ma_long + 10
+            )[stock]['close']
+            
+            if len(close_prices) < ma_long:
+                continue
+                
+            # 计算移动平均线
+            ma_short_value = close_prices[-ma_short:].mean()
+            ma_long_value = close_prices[-ma_long:].mean()
+            
+            # 获取当前持仓
+            current_position = ContextInfo.get_position(stock)
+            
+            # 交易信号判断
+            if ma_short_value > ma_long_value and current_position == 0:
+                # 金叉买入信号
+                buy_amount = int(ContextInfo.capital * params['position_size'] / close_prices[-1])
+                if buy_amount > 0:
+                    order_result = ContextInfo.order_shares(
+                        stock, 
+                        buy_amount, 
+                        'buy',
+                        order_type='market'
+                    )
+                    if order_result:
+                        print(f"买入信号: {stock} 数量:{buy_amount}")
+                        
+            elif ma_short_value < ma_long_value and current_position > 0:
+                # 死叉卖出信号
+                order_result = ContextInfo.order_shares(
+                    stock, 
+                    current_position, 
+                    'sell',
+                    order_type='market'
+                )
+                if order_result:
+                    print(f"卖出信号: {stock} 数量:{current_position}")
+                    
+        except Exception as e:
+            print(f"处理股票 {stock} 时发生错误: {str(e)}")
+            continue
+```
+
+### 3.3 性能优化建议
+
+```python
+def handlebar(ContextInfo):
+    """优化版本的handlebar函数"""
+    
+    # 1. 减少不必要的计算
+    if not ContextInfo.is_new_bar():
+        return  # 只在新K线时执行
+    
+    # 2. 批量获取数据
+    all_data = ContextInfo.get_market_data_ex(
+        ContextInfo.target_stocks,
+        period=ContextInfo.period,
+        count=50  # 一次性获取足够的历史数据
+    )
+    
+    # 3. 使用缓存避免重复计算
+    if not hasattr(ContextInfo, 'indicator_cache'):
+        ContextInfo.indicator_cache = {}
+    
+    current_time = ContextInfo.get_current_time()
+    
+    for stock in ContextInfo.target_stocks:
+        # 检查缓存
+        cache_key = f"{stock}_{current_time}"
+        if cache_key in ContextInfo.indicator_cache:
+            continue
+            
+        # 执行策略逻辑
+        # ... 策略代码 ...
+        
+        # 更新缓存
+        ContextInfo.indicator_cache[cache_key] = True
+```
+
+---
+
+## 4. 上下文对象 ContextInfo
+
+### 4.1 对象概述
+
+`ContextInfo` 是QMT策略框架中最核心的对象，它承载了策略运行所需的全部环境信息和功能接口。
+
+**主要特性：**
+- **全局可访问**：在所有策略函数中都可以使用
+- **状态持久化**：自动保存策略运行状态
+- **功能丰富**：内置100+个属性和方法
+- **可扩展性**：支持绑定自定义属性和方法
+
+### 4.2 逐K线保存机制
+
+QMT采用了独特的逐K线状态保存机制，这对策略开发有重要影响：
+
+**机制说明：**
+1. 每次`handlebar`调用前，系统对`ContextInfo`进行深拷贝
+2. 只有K线结束时的最后一次修改才会被保存
+3. K线内的中间修改会在下一个tick到达时被回退
+
+**代码示例：**
+```python
+def handlebar(ContextInfo):
+    """演示ContextInfo状态保存机制"""
+    
+    # 这个修改只在K线结束时才会被保存
+    ContextInfo.temp_value = "当前K线的临时数据"
+    
+    # 如果需要立即生效的交易，使用quickTrade=2
+    if ContextInfo.is_last_bar():
+        order_result = passorder(
+            23, 1101, 
+            ContextInfo.accID, 
+            '000001.SZ', 
+            5, 0, 100,
+            "策略名称", 
+            2,  # quickTrade=2 立即下单
+            "立即执行", 
+            ContextInfo
+        )
+```
+
+**最佳实践：**
+```python
+# 全局变量存储（推荐用于立即下单场景）
+class GlobalData:
+    def __init__(self):
+        self.positions = {}
+        self.orders = {}
+        self.signals = {}
+
+g_data = GlobalData()
+
+def handlebar(ContextInfo):
+    """使用全局变量避免状态回退问题"""
+    
+    # 使用全局变量存储立即生效的数据
+    g_data.positions['000001.SZ'] = 1000
+    
+    # ContextInfo用于存储K线级别的数据
+    ContextInfo.ma_values = calculate_ma(close_prices, 20)
+```
+
+---
+
+## 5. 账户管理功能
+
+### 5.1 设置交易账户
+
+```python
+def set_account(account_id):
+    """
+    设置交易账户
+    
+    Args:
+        account_id (str): 账户编号
+        
+    注意事项：
+    1. 必须在init()函数中调用
+    2. 可以设置多个账户
+    3. 后续交易会使用最后设置的账户
+    """
+    pass
+
+# 使用示例
+def init(ContextInfo):
+    # 设置股票账户
+    ContextInfo.set_account('股票账户号')
+    
+    # 设置期货账户（如果需要）
+    ContextInfo.set_account('期货账户号')
+    
+    print("账户设置完成")
+```
+
+### 5.2 股票池管理（已弃用）
+
+> **注意：** `set_universe()` 和 `get_universe()` 方法已不推荐使用，建议使用更灵活的数据获取方式。
+
+**替代方案：**
+```python
+def init(ContextInfo):
+    """现代化的股票池管理方式"""
+    
+    # 方式1：直接定义股票列表
+    ContextInfo.stock_pool = [
+        '000001.SZ', '000002.SZ', '600000.SH', '600036.SH'
+    ]
+    
+    # 方式2：获取指数成分股
+    index_stocks = ContextInfo.get_sector('000300.SH')  # 沪深300
+    ContextInfo.stock_pool = index_stocks[:50]  # 取前50只
+    
+    # 方式3：获取行业股票
+    industry_stocks = ContextInfo.get_stock_list_in_sector('银行')
+    ContextInfo.stock_pool = industry_stocks
+    
+    # 方式4：动态筛选
+    all_stocks = ContextInfo.get_stock_list_in_sector('沪深A股')
+    filtered_stocks = []
+    
+    for stock in all_stocks:
+        # 添加筛选条件
+        if not ContextInfo.is_suspended_stock(stock):  # 非停牌
+            market_cap = ContextInfo.get_market_value(stock)
+            if market_cap > 10000000000:  # 市值大于100亿
+                filtered_stocks.append(stock)
+    
+    ContextInfo.stock_pool = filtered_stocks[:100]  # 取前100只
+    
+    print(f"股票池设置完成，共{len(ContextInfo.stock_pool)}只股票")
+```
+
+---
+
+## 6. 时间和日期处理
+
+### 6.1 时间戳转换
+
+```python
+def time_conversion_examples():
+    """时间处理示例"""
+    
+    # 毫秒时间戳转日期时间
+    timestamp = 1512748860000
+    datetime_str = timetag_to_datetime(timestamp, '%Y-%m-%d %H:%M:%S')
+    print(f"时间戳 {timestamp} 转换为: {datetime_str}")
+    
+    # 获取当前时间
+    current_time = ContextInfo.get_current_time()
+    print(f"当前时间: {current_time}")
+    
+    # 获取交易日
+    trading_dates = ContextInfo.get_trading_dates('SH', '2024-01-01', '2024-12-31')
+    print(f"2024年交易日数量: {len(trading_dates)}")
+
+def handlebar(ContextInfo):
+    """在策略中使用时间信息"""
+    
+    # 获取当前K线时间
+    current_time = ContextInfo.get_current_time()
+    
+    # 只在特定时间执行交易
+    if current_time.hour == 9 and current_time.minute == 30:
+        print("开盘时间，执行开盘策略")
+        # 执行开盘相关逻辑
+        
+    elif current_time.hour == 14 and current_time.minute == 50:
+        print("临近收盘，执行收盘策略")
+        # 执行收盘相关逻辑
+```
+
+### 6.2 定时任务设置
+
+```python
+def init(ContextInfo):
+    """设置定时任务示例"""
+    
+    # 每5秒执行一次
+    ContextInfo.run_time(
+        "check_market_status",     # 函数名
+        "5nSecond",               # 时间间隔
+        "1970-01-01 00:00:00",    # 开始时间（立即开始）
+        "SH"                      # 市场代码
+    )
+    
+    # 每天执行一次
+    ContextInfo.run_time(
+        "daily_analysis", 
+        "1nDay", 
+        "2024-01-01 15:30:00",    # 每天15:30执行
+        "SH"
+    )
+    
+    # 每500毫秒执行一次（高频策略）
+    ContextInfo.run_time(
+        "high_frequency_strategy", 
+        "500nMilliSecond", 
+        "1970-01-01 00:00:00", 
+        "SH"
+    )
+
+def check_market_status(ContextInfo):
+    """市场状态检查函数"""
+    import datetime
+    
+    now = datetime.datetime.now()
+    print(f"{now}: 执行市场状态检查")
+    
+    # 获取实时行情
+    stocks = ['000001.SZ', '600000.SH']
+    tick_data = ContextInfo.get_full_tick(stocks)
+    
+    for stock in stocks:
+        if stock in tick_data:
+            price = tick_data[stock]['lastPrice']
+            change_pct = (price / tick_data[stock]['lastClose'] - 1) * 100
+            print(f"{stock}: 价格{price:.2f}, 涨跌幅{change_pct:.2f}%")
+
+def daily_analysis(ContextInfo):
+    """每日分析函数"""
+    print("执行每日分析任务")
+    
+    # 计算当日收益
+    portfolio_value = ContextInfo.get_portfolio_value()
+    print(f"当前组合价值: {portfolio_value:.2f}")
+    
+    # 生成分析报告
+    # ... 分析逻辑 ...
+
+def high_frequency_strategy(ContextInfo):
+    """高频策略函数"""
+    # 高频交易逻辑
+    # 注意：高频策略需要特别注意性能优化
+    pass
+```
+
+---
+
+## 7. 股票信息查询
+
+### 7.1 基础信息查询
+
+```python
+def stock_info_examples(ContextInfo):
+    """股票信息查询示例"""
+    
+    target_stock = '000001.SZ'
+    
+    # 获取股票名称
+    stock_name = ContextInfo.get_stock_name(target_stock)
+    print(f"股票名称: {stock_name}")
+    
+    # 获取上市日期
+    list_date = ContextInfo.get_open_date(target_stock)
+    print(f"上市日期: {list_date}")
+    
+    # 检查是否停牌
+    is_suspended = ContextInfo.is_suspended_stock(target_stock)
+    print(f"是否停牌: {'是' if is_suspended else '否'}")
+    
+    # 获取所属行业
+    industry_csrc = get_industry_name_of_stock('CSRC', target_stock)
+    industry_sw = get_industry_name_of_stock('SW', target_stock)
+    print(f"证监会行业分类: {industry_csrc}")
+    print(f"申万行业分类: {industry_sw}")
+    
+    # 检查是否属于特定板块
+    is_hs300 = is_sector_stock('沪深300', 'SZ', '000001')
+    print(f"是否属于沪深300: {'是' if is_hs300 else '否'}")
+    
+    # 检查股票类型
+    is_stock = is_typed_stock(100003, 'SZ', '000001')  # 100003为股票类型代码
+    print(f"是否为股票: {'是' if is_stock else '否'}")
+```
+
+### 7.2 板块管理功能
+
+```python
+def sector_management_examples():
+    """板块管理示例"""
+    
+    # 获取板块目录结构
+    top_level = get_sector_list('')  # 顶层目录
+    print("顶层目录:", top_level)
+    
+    hs_sectors = get_sector_list('沪深板块')  # 沪深板块
+    print("沪深板块:", hs_sectors)
+    
+    # 创建自定义板块
+    new_sector = create_sector('我的', '量化策略股票池', False)
+    print(f"创建板块: {new_sector}")
+    
+    # 添加股票到板块
+    stocks_to_add = ['000001.SZ', '000002.SZ', '600000.SH']
+    for stock in stocks_to_add:
+        success = add_stock_to_sector('量化策略股票池', stock)
+        print(f"添加 {stock} 到板块: {'成功' if success else '失败'}")
+    
+    # 批量设置板块成分股
+    target_stocks = ['000001.SZ', '000002.SZ', '600000.SH', '600036.SH']
+    success = reset_sector_stock_list('量化策略股票池', target_stocks)
+    print(f"批量设置板块成分股: {'成功' if success else '失败'}")
+    
+    # 从板块移除股票
+    success = remove_stock_from_sector('量化策略股票池', '000002.SZ')
+    print(f"移除股票: {'成功' if success else '失败'}")
+```
+
+---
+
+## 8. 图表和K线信息
+
+### 8.1 当前图表信息
+
+```python
+def chart_info_examples(ContextInfo):
+    """图表信息获取示例"""
+    
+    # 获取当前图表基本信息
+    market = ContextInfo.market          # 市场代码
+    stockcode = ContextInfo.stockcode    # 股票代码
+    period = ContextInfo.period          # 时间周期
+    dividend_type = ContextInfo.dividend_type  # 复权方式
+    
+    print(f"当前图表信息:")
+    print(f"  市场: {market}")
+    print(f"  股票代码: {stockcode}")
+    print(f"  时间周期: {period}")
+    print(f"  复权方式: {dividend_type}")
+    
+    # 获取K线相关信息
+    total_bars = ContextInfo.time_tick_size  # K线总数
+    current_bar = ContextInfo.barpos         # 当前K线位置
+    
+    print(f"K线信息:")
+    print(f"  总K线数: {total_bars}")
+    print(f"  当前位置: {current_bar}")
+    print(f"  是否最后一根: {ContextInfo.is_last_bar()}")
+    print(f"  是否新K线: {ContextInfo.is_new_bar()}")
+
+def handlebar(ContextInfo):
+    """在handlebar中使用图表信息"""
+    
+    # 只在新K线时执行
+    if ContextInfo.is_new_bar():
+        current_bar = ContextInfo.barpos
+        total_bars = ContextInfo.time_tick_size
+        progress = (current_bar + 1) / total_bars * 100
+        
+        print(f"处理第 {current_bar + 1}/{total_bars} 根K线 ({progress:.1f}%)")
+        
+        # 获取当前K线数据
+        current_data = ContextInfo.get_market_data_ex(
+            [ContextInfo.stockcode + '.' + ContextInfo.market],
+            period=ContextInfo.period,
+            start_time=current_bar,
+            end_time=current_bar,
+            dividend_type=ContextInfo.dividend_type
+        )
+        
+        if current_data:
+            stock_key = ContextInfo.stockcode + '.' + ContextInfo.market
+            if stock_key in current_data:
+                kline = current_data[stock_key]
+                print(f"当前K线: 开{kline['open'][-1]:.2f} "
+                      f"高{kline['high'][-1]:.2f} "
+                      f"低{kline['low'][-1]:.2f} "
+                      f"收{kline['close'][-1]:.2f}")
+```
+
+---
+
+## 9. 回测参数配置
+
+### 9.1 基础回测设置
+
+```python
+def init(ContextInfo):
+    """完整的回测参数配置"""
+    
+    # 设置回测时间范围
+    ContextInfo.start = '2023-01-01 09:30:00'
+    ContextInfo.end = '2024-12-31 15:00:00'
+    
+    # 设置初始资金
+    ContextInfo.capital = 5000000  # 500万初始资金
+    
+    # 设置手续费（详细配置）
+    commission_list = [
+        0,        # 买入印花税
+        0.001,    # 卖出印花税（千分之一）
+        0.0003,   # 开仓手续费（万三）
+        0.0003,   # 平仓手续费（万三）
+        0,        # 平今手续费
+        5         # 最小手续费5元
+    ]
+    ContextInfo.set_commission(0, commission_list)  # 0表示按比例
+    
+    # 设置滑点
+    ContextInfo.set_slippage(2, 0.001)  # 按比例设置滑点0.1%
+    
+    # 验证设置
+    print("回测参数配置:")
+    print(f"  初始资金: {ContextInfo.capital:,.0f}")
+    print(f"  手续费设置: {ContextInfo.get_commission()}")
+    print(f"  滑点设置: {ContextInfo.get_slippage()}")
+    print(f"  回测模式: {ContextInfo.do_back_test}")
+
+def get_backtest_results(ContextInfo):
+    """获取回测结果示例"""
+    
+    if not ContextInfo.do_back_test:
+        print("当前不在回测模式")
+        return
+    
+    current_bar = ContextInfo.barpos
+    
+    # 获取当前净值
+    net_value = ContextInfo.get_net_value(0)
+    print(f"当前净值: {net_value:.4f}")
+    
+    # 获取持仓记录
+    holdings = get_result_records('holdings', current_bar, ContextInfo)
+    print(f"当前持仓数量: {len(holdings)}")
+    
+    for holding in holdings:
+        print(f"  {holding.stockcode}: "
+              f"持仓{holding.position}股, "
+              f"成本{holding.trade_price:.2f}, "
+              f"现价{holding.current_price:.2f}, "
+              f"盈亏{holding.profit:.2f}")
+    
+    # 获取交易明细
+    deals = get_result_records('dealdetails', current_bar, ContextInfo)
+    if deals:
+        latest_deal = deals[-1]
+        trade_date = timetag_to_datetime(latest_deal.trade_date, '%Y-%m-%d %H:%M:%S')
+        print(f"最新交易: {latest_deal.stockcode} "
+              f"{'买入' if latest_deal.open_close == 1 else '卖出'} "
+              f"{latest_deal.position}股 "
+              f"价格{latest_deal.trade_price:.2f} "
+              f"时间{trade_date}")
+```
+
+### 9.2 高级回测分析
+
+```python
+def advanced_backtest_analysis(ContextInfo):
+    """高级回测分析示例"""
+    
+    if not ContextInfo.do_back_test:
+        return
+    
+    current_bar = ContextInfo.barpos
+    
+    # 获取历史汇总数据
+    history_summary = get_result_records('historysums', current_bar, ContextInfo)
+    
+    if history_summary:
+        total_profit = sum(record.profit for record in history_summary)
+        total_trades = sum(record.buy_sell_times for record in history_summary)
+        win_trades = sum(1 for record in history_summary if record.profit > 0)
+        
+        win_rate = win_trades / len(history_summary) * 100 if history_summary else 0
+        avg_profit = total_profit / len(history_summary) if history_summary else 0
+        
+        print(f"策略分析 (截至第{current_bar}根K线):")
+        print(f"  总盈亏: {total_profit:.2f}")
+        print(f"  交易次数: {total_trades}")
+        print(f"  胜率: {win_rate:.1f}%")
+        print(f"  平均盈亏: {avg_profit:.2f}")
+        
+        # 计算最大回撤等指标
+        net_values = []
+        for i in range(max(0, current_bar - 100), current_bar + 1):
+            nv = ContextInfo.get_net_value(i)
+            if nv > 0:
+                net_values.append(nv)
+        
+        if len(net_values) > 1:
+            peak = max(net_values)
+            current_value = net_values[-1]
+            max_drawdown = (peak - current_value) / peak * 100
+            
+            print(f"  当前净值: {current_value:.4f}")
+            print(f"  历史最高: {peak:.4f}")
+            print(f"  最大回撤: {max_drawdown:.2f}%")
+```
+
+---
+
+## 10. 总结
+
+本章详细介绍了QMT量化交易平台的核心编程框架，包括：
+
+### 10.1 核心组件
+- ✅ **init()函数** - 策略初始化的标准入口，负责账户设置、参数配置等
+- ✅ **handlebar()函数** - 核心交易逻辑执行器，处理每次行情更新
+- ✅ **ContextInfo对象** - 策略运行环境的数据中心，提供100+个API接口
+- ✅ **stop()函数** - 策略停止时的清理处理（可选）
+
+### 10.2 关键特性
+- **面向对象架构** - 基于类继承的策略开发模式
+- **事件驱动机制** - 基于行情触发的执行模式  
+- **状态管理机制** - 逐K线的状态保存和回退
+- **丰富的功能接口** - 涵盖数据获取、交易执行、风险管理等
+
+### 10.3 重要概念
+- **逐K线保存机制** - 只有K线结束时的修改才会被保存
+- **时间和周期管理** - 支持多种时间周期和定时任务
+- **股票池管理** - 灵活的股票筛选和管理机制
+- **回测参数配置** - 完整的回测环境设置
+
+### 10.4 最佳实践建议
+1. **合理使用ContextInfo** - 理解其状态保存机制，避免数据丢失
+2. **优化性能** - 使用批量数据获取，减少API调用频率
+3. **错误处理** - 添加完善的异常处理和日志记录
+4. **代码组织** - 采用模块化设计，提高代码可维护性
+
+### 10.5 下一步学习
+掌握了本章的核心框架后，建议继续学习：
+- 第5章：数据获取API详解
+- 第12章：交易执行API详解  
+- 第17章：QMT API完整参考手册
+- 第19章：常见问题解答（FAQ）
+
+通过本章的学习，您已经掌握了QMT策略开发的基础框架，可以开始编写自己的量化交易策略了。
+
+---
+
+*最后更新时间: 2024年8月16日*
