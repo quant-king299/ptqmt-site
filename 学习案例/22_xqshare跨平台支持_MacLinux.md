@@ -1,29 +1,342 @@
-# EasyXT 第22课：EasyXT学习实例 21 - xqshare跨平台支持（Mac/Linux）
-
-> EasyXT学习实例 21 - xqshare跨平台支持（Mac/Linux）
-学习目标：掌握使用xqshare远程客户端在Mac/Linux平台上使用EasyXT
-
-适用场景：
-- macOS 用户：无需安装虚拟机即可使用 EasyXT
-- Linux 用户：在服务器上部署量化策略
-- Windows 用户：作为备用数据源（QMT不可用时）
-
-前置条件：
-1. 安装 xqshare: pip install xqshare
-2. 配置环境变量（或创建 .env 文件）：
-   export XQSHARE_REMOTE_HOST="your-server-ip"
-   export XQSHARE_REMOTE_PORT="18812"
-
-贡献者：@jasonhu - 感谢贡献xqshare跨平台支持功能！
-
-## 学习要点
-
-- 第1课：环境配置和数据服务连接
-- 第2课：查询日K线数据
-- 第3课：查询指定日期范围的K线数据
-- 第4课：查询账户资产信息
-- 第5课：查询持仓信息
-
-源码：[22_xqshare跨平台支持_MacLinux.py](https://github.com/quant-king299/EasyXT/blob/main/学习实例/22_xqshare跨平台支持_MacLinux.py)
+# QMT支持Mac和Linux了！告别虚拟机，你的MacBook也能跑量化策略！
 
 ---
+
+> **来源**：王者quant
+
+> **链接**：https://mp.weixin.qq.com/s/XlxjWdp1okH4uS6a6FGrSA
+
+> **保存时间**：2026/7/7 15:30:04
+
+---
+
+# 特别声明
+本公众号所有内容仅为个人量化技术研究、思路分享与案例分析，不构成任何投资建议或股票推荐。金融市场具有较高风险，所有操作决策需建立在独立判断之上。
+文中提及的任何策略、指标或方法均存在局限性，过往表现不代表未来收益，且可能随市场环境变化而失效。文章仅为技术分享学习使用，不可直接用于实盘
+
+EasyXT项目介绍
+
+EasyXT是基于miniqmt中xtquant的二次开发封装库，旨在简化xtquant的使用，提供更友好的API接口。通过统一的接口设计、智能参数处理和完善的错误处理，让量化交易开发变得更加简单高效。
+
+项目地址: https://github.com/quant-king299/EasyXT
+
+## 🛠️ 环境准备
+
+### 系统要求
+
+操作系统：Windows 10/11（PowerShell 7）
+
+Python：3.9+（建议 3.10+），并将 Python 加入 PATH
+
+### ptrade/QMT账号获取指导
+
+**📱 还没有ptrade/QMT账号的朋友，可以扫码加我微信，全程指导搞定Ptrade/QMT账号！**
+
+![图片](https://mmbiz.qpic.cn/sz_mmbiz_jpg/VGaoU3y4niaL3F7VJfPwia7wp4AQMOWqDgicUUJicDx9HqakpDya47oYC7rXMoiacX9J1QHHJWUX2U402qibicERhpOrQ/640?wx_fmt=jpeg&from=appmsg&wxfrom=5&wx_lazy=1&watermark=1&tp=webp#imgIndex=0)
+
+## 📢 开场白
+
+Hello大家好！我是你们的王者 quant！👋
+
+今天要给大家分享一个**超级激动人心的好消息**：
+
+**QMT 现在支持 Mac 和 Linux 了！** 🎉
+
+是的，你没听错！ 不用装虚拟机、不用买 Windows 电脑、不用在两个系统之间来回切换！
+
+现在你手中的 MacBook、iMac、Ubuntu 服务器，都可以直接跑 QMT 量化策略了！
+
+## 💭 以前有多难受？
+
+### Mac 用户的痛 😭
+
+想象一下这个场景：
+
+你在咖啡厅，拿着刚买的 MacBook Pro，准备调试一下量化策略 打开一看... 哎，QMT 只能在 Windows 上跑！
+
+怎么办？
+
+装个虚拟机？太卡了，风扇呼呼转
+
+再买个 Windows 电脑？太贵了
+
+回家用台式机？那还买 MacBook 干啥
+
+**很多粉丝在后台问我：能不能用 Mac 跑 QMT？我只能说：技术上不行...**
+
+**直到现在！** 🎉
+
+## 💡 怎么做到的？
+
+说起来其实很简单，就像**远程控制**一样：
+
+### 原理很简单
+
+想象一下：
+
+你在 Mac 上写代码
+
+代码通过网络发送到你家里的 Windows 电脑
+
+Windows 电脑运行 QMT，拿到数据
+
+数据再通过网络传回你的 Mac
+
+你在 Mac 上就看到了结果！
+
+**就像你在用云端文档一样，编辑和运行是分开的！**
+
+你的 MacBook ←→ 网络 ←→ 家里的 Windows 电脑
+写代码 发送请求 运行QMT 返回数据
+看到结果 （这就是"服务端"）
+
+### 我们用了什么黑科技？
+
+我们使用了一个开源工具 **xqshare**，它的作用就是：
+
+让你的 Mac 以为自己就在 Windows 上运行一样！
+
+**简单来说就是：**
+
+✅ 不用装虚拟机
+
+✅ 不用买新电脑
+
+✅ 不用学新东西
+
+✅ 写法完全一样
+
+## 🎮 怎么用？超级简单！
+
+### 只需要两台电脑
+
+**一台是 Windows（家里/公司）** - 这台跑 QMT**一台是 Mac/Linux（随时随地的）** - 这台写代码
+
+### Step 1：Windows 电脑上启动服务
+
+就在你平时跑 QMT 的那台 Windows 电脑上：
+
+# 安装工具
+pip install xqshare
+
+# 启动服务（就像开启一个服务器）
+python -m xqshare.server
+
+**就这么简单！** 你的 Windows 电脑现在变成了一台"QMT 服务器"了！
+
+### Step 2：Mac 上连接使用
+
+在你的 MacBook 上：
+
+from xqshare import XtQuantRemote
+
+# 连接到家里的 Windows 电脑
+xt = XtQuantRemote("192.168.1.100") # 改成你Windows电脑的IP
+
+# 然后就和在本地完全一样了！
+stocks = xt.xtdata.get_stock_list_in_sector("沪深A股")
+print(f"获取到 {len(stocks)} 只股票")
+
+# 获取行情数据
+df = xt.xtdata.get_market_data(
+ stock_list=["000001.SZ", "600000.SH"],
+ period="1d",
+ start_time="20240101"
+)
+print(df)
+
+# 看实时行情
+ticks = xt.xtdata.get_full_tick(["000001.SZ"])
+print(ticks)
+
+**看！和平时写代码一模一样！** 你根本感觉不到是在远程调用！
+
+### 使用场景举例
+
+**场景1：在咖啡厅写策略**
+
+📍 咖啡厅
+你的 MacBook → 写代码 → 调试 → 看到结果
+ ↓ 网络传输
+📍 家里
+Windows 电脑 → 运行QMT → 返回数据
+
+**场景2：用服务器跑策略**
+
+📍 任何地方
+你的电脑 → 发送交易指令
+ ↓ 网络传输
+📍 数据中心
+Linux 服务器 → Windows服务器 → QMT下单
+
+**就是这么简单！不用再纠结系统问题了！** 🎉
+
+### 命令行工具（可选）
+
+xqshare 还提供了命令行工具，更方便：
+
+# 获取股票列表
+xtdata get_stock_list_in_sector --sector-name "沪深A股"
+
+# 获取K线数据
+xtdata get_market_data_ex \
+ --stock-list "['000001.SZ']" \
+ --period "1d" \
+ --start-time "20260101" \
+ --end-time "20260228"
+
+# 获取实时行情
+xtdata get_full_tick --stock-list "['000001.SZ', '600000.SH']"
+
+## 🔒 安全吗？
+
+这是大家最关心的问题！
+
+### 简单来说：很安全！
+
+**第一道锁：密码认证**
+
+就像你家门锁一样，连接需要输入"密码"：
+
+# 只有知道密码的人才能连接
+xt = XtQuantRemote("192.168.1.100", client_secret="你的密码")
+
+**第二道锁：加密传输（可选）**
+
+如果你特别在意安全，可以开启加密模式：
+
+就像访问银行网站一样，数据全程加密
+
+即使有人截获了数据，也看不懂内容
+
+**第三道锁：内网使用（推荐）**
+
+最安全的用法：
+
+两台电脑在同一个局域网（比如家里的WiFi）
+
+外网根本访问不到你的 Windows 电脑
+
+物理隔离 + 密码认证 = 双重保险
+
+### 小建议
+
+✅ **家庭用户**：同一个 WiFi 下用，设置个好密码就够了 ✅ **专业用户**：开启加密模式，就像访问网银一样安全 ✅ **超级谨慎**：不用远程功能，还是老老实实 Windows 单机
+
+## 🚀 EasyXT 的计划
+
+### 很快就会更好用！
+
+现在你可以先用 xqshare 实现跨平台，但我们不会止步于此！
+
+**EasyXT 正在计划原生支持远程模式：**
+
+# 未来会更简单
+from easy_xt import EasyXT
+
+# 告诉 EasyXT：我要用远程模式
+api = EasyXT(mode="remote", host="192.168.1.100")
+
+# 然后... 就和本地一模一样了！
+api.init_data()
+data = api.get_price(['000001.SZ'], count=100)
+print(data.head())
+
+# 交易也一样简单
+api.init_trade(USERDATA_PATH)
+api.buy(account_id=ACCOUNT_ID, code='000001.SZ', volume=100)
+## 📊 和其他方案比怎么样？
+
+来看看各种解决方案的对比：
+
+方案
+
+麻烦程度
+
+要花多少钱
+
+好不好用
+**装虚拟机**
+😫 很麻烦
+
+💰 要花钱
+
+😐 卡顿
+**远程桌面**
+😐 一般
+
+💰💰 中等
+
+😐 一般
+**买Windows电脑**
+🤔 不麻烦
+
+💰💰💰 很贵
+
+😊 好用
+**EasyXT远程**
+ ⭐
+
+😊 不麻烦
+
+💰 免费/很便宜
+
+🎉 超好用
+
+### 最大的优势
+
+✅ **不用学新东西** - 代码写法和原来一模一样 ✅ **速度快** - 只传数据，不传画面，秒级响应 ✅ **省钱** - 不用买新电脑 ✅ **安全** - 有密码，还能加密 ✅ **免费** - 开源项目，一分钱不用花
+
+**简单总结：又快、又好、又便宜！** 👍
+
+## 🎓 谁适合用？
+
+### 如果你符合下面任何一条：
+
+✅ **Mac 用户** - 用 MacBook 写代码，但 QMT 在 Windows 上 ✅ **Linux 服务器** - 想在服务器上自动跑策略 ✅ **多设备切换** - 家里台式机、公司笔记本、随时随地上班 ✅ **团队协作** - 多个人共用一个 QMT 账户 ✅ **追求体验** - 就想用 Mac，但需要 QMT 的功能
+
+**那你就是我们要找的人！** 🎯
+
+## 
+
+## ❓ 常见问题
+
+**Q: 速度会变慢吗？**A: 几乎感觉不到！就像你打开网页一样快，几十毫秒的延迟对交易没啥影响。
+
+**Q: 安全吗？会不会被黑客攻击？**A: 有密码保护，还能加密。如果你在家用（同一个WiFi），基本不用担心安全问题。
+
+**Q: Windows 电脑要一直开着吗？**A: 是的，就像你的"QMT服务器"。不过你也可以只在需要的时候开启。
+
+**Q: 能多人同时用吗？**A: 可以！一家人、一个小团队都能连同一台 Windows 电脑。
+
+**Q: 我不懂技术，能用吗？**A: 只要你会复制粘贴命令就行！我们准备了详细教程，一步步跟着做就行。
+
+**Q: EasyXT 什么时候能直接用？**A: 正在开发中！关注我们的公众号，第一时间获取更新。
+
+**还有问题？**欢迎在公众号留言，或者加入交流群提问！
+
+**⚠️ 风险提示：本文仅供技术交流，不构成投资建议。量化交易有风险，投资需谨慎。**
+
+## 📱 关注我们
+
+**欢迎扫码持续关注公众号，会持续分享**
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/VgJsmWg8OhB0e2DzeBaoPJW7G526g2gicfcIwmfK4UxTe3gB8rwKln3POVX03eLSQvJklo0G9DE3vnibEm1sbbkQ/640?wx_fmt=other&from=appmsg&wxfrom=5&wx_lazy=1&wx_co=1&tp=webp#imgIndex=1)
+
+🔍 **公众号名称**: 王者quant
+📚 **分享内容**: 量化交易、Python编程、投资策略
+🎯 **更新频率**: 持续更新，干货满满
+
+通过公众号您可以获得：
+
+📈 最新的量化交易策略分享
+
+💻 Python量化编程技巧
+
+📊 市场分析和投资心得
+
+🚀 EasyXT功能更新和使用技巧
+
+💡 量化交易实战案例
+
+*本教程仅供学习参考，实际交易请谨慎操作！*
