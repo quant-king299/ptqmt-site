@@ -413,17 +413,23 @@ python scripts/download_stocks.py
 
 **创建测试数据库**
 
+
+```python
 import pandas as pd
 import duckdb
 import numpy as np
+```
 
 # 创建测试数据
 dates = pd.date_range('2023-01-01', periods=500, freq='D')
 stocks = ['000001.SZ', '000002.SZ', '600000.SH']
 
 data = []
+
+```python
 for stock in stocks:
  for date in dates:
+```
  data.append({
  'date': date,
  'stock_code': stock,

@@ -81,9 +81,12 @@ from easy_xt.factor_library import create_easy_factor
 ef = create_easy_factor(r'D:/StockData/stock_data.ddb', enable_extended_modules=True)
 
 # 获取29个基本面因子
+
+```python
 from easy_xt.fundamental_enhanced import get_enhanced_fundamental_factors
 df = get_enhanced_fundamental_factors('000001.SZ', ef.duckdb_reader)
 print(df)
+```
 
 **输出**：
 
@@ -201,8 +204,11 @@ single = ef.get_ths_stock_money_flow(stock_code='000001')
 
 ## 🎯 实战案例1：多因子选股
 
+
+```python
 from easy_xt.factor_library import create_easy_factor
 from easy_xt.fundamental_enhanced import get_batch_enhanced_factors
+```
 
 # 初始化
 ef = create_easy_factor(r'D:/StockData/stock_data.ddb', enable_extended_modules=True)
@@ -221,8 +227,11 @@ df_selected = df[
  (df['volatility_20d'] < 0.3) # 风险适中
 ]
 
+
+```python
 print("符合条件的股票：")
 print(df_selected[['momentum_20d', 'momentum_60d', 'rsi_14']])
+```
 
 ## 🎯 实战案例2：资金流向+技术面双筛选
 
@@ -239,8 +248,11 @@ df_selected = df_factors[
  (df_factors['trend_strength_60d'] > 0) # 趋势强度高
 ]
 
+
+```python
 print("资金流入且技术面强势的股票：")
 print(df_selected)
+```
 
 ## 🎯 实战案例3：板块轮动策略
 

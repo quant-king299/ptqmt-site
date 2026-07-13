@@ -165,8 +165,11 @@ A股最长停牌不超过5个交易日
 第三层：调仓前二次确认
 [20240801] 调仓...
  # 检查当前持仓是否有退市股票
+
+```python
  for stock in current_positions:
  if is_delisted(stock):
+```
  [DELISTED] 强制卖出，避免损失扩大
 
 **实战效果**：
@@ -365,8 +368,11 @@ self.fundamentals_cache = {
 }
 
 # 后续查询直接读缓存
+
+```python
 if date in cache:
  return cache[date]
+```
 
 **效果**：
 
@@ -519,9 +525,12 @@ python run_gui.py
 def get_market_value(date):
  总资产 = 现金 + 持仓市值
 
+
+```python
  for 股票 in 持仓:
  价格 = get_price(股票, date)
  if 价格:
+```
  持仓市值 += 价格 × 持仓数量
  else:
  # 无价格时使用成本价估值
@@ -531,8 +540,11 @@ def get_market_value(date):
 持仓调整
 def rebalance(date, target_weights):
  # 1. 卖出不在目标中的股票
+
+```python
  for 股票 in 当前持仓:
  if 股票 notin target_weights:
+```
  sell(股票, 全部持仓)
 
  # 2. 买入目标股票
@@ -561,8 +573,11 @@ def rebalance(date, target_weights):
 回撤序列 = []
 峰值 = 0
 
+
+```python
 for 总资产 in 每日资产:
  if 总资产 > 峰值:
+```
  峰值 = 总资产
  回撤 = (峰值 - 总资产) / 峰值
  回撤序列.append(回撤)
@@ -720,8 +735,11 @@ class YourStrategy(StrategyBase):
 
  # 2. 你的选股条件
  filtered = []
+
+```python
  for stock in stocks:
  if your_condition(stock):
+```
  filtered.append(stock)
 
  # 3. 返回选中的股票

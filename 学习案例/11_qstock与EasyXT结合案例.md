@@ -107,21 +107,33 @@ python 09_qstock与EasyXT结合案例.py
 **1. 模块导入策略**
 
 # qstock数据获取模块
+
+```python
 try:
  import qstock as qs
+```
  QSTOCK_AVAILABLE = True
+
+```python
  print("✅ qstock数据模块加载成功")
 except ImportError as e:
  print(f"❌ qstock模块导入失败: {e}")
+```
  QSTOCK_AVAILABLE = False
 
 # EasyXT交易执行模块
+
+```python
 try:
  from easy_xt.api import EasyXT
+```
  EASYXT_AVAILABLE = True
+
+```python
  print("✅ EasyXT交易模块加载成功")
 except ImportError as e:
  print(f"❌ EasyXT模块导入失败: {e}")
+```
  EASYXT_AVAILABLE = False
 
 **2. 系统初始化流程**
@@ -129,17 +141,26 @@ except ImportError as e:
 class QStockEasyXTIntegration:
  def__init__(self):
  # 数据存储
+
+```python
  self.data_cache = {}
  self.signal_history = []
  self.trade_history = []
+```
  
  # 系统状态
+
+```python
  self.is_trading_enabled = False
  self.is_monitoring = False
+```
  
  # 初始化模块
+
+```python
  self.init_data_module() # qstock数据模块
  self.init_trading_module() # EasyXT交易模块
+```
 🖥️ 运行效果预览
 🚀 qstock与EasyXT完美结合量化交易系统
 ============================================================
@@ -463,13 +484,19 @@ def risk_management_check(self, signal, account_info, position_info):
  
  if signal['signal_type'] == 'BUY':
  trade_value = signal['price'] * 100
+
+```python
  if current_position_value + trade_value > max_position_value:
  return {'passed': False, 'reason': '超过最大仓位限制'}
+```
  
  # 检查2: 单股仓位限制
  single_stock_max = total_asset * TRADING_CONFIG['single_stock_ratio']
+
+```python
  if current_position_value > single_stock_max:
  return {'passed': False, 'reason': '超过单股最大仓位'}
+```
  
  # 检查3: 止损检查
  if position_info.get('volume', 0) > 0:
@@ -477,12 +504,18 @@ def risk_management_check(self, signal, account_info, position_info):
  current_price = signal['price']
  loss_ratio = (cost_price - current_price) / cost_price
  
+
+```python
  if loss_ratio > TRADING_CONFIG['stop_loss_ratio']:
  return {'passed': False, 'reason': '触发止损'}
+```
  
  # 检查4: 信号置信度
+
+```python
  if signal['confidence'] < STRATEGY_CONFIG['signal_threshold']:
  return {'passed': False, 'reason': '信号置信度不足'}
+```
  
  return {'passed': True, 'reason': '风险检查通过'}
 
@@ -505,8 +538,11 @@ def calculate_trade_quantity(self, signal, account_info, position_info):
  can_sell = position_info.get('can_use_volume', 0)
  if can_sell > 0:
  # 根据信号强度决定卖出比例
+
+```python
  sell_ratio = min(0.5, abs(signal['strength']))
  quantity = int(can_sell * sell_ratio) // 100 * 100
+```
  returnmax(100, min(quantity, can_sell))
  
  return0
@@ -568,8 +604,11 @@ def_monitoring_loop(self):
  # 监控股票池
  all_signals = []
  
+
+```python
  for category, stocks in STOCK_POOL.items():
  print(f"📊 监控 {category}...")
+```
  
  for stock in stocks[:2]: # 限制监控数量
  # 获取数据
@@ -588,10 +627,13 @@ def_monitoring_loop(self):
  print(f" {stock}: 价格 {latest['close']:.2f}, RSI {latest.get('RSI', 50):.1f}")
  
  # 处理信号
+
+```python
  if all_signals:
  for signal in all_signals:
  if signal['confidence'] >= STRATEGY_CONFIG['signal_threshold']:
  print(f"🔥 高质量信号: {signal['symbol']} {signal['signal_type']}")
+```
  
  # 显示账户状态
  self._display_account_status()
@@ -605,11 +647,14 @@ def _display_account_status(self):
  """显示账户状态"""
  account_info = self.get_account_info()
  
+
+```python
  print(f"\n💼 账户状态:")
  print(f" 总资产: {account_info.get('total_asset', 0):,.2f}")
  print(f" 可用资金: {account_info.get('cash', 0):,.2f}")
  print(f" 持仓市值: {account_info.get('market_value', 0):,.2f}")
  print(f" 浮动盈亏: {account_info.get('profit_loss', 0):,.2f}")
+```
 🖥️ 运行效果预览
 🔄 启动实时监控系统...
 ✅ 实时监控系统已启动
@@ -799,8 +844,11 @@ def create_visualization(self, symbol: str, data: pd.DataFrame, signals: List[Di
  ax1.plot(data.index, data['MA20'], label='MA20', alpha=0.7)
  
  # 标记交易信号
+
+```python
  for signal in signals:
  if signal['signal_type'] == 'BUY':
+```
  ax1.scatter(data.index[-1], signal['price'], color='red', marker='^', s=100)
  else:
  ax1.scatter(data.index[-1], signal['price'], color='green', marker='v', s=100)

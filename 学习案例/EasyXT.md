@@ -50,8 +50,11 @@ print(df[['close', 'volume']])
 ```python
 # 多只股票实时快照
 df = api.get_current_price(['000001.SZ', '600519.SH', '300750.SZ'])
+
+```python
 for _, row in df.iterrows():
     print(f"{row['code']}: {row['price']:.2f}")
+```
 ```
 
 ## 获取财务数据
@@ -59,8 +62,11 @@ for _, row in df.iterrows():
 ```python
 # 获取三大报表
 data = api.get_financial_data(['000001.SZ'],
+
+```python
     tables=['Balance', 'Income', 'CashFlow'],
     start='20240101')
+```
 
 income = data['000001.SZ']['Income']
 print(income[['revenue', 'net_profit_incl_min_int_inc']])

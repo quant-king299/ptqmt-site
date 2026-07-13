@@ -299,32 +299,44 @@ factor_dict = {
 # ========== Step 1: IC/IR分析 ==========
 print("【Step 1】IC/IR分析 - 筛选有效因子")
 results = {}
+
+```python
 for name, data in factor_dict.items():
  analyzer = ICIRAnalyzer(price_data, data)
+```
  analyzer.calculate_ic()
  results[name] = analyzer.calculate_ic_stats()
 
 # 按IR排序
+
+```python
 sorted_factors = sorted(results.items(), key=lambda x: x[1]['ir'], reverse=True)
 print("\n因子排名（按IR）：")
 for name, stats in sorted_factors:
  print(f"{name}: IR={stats['ir']:.3f}, IC均值={stats['ic_mean']:.3f}")
+```
 
 # 选择前5个因子
 top_5 = dict(sorted_factors[:5])
 
 # ========== Step 2: 相关性分析 ==========
+
+```python
 print("\n【Step 2】相关性分析 - 去除冗余因子")
 correlation_analyzer = FactorCorrelationAnalyzer(
+```
  {name: factor_dict[name] for name in top_5}
 )
 correlation_analyzer.print_report(threshold=0.7)
 
 # ========== Step 3: 分层回测验证 ==========
+
+```python
 print("\n【Step 3】分层回测 - 验证实际效果")
 for name in top_5:
  print(f"\n--- {name} 回测结果 ---")
  backtester = LayeredBacktester(price_data, factor_dict[name])
+```
  backtester.calculate_layer_returns(n_layers=5)
  backtester.calculate_long_short_returns(n_layers=5)
  backtester.print_report()

@@ -195,8 +195,11 @@ selected_stocks = momentum_20[
  (momentum_20['momentum_pct'] < 50) # 排除过度投机
 ]
 
+
+```python
 print(f"筛选出 {len(selected_stocks)} 只强势股：")
 print(selected_stocks[['stock_code', 'momentum_pct', 'current_price']].head(10))
+```
 
 ## 📊 四、性能优势
 
@@ -268,10 +271,13 @@ results = ef.analyze_batch(
 )
 
 # 查看各类因子
+
+```python
 print(results['momentum']) # 动量因子
 print(results['volatility']) # 波动率
 print(results['technical']) # 技术指标
 print(results['score']) # 综合评分
+```
 
 ### 4. 综合评分选股
 
@@ -383,8 +389,11 @@ df = ef.get_market_data_ex('000001.SZ', '20240101', '20241231')
 
 A: 可以继承 EasyFactor 类，添加自己的因子计算方法：
 
+
+```python
 class CustomEasyFactor(EasyFactor):
  def _calc_custom_factor(self, df):
+```
  """自定义因子计算"""
  # 你的计算逻辑
  pass

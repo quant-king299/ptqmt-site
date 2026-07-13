@@ -150,10 +150,13 @@ PyQt5
 
 # local_data_manager.py
 
+
+```python
 from pathlib import Path
 import pandas as pd
 import sqlite3
 from datetime import datetime
+```
 
 classLocalDataManager:
  """本地数据管理器 - 让数据持久化变得简单"""
@@ -165,8 +168,11 @@ classLocalDataManager:
  Args:
  data_dir: 数据存储目录
  """
+
+```python
  self.data_dir = Path(data_dir)
  self.data_dir.mkdir(parents=True, exist_ok=True)
+```
 
  # 初始化元数据库
  self.metadata = self._init_metadata_db()
@@ -220,14 +226,20 @@ classLocalDataManager:
  len(df), file_size_mb
  )
 
+
+```python
  print(f"✓ 已保存 {stock_code} {data_type} 数据")
  print(f" 记录数: {len(df):,}")
  print(f" 文件大小: {file_size_mb:.2f} MB")
+```
 
  returnTrue, file_size_mb
 
+
+```python
  except Exception as e:
  print(f"✗ 保存失败: {e}")
+```
  returnFalse, 0
 
  defload_data(self, stock_code, data_type='daily'):
@@ -249,8 +261,11 @@ classLocalDataManager:
  # 从Parquet读取（秒级响应）
  df = pd.read_parquet(file_path)
 
+
+```python
  print(f"✓ 从本地加载 {stock_code} {data_type} 数据")
  print(f" 记录数: {len(df):,}")
+```
 
  return df
 
@@ -321,9 +336,12 @@ classLocalDataManager:
 
 # save_qmt_data.py
 
+
+```python
 from xtquant import xtdata
 import pandas as pd
 from datetime import datetime
+```
 
 defsave_qmt_minute_data(stock_code):
  """
@@ -358,16 +376,22 @@ defsave_qmt_minute_data(stock_code):
  return
 
  # 3. 转换为标准DataFrame
+
+```python
  print("🔄 转换数据格式...")
  df = convert_xtdata_to_dataframe(data)
+```
 
  # 4. 保存到本地
  manager = LocalDataManager()
  success, size_mb = manager.save_data(df, stock_code, '1min')
  manager.close()
 
+
+```python
  if success:
  print(f"\n✅ 成功！文件大小: {size_mb:.2f} MB")
+```
 
 defconvert_xtdata_to_dataframe(data):
  """
@@ -387,8 +411,11 @@ defconvert_xtdata_to_dataframe(data):
  timestamps = time_df.columns.tolist()
 
  records = []
+
+```python
  for i, ts inenumerate(timestamps):
  try:
+```
  # 转换时间戳 (格式: 20250124145100)
  ts_str = str(ts)
  dt_str = f"{ts_str[:4]}-{ts_str[4:6]}-{ts_str[6:8]} " \
@@ -407,9 +434,12 @@ defconvert_xtdata_to_dataframe(data):
  }
  records.append(record)
 
+
+```python
  except Exception as e:
  print(f"⚠️ 跳过记录 {i}: {e}")
  continue
+```
 
  df = pd.DataFrame(records)
  ifnot df.empty:
@@ -449,8 +479,11 @@ classBacktestEngine:
  """
  self.use_local_cache = use_local_cache
 
+
+```python
  if use_local_cache:
  self.data_manager = LocalDataManager()
+```
 
  defget_data(self, stock_code, data_type='1min'):
  """
@@ -463,8 +496,11 @@ classBacktestEngine:
  df = self.data_manager.load_data(stock_code, data_type)
 
  ifnot df.empty:
+
+```python
  print(f"✓ 从本地加载 {stock_code} 数据 ({len(df)} 条)")
  return df
+```
 
  print(f"⚠️ 本地无 {stock_code} 数据，尝试从QMT获取...")
 
@@ -486,8 +522,11 @@ classBacktestEngine:
  start_date: 开始日期
  end_date: 结束日期
  """
+
+```python
  print(f"🚀 开始回测 {stock_code}...")
  print(f" 时间范围: {start_date} 到 {end_date}")
+```
 
  # 加载数据（自动优先使用本地）
  df = self.get_data(stock_code, '1min')
@@ -495,8 +534,11 @@ classBacktestEngine:
  # 过滤日期范围
  df = df.loc[start_date:end_date]
 
+
+```python
  print(f"✓ 数据加载完成: {len(df)} 条记录")
  print(f" 日期范围: {df.index.min()} 到 {df.index.max()}")
+```
 
  # 执行回测逻辑
  total_profit = 0
@@ -515,8 +557,11 @@ classBacktestEngine:
  return df
 
 # 使用示例
+
+```python
 if __name__ == '__main__':
  engine = BacktestEngine(use_local_cache=True)
+```
 
  # 首次运行会从QMT下载并保存
  result = engine.run_backtest(
@@ -559,8 +604,11 @@ classETFPortfolio:
  """ETF组合管理"""
 
  def__init__(self):
+
+```python
  self.manager = LocalDataManager()
  self.etf_list = [
+```
  '511380.SH', # 可转债ETF
  '512100.SH', # 中证1000ETF
  '510300.SH', # 沪深300ETF
@@ -570,25 +618,37 @@ classETFPortfolio:
 
  defupdate_all(self):
  """更新所有ETF数据"""
+
+```python
  print("📥 开始批量更新ETF数据...")
  print(f" 总数: {len(self.etf_list)} 只")
+```
 
  success_count = 0
+
+```python
  for i, etf inenumerate(self.etf_list, 1):
  try:
  print(f"\n[{i}/{len(self.etf_list)}] {etf}")
+```
 
  # 下载QMT数据
  save_qmt_minute_data(etf)
  success_count += 1
 
+
+```python
  except Exception as e:
  print(f"✗ {etf} 更新失败: {e}")
+```
 
  self.manager.close()
 
+
+```python
  print(f"\n✅ 更新完成！")
  print(f" 成功: {success_count}/{len(self.etf_list)}")
+```
 
  defload_all(self):
  """加载所有ETF数据"""
@@ -604,8 +664,11 @@ classETFPortfolio:
 
  self.manager.close()
 
+
+```python
  print(f"\n✅ 加载完成！共 {len(data_dict)} 只ETF")
  return data_dict
+```
 
 # 使用
 portfolio = ETFPortfolio()
@@ -660,12 +723,18 @@ manager = LocalDataManager()
 df_1m = manager.load_data('511380.SH', '1min')
 
 # 转换为5分钟
+
+```python
 df_5m = convert_period(df_1m, '5m')
 print(f"✓ 转换为5分钟: {len(df_5m)} 条")
+```
 
 # 转换为日线
+
+```python
 df_1d = convert_period(df_1m, '1d')
 print(f"✓ 转换为日线: {len(df_1d)} 条")
+```
 
 # 保存转换后的数据
 manager.save_data(df_5m, '511380.SH', '5min')
@@ -688,22 +757,31 @@ manager.close()
 
 # auto_update.py
 
+
+```python
 import schedule
 import time
+```
 
 defauto_update_job():
  """定时更新任务"""
+
+```python
  print(f"\n{'='*50}")
  print(f"🔄 自动更新任务: {datetime.now()}")
  print(f"{'='*50}")
+```
 
  manager = LocalDataManager()
 
  # 获取需要更新的股票
  symbols_to_update = ['511380.SH', '512100.SH', '510300.SH']
 
+
+```python
  for symbol in symbols_to_update:
  try:
+```
  # 只下载最近7天的数据
  end_date = datetime.now()
  start_date = end_date - pd.Timedelta(days=7)
@@ -715,8 +793,11 @@ defauto_update_job():
  manager.save_data(df, symbol, '1min')
  print(f"✓ {symbol} 更新完成")
 
+
+```python
  except Exception as e:
  print(f"✗ {symbol} 更新失败: {e}")
+```
 
  manager.close()
  print(f"✅ 自动更新完成\n")
@@ -744,15 +825,21 @@ defvalidate_data_quality(stock_code, data_type):
  2. 价格关系合理性
  3. 连续性（无异常缺口）
  """
+
+```python
  print(f"\n🔍 验证 {stock_code} {data_type} 数据质量")
  print(f"{'='*50}")
+```
 
  manager = LocalDataManager()
  df = manager.load_data(stock_code, data_type)
  manager.close()
 
+
+```python
  if df.empty:
  print("✗ 无数据")
+```
  returnFalse
 
  # 检查1：数据完整性
@@ -766,9 +853,12 @@ defvalidate_data_quality(stock_code, data_type):
  actual = len(df)
  completeness = (actual / expected) * 100if expected > 0else0
 
+
+```python
  print(f"1️⃣ 数据完整度: {completeness:.1f}%")
  print(f" 期望记录数: {expected:,}")
  print(f" 实际记录数: {actual:,}")
+```
 
  # 检查2：价格关系
  ifall(col in df.columns for col in ['open', 'high', 'low', 'close']):
@@ -792,29 +882,41 @@ defvalidate_data_quality(stock_code, data_type):
  time_diff = df.index.to_series().diff()
  gaps = time_diff > pd.Timedelta('2min')
 
+
+```python
  print(f"\n3️⃣ 数据连续性:")
  if gaps.any():
+```
  gap_count = gaps.sum()
  print(f" ⚠️ 发现 {gap_count} 处缺口")
 
  # 显示缺口详情
  gap_times = df.index[gaps]
+
+```python
  for gt in gap_times[:5]: # 只显示前5个
  print(f" - {gt}")
  else:
  print(f" ✓ 无明显缺口")
+```
 
  # 检查4：缺失值
  missing = df.isnull().sum()
+
+```python
  print(f"\n4️⃣ 缺失值检查:")
  if missing.sum() > 0:
  print(missing[missing > 0])
  else:
  print(f" ✓ 无缺失值")
+```
 
+
+```python
  print(f"\n{'='*50}")
  print(f"✅ 验证完成")
  print(f"{'='*50}\n")
+```
 
  returnTrue
 
@@ -854,6 +956,8 @@ defexport_statistics():
  # 获取统计信息
  stats = manager.get_statistics()
 
+
+```python
  print("\n" + "="*50)
  print("📊 本地数据统计报告")
  print("="*50)
@@ -861,6 +965,7 @@ defexport_statistics():
  print(f"总记录数: {stats['total_records']:,}")
  print(f"总大小: {stats['total_size_mb']:.2f} MB")
  print("="*50 + "\n")
+```
 
  # 按类型统计
  conn = manager.metadata.conn
@@ -876,9 +981,12 @@ defexport_statistics():
  ORDER BY data_type
  """)
 
+
+```python
  print("按数据类型统计:")
  print("-"*50)
  for row in cursor.fetchall():
+```
  data_type, count, records, size = row
  print(f"{data_type:8s}: {count:4d} 只, {records:10,} 条, {size:6.2f} MB")
 
@@ -894,8 +1002,11 @@ defexport_to_csv(stock_code, data_type, output_dir='./'):
  ifnot df.empty:
  output_path = Path(output_dir) / f"{stock_code}_{data_type}.csv"
  df.to_csv(output_path)
+
+```python
  print(f"✓ 已导出到 {output_path}")
  print(f" 记录数: {len(df):,}")
+```
 
  manager.close()
 
@@ -1054,8 +1165,11 @@ df = cache['511380.SH'] # 毫秒级响应
 
 from contextlib import contextmanager
 
+
+```python
 @contextmanager
 def DataManager():
+```
  """上下文管理器"""
  manager = LocalDataManager()
  yield manager
@@ -1070,8 +1184,11 @@ with DataManager() as manager:
 ### 优化3：批量操作
 
 # 批量加载（减少IO次数）
+
+```python
 def load_batch(stock_list):
  manager = LocalDataManager()
+```
 
  data_dict = {}
  for stock in stock_list:

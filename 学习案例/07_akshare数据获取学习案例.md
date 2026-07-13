@@ -134,8 +134,11 @@ data = get_stock_data('511380.SH', '2024-01-01', '2024-12-31')
 ### 使用示例
 
 # 一行代码切换复权方式，零延迟！
+
+```python
 data = get_stock_data('511380.SH', '2024-01-01', '2024-12-31', adjust='front')
 data = get_stock_data('511380.SH', '2024-01-01', '2024-12-31', adjust='back')
+```
 
 # 瞬间完成，无需重新计算！
 
@@ -216,8 +219,11 @@ checker.connect()
 # 检查数据完整性
 report = checker.check_integrity('511380.SH', '2024-01-01', '2024-12-31')
 
+
+```python
 print(f"完整度: {report['completeness_ratio']*100:.2f}%")
 print(f"状态: {report['status']}")
+```
 
 ## 八、可视化数据管理
 
