@@ -46,7 +46,7 @@
   * [快速入门指南](docs/EasyXT快速入门指南.html)
   * [核心 API 手册](docs/EasyXT核心API手册.html)
   * [回测系统文档](docs/EasyXT回测系统文档.html)
-  * [GUI 操作手册](docs/EasyXT GUI操作手册.html)
+  * [GUI 操作手册](docs/EasyXT_GUI操作手册.html)
   * [策略开发指南](docs/EasyXT策略开发指南.html)
   * [架构与部署](docs/EasyXT架构与部署.html)
 
