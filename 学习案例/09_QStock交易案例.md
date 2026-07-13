@@ -1,4 +1,4 @@
-# EasyXT第十课：QStock真实交易案例教程
+# 🚀 EasyXT第九课：QStock交易案例
 
 **项目地址**: https://github.com/quant-king299/EasyXT
 
