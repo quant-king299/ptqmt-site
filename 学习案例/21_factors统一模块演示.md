@@ -12,7 +12,6 @@
 
 特别声明
 
-本公众号所有内容仅为个人量化技术研究、思路分享与案例分析，不构成任何投资建议或股票推荐。金融市场具有较高风险，所有操作决策需建立在独立判断之上。
 
 文中提及的任何策略、指标或方法均存在局限性，过往表现不代表未来收益，且可能随市场环境变化而失效。文章仅为技术分享学习使用，不可直接用于实盘。
 EasyXT项目介绍
@@ -229,7 +228,6 @@ IR值
 
 ### 📊 图1：IC时序图
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/EJlBUWwkaEVAqQAmGEgdLBHPRkxEynTn6Gwp4eYjyGiaIqRibicaDiaDntAS2ibuYfXQC9iczfxJyqLUwicJv3VSfDdW6rYN5khpeeZXfdpibnVIWYo/640?wx_fmt=png&from=appmsg)
 
 **展示内容：**
 
@@ -243,7 +241,6 @@ IR值
 
 ### 📊 图2：IC统计综合图（4个子图）
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/EJlBUWwkaEUic6LRvvQ6iafJmsZQtUS7B5icIHMtKFd52TmaKarEGLTPSfAMsO2b4ABn0vT60x8VpHUH9NbmdqFxbJ2xC5whW7qeMSaquEqN1c/640?wx_fmt=png&from=appmsg)
 
 **包含4个子图：**
 **IC分布直方图**
@@ -257,7 +254,6 @@ IR值
 
 ### 📊 图3：净值曲线图
 
-![图片](https://mmbiz.qpic.cn/sz_mmbiz_png/EJlBUWwkaEUDRGcJl7RHZFfP5e3ZH3gNDLhsykxrn8XT7awvT0LFOlZueicP6GceDgAaShQZjt5RETa4aun1vknU8Z8eq4maXLPnUcAV0nK0/640?wx_fmt=png&from=appmsg)
 
 **对比展示：**
 
@@ -271,7 +267,6 @@ IR值
 
 ### 📊 图4：分组收益对比图
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/EJlBUWwkaEUzjUxtbjGq7HTibJxb0P89I1ImUpGl6XIUqa2e7KNlEaRtfaC4EaDPte78ibAaRLicSXJf1HbFJOsTtAbocsLc2DcFyKMibWyyvBI/640?wx_fmt=png&from=appmsg)
 
 **清晰展示：**
 
@@ -283,7 +278,6 @@ IR值
 
 ### 📊 图5：回撤分析图
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/EJlBUWwkaEWGNCCSxhC9ju3ic4nKxz0Gqcibcd5BuY1Z6cSFpRcLuQv0lHia2WSlYuHE0gvu8FUvN9D4dHWZx6ZcUgongATHB5u7YWKzkGSmP0/640?wx_fmt=png&from=appmsg)
 
 **风险可视化：**
 
@@ -520,15 +514,11 @@ plt.rcParams['axes.unicode_minus'] = False
 
 ## 📱 关注我们
 
-**欢迎扫码持续关注公众号，会持续分享**
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/VgJsmWg8OhB0e2DzeBaoPJW7G526g2gicfcIwmfK4UxTe3gB8rwKln3POVX03eLSQvJklo0G9DE3vnibEm1sbbkQ/640?wx_fmt=other&from=appmsg&wxfrom=5&wx_lazy=1&wx_co=1&tp=webp#imgIndex=1)
 
-🔍 **公众号名称**: 王者quant
 📚 **分享内容**: 量化交易、Python编程、投资策略
 🎯 **更新频率**: 持续更新，干货满满
 
-通过公众号您可以获得：
 
 📈 最新的量化交易策略分享
 

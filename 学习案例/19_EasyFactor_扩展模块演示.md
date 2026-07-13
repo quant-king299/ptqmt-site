@@ -11,7 +11,6 @@
 ---
 
 # 特别声明
-本公众号所有内容仅为个人量化技术研究、思路分享与案例分析，不构成任何投资建议或股票推荐。金融市场具有较高风险，所有操作决策需建立在独立判断之上。
 文中提及的任何策略、指标或方法均存在局限性，过往表现不代表未来收益，且可能随市场环境变化而失效。文章仅为技术分享学习使用，不可直接用于实盘。
 EasyXT项目介绍
 
@@ -29,9 +28,7 @@ Python：3.9+（建议 3.10+），并将 Python 加入 PATH
 
 ### ptrade/QMT账号获取指导
 
-**📱 还没有ptrade/QMT账号的朋友，可以扫码加我微信，全程指导搞定Ptrade/QMT账号！**
 
-![图片](https://mmbiz.qpic.cn/sz_mmbiz_jpg/VGaoU3y4niaL3F7VJfPwia7wp4AQMOWqDgicUUJicDx9HqakpDya47oYC7rXMoiacX9J1QHHJWUX2U402qibicERhpOrQ/640?wx_fmt=jpeg&from=appmsg&wxfrom=5&wx_lazy=1&watermark=1&tp=webp#imgIndex=0)
 
 # 前言
 
@@ -53,7 +50,6 @@ Python：3.9+（建议 3.10+），并将 Python 加入 PATH
 
 **实战案例**：用小市值策略演示，2024年收益+12.58%，成功避开4只退市股票！
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/EJlBUWwkaEU2GJTfx4n6SoMHCRcLHcRGUjK6uyVvU5CcNMfVVgh4R14D4Xican6RVLWt1L39OaiabfcUwhMQp2LRXmV0uLRtcIKpQLGIviao28/640?wx_fmt=png&from=appmsg)
 
 ## 🎯 一、平台定位与核心价值
 
@@ -412,11 +408,8 @@ python run_gui.py
 
 ## 🖥️ 四、核心功能三：可视化界面
 
-![图片](https://mmbiz.qpic.cn/sz_mmbiz_png/EJlBUWwkaEUF6MUncGoa2icwbDJtt4waUxLibxwkGJ3PYtexluMDGFbSM00ZpzhbqfsmmbZ2J66q61oVkkr0Z9oYbPtzWL3kf3XiaEhFqqiar3o/640?wx_fmt=png&from=appmsg)
 
-![图片](https://mmbiz.qpic.cn/sz_mmbiz_png/EJlBUWwkaEVLX9r4X3M9NiaiaaVS9KZ7I3746JgxPwp6tQdcGAcpGicD6ynY0gzHWZQlPWu0YbBmITWBcA2PXcUBCJUKzcIjjSnQxsOVicIicmQw/640?wx_fmt=png&from=appmsg)
 
-![图片](https://mmbiz.qpic.cn/sz_mmbiz_png/EJlBUWwkaEXsMBRb9fsUMBRAjkKQ6wWE7Am7YL1EMFU13XFcXqHBkRMLtJbzs7GyicxaqAaG30a1jhW7G6ciaTKvhlHMia2pbn5kmsQShnqCias/640?wx_fmt=png&from=appmsg)
 
 ## 
 
@@ -937,15 +930,11 @@ python -m streamlit run app.py
 
 ## 📱 关注我们
 
-**欢迎扫码持续关注公众号，会持续分享**
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/VgJsmWg8OhB0e2DzeBaoPJW7G526g2gicfcIwmfK4UxTe3gB8rwKln3POVX03eLSQvJklo0G9DE3vnibEm1sbbkQ/640?wx_fmt=other&from=appmsg&wxfrom=5&wx_lazy=1&wx_co=1&tp=webp#imgIndex=1)
 
-🔍 **公众号名称**: 王者quant
 📚 **分享内容**: 量化交易、Python编程、投资策略
 🎯 **更新频率**: 持续更新，干货满满
 
-通过公众号您可以获得：
 
 📈 最新的量化交易策略分享
 

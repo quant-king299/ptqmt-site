@@ -58,9 +58,7 @@ Python 3.7+ 环境
 
 ### QMT账号获取指导
 
-**📱 还没有QMT账号的朋友，可以扫码加我微信，全程指导搞定QMT账号！**
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/VgJsmWg8OhAdslicZKicLibUEDclDLHsqUp6pw5NQrmNib3cUrDMPNACgwibZnSx1qF0qE6PCpfJZG36hWtoBCen6mg/640?wx_fmt=jpeg&from=appmsg&wxfrom=5&wx_lazy=1&tp=webp#imgIndex=0)
 
 迅投QMT客户端（已安装、启动并登录）
 
@@ -854,7 +852,6 @@ def create_visualization(self, symbol: str, data: pd.DataFrame, signals: List[Di
 📊 数据已导出: reports/000001_data_20250926_220641.csv
 📊 信号已保存: reports/000001_signals_20250926_220641.json
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/VgJsmWg8OhBzWkdib3Rmbiaiacz3Mo1nkicVt1PhEwTKmsk6Vc9QBl2c0L5K1s60lfTUlb698iaDD0uUExcBPH90LyQ/640?wx_fmt=png&from=appmsg)
 
 💡 核心知识点
 可视化图表直观展示分析结果
@@ -941,15 +938,11 @@ def create_visualization(self, symbol: str, data: pd.DataFrame, signals: List[Di
 
 ## 📱 关注我们
 
-**欢迎扫码持续关注公众号，会持续分享**
 
-![图片](http://mmbiz.qpic.cn/mmbiz_png/VgJsmWg8OhB0e2DzeBaoPJW7G526g2gicfcIwmfK4UxTe3gB8rwKln3POVX03eLSQvJklo0G9DE3vnibEm1sbbkQ/640?wx_fmt=other&from=appmsg&wxfrom=5&wx_lazy=1&wx_co=1&tp=webp#imgIndex=1)
 
-🔍 **公众号名称**: 王者quant
 📚 **分享内容**: 量化交易、Python编程、投资策略
 🎯 **更新频率**: 持续更新，干货满满
 
-通过公众号您可以获得：
 
 📈 最新的量化交易策略分享
 

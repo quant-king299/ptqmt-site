@@ -27,9 +27,7 @@ Python 3.7+ 环境
 
 ### QMT账号获取指导
 
-**📱 还没有QMT账号的朋友，可以扫码加我微信，全程指导搞定QMT账号！**
 
-![图片](https://mmbiz.qpic.cn/mmbiz_jpg/VgJsmWg8OhAdslicZKicLibUEDclDLHsqUp6pw5NQrmNib3cUrDMPNACgwibZnSx1qF0qE6PCpfJZG36hWtoBCen6mg/640?wx_fmt=jpeg&from=appmsg&wxfrom=5&wx_lazy=1&tp=webp#imgIndex=0)
 
 迅投QMT客户端（已安装、启动并登录）
 
@@ -214,7 +212,6 @@ python 学习实例/11_GUI应用入门.py --auto --run
 🔄 正在启动子进程...
 ✓ 已尝试启动，若无界面请检查依赖与环境。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/VgJsmWg8OhDUPkfzxdntOjeDhbia1W6HoJt05uBAAUyPjxQysGpM9sUYDCLN1q91UmPwVXLhFI0az1EVXXp4fTg/640?wx_fmt=png&from=appmsg)
 
 ### 第4课：启动简洁交易界面（trading_interface_simple.py）
 
@@ -282,7 +279,6 @@ python 学习实例/11_GUI应用入门.py --run
 🔄 正在启动子进程...
 ✓ 已尝试启动，若无界面请检查依赖与环境。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/VgJsmWg8OhAWncfF0zaQCtw8Qk54GFlb56UCIba3n6jicqZSdxdXPuGuG16HJtyicnM3JTthhRSiaP8Gm6TNGtNWw/640?wx_fmt=png&from=appmsg)
 
 ### 第6课：常见问题与建议
 
@@ -325,15 +321,11 @@ Windows 子进程新窗口：
 
 ## 📱 关注我们
 
-**欢迎扫码持续关注公众号，会持续分享**
 
-![图片](http://mmbiz.qpic.cn/mmbiz_png/VgJsmWg8OhB0e2DzeBaoPJW7G526g2gicfcIwmfK4UxTe3gB8rwKln3POVX03eLSQvJklo0G9DE3vnibEm1sbbkQ/640?wx_fmt=other&from=appmsg&wxfrom=5&wx_lazy=1&wx_co=1&tp=webp#imgIndex=1)
 
-🔍 **公众号名称**: 王者quant
 📚 **分享内容**: 量化交易、Python编程、投资策略
 🎯 **更新频率**: 持续更新，干货满满
 
-通过公众号您可以获得：
 
 📈 最新的量化交易策略分享
 
