@@ -292,20 +292,21 @@
   gap: 6px;
   padding: 12px 28px;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #fff !important;
-  background: linear-gradient(135deg, #c8a45c 0%, #b8942f 100%) !important;
+  background: linear-gradient(135deg, #d4a84a 0%, #c4922a 100%) !important;
   border: none;
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(200, 164, 92, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(200, 164, 92, 0.4) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .cover-btn-primary:hover {
-  background: linear-gradient(135deg, #d4b068 0%, #c4a03f 100%) !important;
+  background: linear-gradient(135deg, #e0b85a 0%, #d4a43a 100%) !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(200, 164, 92, 0.5) !important;
+  box-shadow: 0 6px 20px rgba(200, 164, 92, 0.6) !important;
 }
 
 .cover-btn-outline {
