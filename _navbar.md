@@ -18,5 +18,5 @@
   * [PTrade测试版](https://download.gjzq.com.cn/temp/organ/gjzqptrade_ceshi.rar)
 
 * 关注我
-  * [王者quant公众号](https://mp.weixin.qq.com/s?__biz=Mzg3MjY0NjQ3MQ==&mid=2247485740&idx=1&sn=21bb7a7fa8096bce3aa7107a3bfc4685&chksm=ceed5b04f99ad2127e25d88b0f7d0acd4c46a63c2324a9f7969dcd8f79f5f84dc9db8024da00&token=189115296&lang=zh_CN#rd)
+  * [王者quant公众号](https://mp.weixin.qq.com/s/9cN2uHYsZ6fPay2gxcxAGg)
   * [GitHub](https://github.com/quant-king299/EasyXT)
