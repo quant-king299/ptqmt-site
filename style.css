@@ -271,6 +271,14 @@
   flex-wrap: wrap;
 }
 
+/* 覆盖 docsify-themeable 主题的 .cover a 样式 */
+.cover-actions a,
+.cover-actions a:hover {
+  background: none !important;
+  border: none !important;
+  text-shadow: none !important;
+}
+
 /* 社交平台区域 */
 .cover-social {
   margin-bottom: 24px;
