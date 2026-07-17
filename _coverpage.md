@@ -35,7 +35,7 @@
 
   <!-- 社交平台 -->
   <div class="cover-social">
-    <p class="cover-social-label">关注我们</p>
+    <p class="cover-social-label">关注我</p>
     <div class="cover-social-links">
       <!-- B站 -->
       <a href="https://space.bilibili.com/3546954682337740" target="_blank" class="social-btn social-bilibili" title="Bilibili">
