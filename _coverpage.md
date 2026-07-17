@@ -29,7 +29,7 @@
 
   <!-- 快速入口 -->
   <div class="cover-actions">
-    <a href="#/?id=前言" class="cover-btn-primary">📖 开始阅读文档</a>
+    <a href="#/README" class="cover-btn-primary">📖 开始阅读文档</a>
     <a href="#/学习案例/EasyXT" class="cover-btn-outline">⚡ EasyXT</a>
   </div>
 
