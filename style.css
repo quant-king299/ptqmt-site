@@ -285,19 +285,19 @@
   padding: 12px 28px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #c8a45c 0%, #b8942f 100%);
+  color: #fff !important;
+  background: linear-gradient(135deg, #c8a45c 0%, #b8942f 100%) !important;
   border: none;
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(200, 164, 92, 0.3);
+  box-shadow: 0 4px 12px rgba(200, 164, 92, 0.3) !important;
 }
 
 .cover-btn-primary:hover {
-  background: linear-gradient(135deg, #d4b068 0%, #c4a03f 100%);
+  background: linear-gradient(135deg, #d4b068 0%, #c4a03f 100%) !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(200, 164, 92, 0.5);
+  box-shadow: 0 6px 20px rgba(200, 164, 92, 0.5) !important;
 }
 
 .cover-btn-outline {
