@@ -286,17 +286,18 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: #fff;
-  background: #1a365d;
+  background: linear-gradient(135deg, #c8a45c 0%, #b8942f 100%);
   border: none;
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(200, 164, 92, 0.3);
 }
 
 .cover-btn-primary:hover {
-  background: #2b5a8c;
+  background: linear-gradient(135deg, #d4b068 0%, #c4a03f 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(26, 54, 93, 0.3);
+  box-shadow: 0 6px 20px rgba(200, 164, 92, 0.5);
 }
 
 .cover-btn-outline {
