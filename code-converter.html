@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>聚宽代码转换器 — 王者Quant</title>
-  <meta name="description" content="聚宽策略代码一键转换为PTrade/QMT格式，基于Pyodide运行真实Python转换引擎(V5.1)">
+  <meta name="description" content="聚宽策略代码一键转换为PTrade/QMT格式，基于Pyodide运行真实Python转换引擎(V5.3)">
   <style>
     :root {
       --bg-primary: #0f1923; --bg-secondary: #1a2733; --bg-tertiary: #1e3044;
@@ -189,12 +189,12 @@
       <span style="color:var(--text-muted);font-size:12px;" id="reportToggle">展开 ▼</span>
     </div>
     <div class="report-body" id="reportBody">
-      <div class="report-empty">点击"开始转换"查看详细变更报告（由 Python V5.1 转换器生成）</div>
+      <div class="report-empty">点击"开始转换"查看详细变更报告（由 Python V5.3 转换器生成）</div>
     </div>
   </div>
 
   <div class="footer">
-    Copyright © 2024 王者Quant · 基于 <a href="https://pyodide.org" target="_blank" style="color:var(--accent);">Pyodide</a> 在浏览器中运行 Python V5.1 转换器 · 代码不上传服务器
+    Copyright © 2024 王者Quant · 基于 <a href="https://pyodide.org" target="_blank" style="color:var(--accent);">Pyodide</a> 在浏览器中运行 Python V5.3 转换器 · 代码不上传服务器
   </div>
 </div>
 
@@ -203,7 +203,7 @@
 <script>
 // ============================================================
 //  Pyodide 驱动的聚宽 → PTrade/QMT 转换器
-//  引擎: code_converter/converters/jq_to_ptrade_unified_v3.py (V5.1)
+//  引擎: code_converter/converters/jq_to_ptrade_unified_v3.py (V5.3)
 //        code_converter/converters/jq_to_easyxt.py (V1.0)
 // ============================================================
 
@@ -260,7 +260,7 @@ async function initPyodide() {
     });
 
     // 加载 Python 转换器文件
-    updateLoadingText('加载 PTrade 转换器 (V5.1)...');
+    updateLoadingText('加载 PTrade 转换器 (V5.3)...');
     const [ptradeCode, easyxtCode, tushareCode] = await Promise.all([
       fetch('py_converter/jq_to_ptrade_unified_v3.py').then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}: jq_to_ptrade_unified_v3.py`);
@@ -626,7 +626,7 @@ function clearInput() {
   document.getElementById('outputEditor').value = '';
   document.getElementById('outputEditor').classList.remove('has-content');
   updateLineNumbers();
-  document.getElementById('reportBody').innerHTML = '<div class="report-empty">点击"开始转换"查看详细变更报告（由 Python V5.1 转换器生成）</div>';
+  document.getElementById('reportBody').innerHTML = '<div class="report-empty">点击"开始转换"查看详细变更报告（由 Python V5.3 转换器生成）</div>';
   document.getElementById('reportSummary').textContent = '';
 }
 
