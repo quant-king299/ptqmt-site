@@ -132,6 +132,7 @@
       <label>目标平台:</label>
       <button class="platform-btn active" data-target="ptrade" onclick="setTarget('ptrade')">📊 PTrade</button>
       <button class="platform-btn" data-target="qmt" onclick="setTarget('qmt')">📈 QMT / EasyXT</button>
+      <button class="platform-btn" data-target="daqmt" onclick="setTarget('daqmt')">🏢 大QMT（内置）</button>
     </div>
     <button class="btn" onclick="loadSample()">📋 加载示例</button>
     <div class="toolbar-spacer"></div>
@@ -211,7 +212,7 @@ let currentTarget = 'ptrade';
 let pyodide = null;
 let pyodideLoading = false;
 let pyodideReady = false;
-let modulesReady = { ptrade: false, qmt: false };
+let modulesReady = { ptrade: false, qmt: false, daqmt: false };
 let lastReport = null;
 
 // ==================== Pyodide 初始化 ====================
@@ -261,13 +262,17 @@ async function initPyodide() {
 
     // 加载 Python 转换器文件
     updateLoadingText('加载 PTrade 转换器 (V5.3)...');
-    const [ptradeCode, easyxtCode, tushareCode] = await Promise.all([
+    const [ptradeCode, easyxtCode, daqmtCode, tushareCode] = await Promise.all([
       fetch('py_converter/jq_to_ptrade_unified_v3.py').then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}: jq_to_ptrade_unified_v3.py`);
         return r.text();
       }),
       fetch('py_converter/jq_to_easyxt.py').then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}: jq_to_easyxt.py`);
+        return r.text();
+      }),
+      fetch('py_converter/jq_to_daqmt.py').then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}: jq_to_daqmt.py`);
         return r.text();
       }),
       fetch('py_converter/tushare_data_functions.py').then(r => {
@@ -280,6 +285,7 @@ async function initPyodide() {
     pyodide.FS.writeFile('/home/pyodide/tushare_data_functions.py', tushareCode);
     pyodide.FS.writeFile('/home/pyodide/jq_to_ptrade_unified_v3.py', ptradeCode);
     pyodide.FS.writeFile('/home/pyodide/jq_to_easyxt.py', easyxtCode);
+    pyodide.FS.writeFile('/home/pyodide/jq_to_daqmt.py', daqmtCode);
 
     // 导入模块
     updateLoadingText('导入 PTrade 转换器模块...');
@@ -289,6 +295,10 @@ async function initPyodide() {
     updateLoadingText('导入 QMT 转换器模块...');
     await pyodide.runPythonAsync('import jq_to_easyxt');
     modulesReady.qmt = true;
+
+    updateLoadingText('导入 大QMT 转换器模块...');
+    await pyodide.runPythonAsync('import jq_to_daqmt');
+    modulesReady.daqmt = true;
 
     pyodideReady = true;
     pyodideLoading = false;
@@ -330,6 +340,10 @@ async function convert() {
     showToast('⚠ QMT 转换器模块未加载');
     return;
   }
+  if (currentTarget === 'daqmt' && !modulesReady.daqmt) {
+    showToast('⚠ 大QMT 转换器模块未加载');
+    return;
+  }
 
   // 禁用按钮，显示加载
   setButtonsDisabled(true);
@@ -353,6 +367,27 @@ try:
     result = converter.convert(jq_code)
     report = converter.get_conversion_report()
     print(json.dumps({'success': True, 'code': result, 'report': report}, ensure_ascii=False))
+except Exception as e:
+    import traceback
+    print(json.dumps({'success': False, 'error': str(e), 'traceback': traceback.format_exc()}, ensure_ascii=False))
+`;
+    } else if (currentTarget === 'daqmt') {
+      // 大QMT（内置）
+      pythonCode = `
+import json
+import jq_to_daqmt
+
+with open('/home/pyodide/_input.py', 'r', encoding='utf-8') as f:
+    jq_code = f.read()
+
+converter = jq_to_daqmt.JQToDaQmtConverter(verbose=False)
+try:
+    result = converter.convert(jq_code)
+    report = converter.conversion_report
+    for key in report:
+        if isinstance(report[key], set):
+            report[key] = list(report[key])
+    print(json.dumps({'success': True, 'code': result, 'report': report}, ensure_ascii=False, default=str))
 except Exception as e:
     import traceback
     print(json.dumps({'success': False, 'error': str(e), 'traceback': traceback.format_exc()}, ensure_ascii=False))
@@ -497,8 +532,8 @@ function setTarget(target) {
 }
 
 function updateOutputLabel() {
-  document.getElementById('outputLabel').textContent =
-    currentTarget === 'ptrade' ? 'PTrade 代码' : 'QMT / EasyXT 代码';
+  const labels = { ptrade: 'PTrade 代码', qmt: 'QMT / EasyXT 代码', daqmt: '大QMT 代码' };
+  document.getElementById('outputLabel').textContent = labels[currentTarget] || 'PTrade 代码';
 }
 
 function showLoading(show, text) {
@@ -642,7 +677,8 @@ function copyOutput() {
 function downloadOutput() {
   const output = document.getElementById('outputEditor').value;
   if (!output) { showToast('⚠ 没有可下载的内容'); return; }
-  const ext = currentTarget === 'ptrade' ? 'ptrade' : 'qmt';
+  const exts = { ptrade: 'ptrade', qmt: 'qmt', daqmt: 'daqmt' };
+  const ext = exts[currentTarget] || 'ptrade';
   const blob = new Blob([output], { type: 'text/x-python' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
