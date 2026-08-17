@@ -160,6 +160,8 @@ class JQToDaQmtConverter:
         for func_name in converted_functions:
             converted_functions[func_name]['body'] = self._fix_func_calls(
                 converted_functions[func_name]['body'], all_func_names)
+        self._enforce_ranked_rotation(converted_functions)
+        self._ensure_daily_state_resets(converted_functions)
 
         # Step 5: 生成最终脚本
         final_code = self._generate_script(
@@ -371,6 +373,59 @@ class JQToDaQmtConverter:
 
         return body
 
+    def _ensure_daily_state_resets(self, functions: Dict[str, Dict]) -> None:
+        """修补常见的日内下单标志，避免第一天后永久跳过买入。"""
+        uses_buy_flag = any(
+            re.search(r'\bgvar\.buy_executed_today\s*=\s*True\b', info['body'])
+            for info in functions.values()
+        )
+        if not uses_buy_flag or 'reset_daily_flags' not in functions:
+            return
+
+        reset_body = textwrap.dedent(functions['reset_daily_flags']['body']).rstrip()
+        has_reset = re.search(
+            r'\bgvar\.buy_executed_today\s*=\s*False\b', reset_body)
+        if not has_reset:
+            functions['reset_daily_flags']['body'] = (
+                reset_body + '\n'
+                'gvar.buy_executed_today = False  # 允许下一个交易日重新执行买入'
+            )
+            self._add_change('补充 buy_executed_today 每日重置，避免轮动策略首日后停止买入')
+
+    def _enforce_ranked_rotation(self, functions: Dict[str, Dict]) -> None:
+        """修补五福类策略的旧候选池保留逻辑，严格按当日排名轮动。"""
+        func = functions.get('get_final_ranked_etfs')
+        if not func:
+            return
+        body = func['body']
+        pattern = re.compile(
+            r'^(?P<indent>[ \t]*)# ========== 第四步：结合当前持仓进行调整 ==========\s*$'
+            r'.*?(?=^[ \t]*log_buffer\.append\(f"【最终目标】)',
+            re.MULTILINE | re.DOTALL,
+        )
+        match = pattern.search(body)
+        if not match:
+            return
+        indent = match.group('indent')
+        lines = [
+            '# ========== 第四步：严格按当天排名确定目标持仓 ==========',
+            '# 旧逻辑会保留仍在候选池内的旧持仓，导致 holdings_num=1 时无法每日轮动。',
+            'log_buffer.append("")',
+            'log_buffer.append(">>> 第四步：按当天排名确定目标持仓 <<<")',
+            'current_holdings = [sec for sec, pos in _get_portfolio(ContextInfo).positions.items() if pos.total_amount > 0]',
+            'final_result = candidate_pool[:gvar.holdings_num]',
+            "target_codes = [item['etf'] for item in final_result]",
+            'rotated_out = [code for code in current_holdings if code not in target_codes]',
+            'rotated_in = [code for code in target_codes if code not in current_holdings]',
+            'log_buffer.append(f"当前持仓ETF：{current_holdings}")',
+            'log_buffer.append(f"【当日排名目标】{target_codes}")',
+            'log_buffer.append(f"【轮动卖出】{rotated_out or \'无\'}")',
+            'log_buffer.append(f"【轮动买入】{rotated_in or \'无\'}")',
+        ]
+        replacement = '\n'.join(indent + line for line in lines) + '\n'
+        func['body'] = body[:match.start()] + replacement + body[match.end():]
+        self._add_change('将候选池旧持仓保留逻辑改为严格按当日排名轮动')
+
     # ================================================================
     #  Step 4b: 交易API转换
     # ================================================================
@@ -458,21 +513,18 @@ class JQToDaQmtConverter:
             self._add_mapping(f'order_target({sec}, {target}) → 调仓')
             return (
                 f'{indent}# order_target({sec}, {target}) → 调整持仓\n'
-                f'{indent}_pos_list = get_trade_detail_data(ACCOUNT_ID, ACCOUNT_TYPE, "POSITION")\n'
-                f'{indent}_current = 0\n'
-                f'{indent}for _p in _pos_list:\n'
-                f'{indent}    if _p.m_strInstrumentID + "." + _p.m_strExchangeID == {sec}:\n'
-                f'{indent}        _current = _p.m_nCanUseVolume\n'
-                f'{indent}        break\n'
+                f'{indent}_current, _closeable = _get_position_volumes({sec})\n'
                 f'{indent}_diff = ({target}) - _current\n'
                 f'{indent}if _diff > 0:\n'
                 f"{indent}    _uoi = f\"{{STRATEGY_NAME}}_{{datetime.now().strftime('%Y%m%d%H%M%S')}}\"\n"
                 f'{indent}    passorder(OPTYPE_BUY, ORDER_TYPE_VOLUME, ACCOUNT_ID, {sec}, '
                 f'PRTYPE_OPPOSITEBEST, -1, _diff, STRATEGY_NAME, 0, _uoi, ContextInfo)\n'
                 f'{indent}elif _diff < 0:\n'
-                f"{indent}    _uoi = f\"{{STRATEGY_NAME}}_{{datetime.now().strftime('%Y%m%d%H%M%S')}}\"\n"
-                f'{indent}    passorder(OPTYPE_SELL, ORDER_TYPE_VOLUME, ACCOUNT_ID, {sec}, '
-                f'PRTYPE_OPPOSITEBEST, -1, abs(_diff), STRATEGY_NAME, 0, _uoi, ContextInfo)'
+                f'{indent}    _sell_volume = min(abs(_diff), _closeable)\n'
+                f'{indent}    if _sell_volume > 0:\n'
+                f"{indent}        _uoi = f\"{{STRATEGY_NAME}}_{{datetime.now().strftime('%Y%m%d%H%M%S')}}\"\n"
+                f'{indent}        passorder(OPTYPE_SELL, ORDER_TYPE_VOLUME, ACCOUNT_ID, {sec}, '
+                f'PRTYPE_OPPOSITEBEST, -1, _sell_volume, STRATEGY_NAME, 0, _uoi, ContextInfo)'
             )
         return f'{indent}{stripped}'
 
@@ -492,21 +544,18 @@ class JQToDaQmtConverter:
                 f'{indent}_price = _price[{sec}]["close"].iloc[-1] if {sec} in _price else 0\n'
                 f'{indent}if _price > 0:\n'
                 f'{indent}    _target_vol = int(({tval}) / _price / 100) * 100\n'
-                f'{indent}    _pos_list = get_trade_detail_data(ACCOUNT_ID, ACCOUNT_TYPE, "POSITION")\n'
-                f'{indent}    _current = 0\n'
-                f'{indent}    for _p in _pos_list:\n'
-                f'{indent}        if _p.m_strInstrumentID + "." + _p.m_strExchangeID == {sec}:\n'
-                f'{indent}            _current = _p.m_nCanUseVolume\n'
-                f'{indent}            break\n'
+                f'{indent}    _current, _closeable = _get_position_volumes({sec})\n'
                 f'{indent}    _diff = _target_vol - _current\n'
                 f'{indent}    if _diff > 0:\n'
                 f"{indent}        _uoi = f\"{{STRATEGY_NAME}}_{{datetime.now().strftime('%Y%m%d%H%M%S')}}\"\n"
                 f'{indent}        passorder(OPTYPE_BUY, ORDER_TYPE_VOLUME, ACCOUNT_ID, {sec}, '
                 f'PRTYPE_OPPOSITEBEST, -1, _diff, STRATEGY_NAME, 0, _uoi, ContextInfo)\n'
                 f'{indent}    elif _diff < 0:\n'
-                f"{indent}        _uoi = f\"{{STRATEGY_NAME}}_{{datetime.now().strftime('%Y%m%d%H%M%S')}}\"\n"
-                f'{indent}        passorder(OPTYPE_SELL, ORDER_TYPE_VOLUME, ACCOUNT_ID, {sec}, '
-                f'PRTYPE_OPPOSITEBEST, -1, abs(_diff), STRATEGY_NAME, 0, _uoi, ContextInfo)'
+                f'{indent}        _sell_volume = min(abs(_diff), _closeable)\n'
+                f'{indent}        if _sell_volume > 0:\n'
+                f"{indent}            _uoi = f\"{{STRATEGY_NAME}}_{{datetime.now().strftime('%Y%m%d%H%M%S')}}\"\n"
+                f'{indent}            passorder(OPTYPE_SELL, ORDER_TYPE_VOLUME, ACCOUNT_ID, {sec}, '
+                f'PRTYPE_OPPOSITEBEST, -1, _sell_volume, STRATEGY_NAME, 0, _uoi, ContextInfo)'
             )
         return f'{indent}{stripped}'
 
@@ -526,21 +575,18 @@ class JQToDaQmtConverter:
                 f'{indent}_price = _price[{sec}]["close"].iloc[-1] if {sec} in _price else 0\n'
                 f'{indent}if _price > 0:\n'
                 f'{indent}    _target_vol = int(_target_value / _price / 100) * 100\n'
-                f'{indent}    _pos_list = get_trade_detail_data(ACCOUNT_ID, ACCOUNT_TYPE, "POSITION")\n'
-                f'{indent}    _current = 0\n'
-                f'{indent}    for _p in _pos_list:\n'
-                f'{indent}        if _p.m_strInstrumentID + "." + _p.m_strExchangeID == {sec}:\n'
-                f'{indent}            _current = _p.m_nCanUseVolume\n'
-                f'{indent}            break\n'
+                f'{indent}    _current, _closeable = _get_position_volumes({sec})\n'
                 f'{indent}    _diff = _target_vol - _current\n'
                 f'{indent}    if _diff > 0:\n'
                 f"{indent}        _uoi = f\"{{STRATEGY_NAME}}_{{datetime.now().strftime('%Y%m%d%H%M%S')}}\"\n"
                 f'{indent}        passorder(OPTYPE_BUY, ORDER_TYPE_VOLUME, ACCOUNT_ID, {sec}, '
                 f'PRTYPE_OPPOSITEBEST, -1, _diff, STRATEGY_NAME, 0, _uoi, ContextInfo)\n'
                 f'{indent}    elif _diff < 0:\n'
-                f"{indent}        _uoi = f\"{{STRATEGY_NAME}}_{{datetime.now().strftime('%Y%m%d%H%M%S')}}\"\n"
-                f'{indent}        passorder(OPTYPE_SELL, ORDER_TYPE_VOLUME, ACCOUNT_ID, {sec}, '
-                f'PRTYPE_OPPOSITEBEST, -1, abs(_diff), STRATEGY_NAME, 0, _uoi, ContextInfo)'
+                f'{indent}        _sell_volume = min(abs(_diff), _closeable)\n'
+                f'{indent}        if _sell_volume > 0:\n'
+                f"{indent}            _uoi = f\"{{STRATEGY_NAME}}_{{datetime.now().strftime('%Y%m%d%H%M%S')}}\"\n"
+                f'{indent}            passorder(OPTYPE_SELL, ORDER_TYPE_VOLUME, ACCOUNT_ID, {sec}, '
+                f'PRTYPE_OPPOSITEBEST, -1, _sell_volume, STRATEGY_NAME, 0, _uoi, ContextInfo)'
             )
         return f'{indent}{stripped}'
 
@@ -612,6 +658,8 @@ class JQToDaQmtConverter:
     def _fix_get_price_params(self, body: str) -> str:
         """移除大QMT不支持的 get_market_data_ex 参数"""
         import re as re2
+        body = re2.sub(r"\bperiod\s*=\s*['\"]daily['\"]", 'period="1d"', body)
+        body = re2.sub(r"\bperiod\s*=\s*['\"]minute['\"]", 'period="1m"', body)
         body = re2.sub(r',\s*skip_paused\s*=\s*(True|False)', '', body)
         body = re2.sub(r',\s*fq\s*=\s*.pre.', '', body)
         body = re2.sub(r',\s*panel\s*=\s*(True|False)', '', body)
@@ -737,21 +785,24 @@ class JQToDaQmtConverter:
         # _get_position_amount 辅助
         if analysis.get('has_trading'):
             parts.extend([
+                'def _get_position_volumes(code):',
+                '    """返回(总持仓, 可卖持仓)，兼容QMT回测中可卖数量延迟刷新。"""',
+                '    for _p in get_trade_detail_data(ACCOUNT_ID, ACCOUNT_TYPE, "POSITION"):',
+                '        if _p.m_strInstrumentID + "." + _p.m_strExchangeID == code:',
+                '            _total = int(getattr(_p, "m_nVolume", 0) or 0)',
+                '            _closeable = int(getattr(_p, "m_nCanUseVolume", 0) or 0)',
+                '            if getattr(gvar, "is_backtest", False) and _total > 0 and _closeable <= 0:',
+                '                _closeable = _total',
+                '            return _total, _closeable',
+                '    return 0, 0',
+                '',
                 'def _get_position_amount(code):',
                 '    """获取持仓数量"""',
-                '    _pos_list = get_trade_detail_data(ACCOUNT_ID, ACCOUNT_TYPE, "POSITION")',
-                '    for _p in _pos_list:',
-                '        if _p.m_strInstrumentID + "." + _p.m_strExchangeID == code:',
-                '            return _p.m_nVolume',
-                '    return 0',
+                '    return _get_position_volumes(code)[0]',
                 '',
                 'def _get_position_available(code):',
                 '    """获取可用持仓"""',
-                '    _pos_list = get_trade_detail_data(ACCOUNT_ID, ACCOUNT_TYPE, "POSITION")',
-                '    for _p in _pos_list:',
-                '        if _p.m_strInstrumentID + "." + _p.m_strExchangeID == code:',
-                '            return _p.m_nCanUseVolume',
-                '    return 0',
+                '    return _get_position_volumes(code)[1]',
                 '',
                 'def _get_position_value(code):',
                 '    """获取持仓市值"""',
@@ -798,10 +849,11 @@ class JQToDaQmtConverter:
                 '    result = {}',
                 '    for p in get_trade_detail_data(ACCOUNT_ID, ACCOUNT_TYPE, "POSITION"):',
                 '        code = p.m_strInstrumentID + "." + p.m_strExchangeID',
+                '        total_volume, closeable_volume = _get_position_volumes(code)',
                 '        pos = types.SimpleNamespace()',
                 '        pos.security = code',
-                '        pos.total_amount = p.m_nVolume',
-                '        pos.closeable_amount = p.m_nCanUseVolume',
+                '        pos.total_amount = total_volume',
+                '        pos.closeable_amount = closeable_volume',
                 '        pos.avg_cost = p.m_dOpenPrice',
                 '        pos.price = 0',
                 '        pos.value = p.m_dMarketValue',
@@ -1008,22 +1060,14 @@ class JQToDaQmtConverter:
         parts.append('        return')
         parts.append('    today = timetag_to_datetime('
                       "ContextInfo.get_bar_timetag(ContextInfo.barpos), '%Y%m%d')")
+        parts.append('    if getattr(gvar, "_last_handlebar_date", None) == today:')
+        parts.append('        return  # 分钟回测同一天可能多次回调，日调仓只执行一次')
+        parts.append('    gvar._last_handlebar_date = today')
         parts.append(f"    print(f'---{{today}}---')")
         parts.append('    gvar._ctx = ContextInfo')
         parts.append('    gvar._today_dt = datetime.strptime(today, \"%Y%m%d\")')
         parts.append('')
-        # 回测时：按顺序调用 run_daily 注册的函数
-        if analysis['timing_functions']:
-            called = set()
-            for ttype, fname, _ in analysis['timing_functions']:
-                if fname not in called and fname in functions:
-                    parts.append(f'    {fname}(ContextInfo)')
-                    called.add(fname)
-        elif analysis['has_handle_data'] and 'handle_data' in functions:
-            parts.append('    handle_data(ContextInfo)')
-        parts.append('')
-
-        # 回测时：按顺序调用 run_daily 注册的函数
+        # 回测时：按顺序调用 run_daily 注册的函数（同一个 handlebar 只调用一次）
         if analysis['timing_functions']:
             called = set()
             for ttype, fname, _ in analysis['timing_functions']:
@@ -1157,11 +1201,18 @@ class JQToDaQmtConverter:
             '        return self._df.columns',
             '',
             '',
-            'def _get_price(stock_code, count=None, period=\"1d\", fields=None,',
-            '               end_time=None, start_time=None, skip_paused=False):',
+            'def _get_price(stock_code=None, count=None, period=\"1d\", fields=None,',
+            '               end_time=None, start_time=None, skip_paused=False,',
+            '               start_date=None, security=None):',
             '    """聚宽 get_price/attribute_history/history 兼容',
             '    将 大QMT {code: DataFrame} → 聚宽风格 DataFrame',
             '    单标的返回简单 DataFrame，多标的返回 _PriceData 包装"""',
+            '    if stock_code is None:',
+            '        stock_code = security',
+            '    elif security is not None:',
+            '        raise TypeError(\"stock_code 与 security 不能同时传入\")',
+            '    if stock_code is None:',
+            '        raise TypeError(\"缺少 stock_code/security\")',
             '    if isinstance(stock_code, str):',
             '        stock_codes = [stock_code]',
             '    else:',
@@ -1170,16 +1221,26 @@ class JQToDaQmtConverter:
             '        fields = [\"close\"]',
             '    if isinstance(fields, str):',
             '        fields = [fields]',
+            '    if start_time is None:',
+            '        start_time = start_date or \"\"',
             '    if end_time is None:',
             '        end_time = \"\"',
+            '    if isinstance(start_time, datetime):',
+            '        start_time = start_time.strftime(\"%Y%m%d%H%M%S\")',
             '    if isinstance(end_time, datetime):',
-            '        end_time = end_time.strftime(\"%Y%m%d\")',
+            '        end_time = end_time.strftime(\"%Y%m%d%H%M%S\")',
             '    if count is None:',
             '        count = -1',
+            '    period = {\"daily\": \"1d\", \"day\": \"1d\", \"minute\": \"1m\", \"min\": \"1m\"}.get(period, period)',
+            '    if isinstance(fields, str):',
+            '        fields = [fields]',
+            '    field_aliases = {\"money\": \"amount\"}',
+            '    qmt_fields = [field_aliases.get(field, field) for field in fields]',
             '',
             '    raw = gvar._ctx.get_market_data_ex(',
-            '        fields=fields, stock_code=stock_codes, period=period,',
-            '        end_time=str(end_time), count=count, dividend_type=\"front\")',
+            '        fields=qmt_fields, stock_code=stock_codes, period=period,',
+            '        start_time=str(start_time), end_time=str(end_time), count=count,',
+            '        dividend_type=\"front\", subscribe=True)',
             '',
             '    # {code: DataFrame} → flat DataFrame',
             '    rows = []',
@@ -1191,15 +1252,26 @@ class JQToDaQmtConverter:
             '            continue',
             '        for idx in df_item.index:',
             '            row = {\"time\": idx, \"code\": code}',
-            '            for f in fields:',
-            '                row[f] = df_item.loc[idx, f] if f in df_item.columns else None',
+            '            for f, qmt_field in zip(fields, qmt_fields):',
+            '                row[f] = df_item.loc[idx, qmt_field] if qmt_field in df_item.columns else None',
             '            rows.append(row)',
             '',
             '    if not rows:',
             '        return pd.DataFrame()',
             '',
             '    result = pd.DataFrame(rows)',
-            '    result[\"time\"] = pd.to_datetime(result[\"time\"].astype(str), format=\"%Y%m%d\", errors=\"coerce\")',
+            '    def _normalize_qmt_time(value):',
+            '        if isinstance(value, (int, float)) or str(value).isdigit():',
+            '            text = str(int(value))',
+            '            if len(text) == 8:',
+            '                return pd.to_datetime(text, format=\"%Y%m%d\", errors=\"coerce\")',
+            '            if len(text) in (12, 14):',
+            '                fmt = \"%Y%m%d%H%M\" if len(text) == 12 else \"%Y%m%d%H%M%S\"',
+            '                return pd.to_datetime(text, format=fmt, errors=\"coerce\")',
+            '            if len(text) >= 13:',
+            '                return pd.to_datetime(int(text), unit=\"ms\", errors=\"coerce\")',
+            '        return pd.to_datetime(value, errors=\"coerce\")',
+            '    result[\"time\"] = result[\"time\"].map(_normalize_qmt_time)',
             '    result = result.dropna(subset=[\"time\"])',
             '    result = result.sort_values([\"code\", \"time\"]).reset_index(drop=True)',
             '',
